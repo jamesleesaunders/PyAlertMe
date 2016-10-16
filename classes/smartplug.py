@@ -1,17 +1,74 @@
 import pprint
+import logging
 from struct import unpack
 from classes import Device
 
 class SmartPlug(Device):
+    specific_messages = {
+        'plug_off': {
+            'description'   : 'Switch Plug Off',
+            'src_endpoint'  : b'\x00',
+            'dest_endpoint' : b'\x02',
+            'cluster'       : b'\x00\xee',
+            'profile'       : Device.ALERTME_PROFILE_ID,
+            'data'          : b'\x11\x00\x02\x00\x01'
+        },
+        'plug_on': {
+            'description'   : 'Switch Plug On',
+            'src_endpoint'  : b'\x00',
+            'dest_endpoint' : b'\x02',
+            'cluster'       : b'\x00\xee',
+            'profile'       : Device.ALERTME_PROFILE_ID,
+            'data'          : b'\x11\x00\x02\x01\x01'
+        },
+        'switch_status': {
+            'description'   : 'Switch Status',
+            'src_endpoint'  : b'\x00',
+            'dest_endpoint' : b'\x02',
+            'cluster'       : b'\x00\xee',
+            'profile'       : Device.ALERTME_PROFILE_ID,
+            'data'          : b'\x11\x00\x01\x01'
+        },
+        'normal_mode': {
+            'description'   : 'Restore Normal Mode',
+            'src_endpoint'  : b'\x00',
+            'dest_endpoint' : b'\x02',
+            'cluster'       : b'\x00\xee',
+            'profile'       : Device.ALERTME_PROFILE_ID,
+            'data'          : b'\x11\x00\xfa\x00\x01'
+        },
+        'range_test': {
+            'description'   : 'Range Test',
+            'src_endpoint'  : b'\x00',
+            'dest_endpoint' : b'\x02',
+            'cluster'       : b'\x00\xee',
+            'profile'       : Device.ALERTME_PROFILE_ID,
+            'data'          : b'\x11\x00\xfa\x01\x01'
+        },
+        'locked_mode': {
+            'description'   : 'Locked Mode',
+            'src_endpoint'  : b'\x00',
+            'dest_endpoint' : b'\x02',
+            'cluster'       : b'\x00\xee',
+            'profile'       : Device.ALERTME_PROFILE_ID,
+            'data'          : b'\x11\x00\xfa\x02\x01'
+        },
+        'silent_mode': {
+            'description'   : 'Silent Mode',
+            'src_endpoint'  : b'\x00',
+            'dest_endpoint' : b'\x02',
+            'cluster'       : b'\x00\xee',
+            'profile'       : Device.ALERTME_PROFILE_ID,
+            'data'          : b'\x11\x00\xfa\x03\x01'
+        }
+    }
 
-    def __init__(self, zb, address, name='SmartPlug'):
-        Device.__init__(self, zb, address, name)
-        self.type          = 'SmartPlug'
-        self.zb            = zb
-        self.name          = name
-        self.long_address  = address
-
-        self.state         = None
+    def __init__(self, long_address, name='SmartPlug'):
+        Device.__init__(self, long_address, name)
+        self.type = 'SmartPlug'
+        
+        # Tack the specific messages onto the standard messages
+        self.messages.update(self.specific_messages)
 
     def getState(self):
         return self.state
@@ -20,54 +77,50 @@ class SmartPlug(Device):
         return self.uptime
 
     def receiveSpecificMessage(self, message):
-        pp = pprint.PrettyPrinter(indent=4)
-
         profileId = message['profile']
         clusterId = message['cluster']
 
         if (profileId == self.ALERTME_PROFILE_ID):
-            # AlertMe Profile ID
             clusterCmd = message['rf_data'][2]
 
-            # SmartPlug Specific
-            if (clusterId == '\x00\xef'):
-                if (clusterCmd == '\x81'):
+            if (clusterId == b'\x00\xef'):
+                if (clusterCmd == b'\x81'):
                     self.power = self.parsePowerInfo(message['rf_data'])
-                    print "\tCurrent Instantaneous Power:", self.power
+                    self.logger.debug('Current Instantaneous Power: %s', self.power)
 
-                elif (clusterCmd == '\x82'):
+                elif (clusterCmd == b'\x82'):
                     usageInfo = self.parseUsageInfo(message['rf_data'])
                     self.uptime           = usageInfo['UpTime'];
                     self.usagewattseconds = usageInfo['UsageWattSeconds'];
                     self.usagewatthours   = usageInfo['UsageWattHours'];
-                    print "\tUsage Stats:"
-                    print "\tUp Time (seconds):", self.uptime
-                    print "\tUsage (watt-seconds):", self.usagewattseconds
-                    print "\tUsage (watt-hours):", self.usagewatthours
+                    self.logger.debug('Uptime: %s Usage: %s', self.uptime, self.usagewatthours)
 
                 else:
-                    print "Minor Error: Unrecognised Cluster Command"
+                    self.logger.error('Unrecognised Cluster Command: %r', clusterCmd)
 
-            elif (clusterId == '\x00\xee'):
-                if (clusterCmd == '\x80'):
+            elif (clusterId == b'\x00\xee'):
+                if (clusterCmd == b'\x80'):
                     self.state = self.parseSwitchStatus(message['rf_data'])
-                    print "Switch Status"
-                    print "\tSwitch is:", self.state
+                    self.logger.debug('Switch Status: %s', self.state)
 
                 else:
-                    print "Minor Error: Unrecognised Cluster Command"
+                    self.logger.error('Unrecognised Cluster Command: %r', clusterCmd)
+
+            elif (clusterId == '\x00\xf0'):
+                if (clusterCmd == '\xfb'):
+                    self.logger.debug('Mystery Cluster Command')
+                    # Needs more investigation...
+
+                else:
+                    self.logger.error('Unrecognised Cluster Command: %r', clusterCmd)
 
             else:
-                print "Minor Error: Unrecognised Cluster ID"
+                self.logger.error('Unrecognised Cluster ID: %r', clusterId)
+                self.pp.pprint(message['rf_data'])
 
         else:
-            print "Minor Error: Unrecognised Profile ID"
-
-
-
-
-
-
+            self.logger.error('Unrecognised Profile ID: %r', profileId)
+            self.pp.pprint(message['rf_data'])
 
 
     @staticmethod
@@ -98,9 +151,8 @@ class SmartPlug(Device):
     @staticmethod
     def parseSwitchStatus(rf_data):
         # Parse Switch Status
-        if (ord(rf_data[3]) & 0x01):
+        values = unpack('< 2x b b b', rf_data)
+        if (values[2] & 0x01):
             return 1
         else:
             return 0
-
-
