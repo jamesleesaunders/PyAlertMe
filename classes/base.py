@@ -14,6 +14,7 @@ class Base(object):
     # ZigBee Profile IDs
     ZDP_PROFILE_ID     = b'\x00\x00'  # Zigbee Device Profile
     HA_PROFILE_ID      = b'\x01\x04'  # HA Device Profile
+    LL_PROFILE_ID      = b'\xc0\x5e'  # Light Link Profile
     ALERTME_PROFILE_ID = b'\xc2\x16'  # AlertMe Private Profile
 
     # ZigBee Addressing
@@ -27,7 +28,7 @@ class Base(object):
             'dest_endpoint' : b'\x00',
             'cluster'       : b'\x00\x32',
             'profile'       : ZDP_PROFILE_ID,
-            'data'          : '\x01'
+            'data'          : '\x12\x01'
         },
         'permit_join_request': {
             'description'   : 'Management Permit Join Request',
@@ -198,10 +199,10 @@ class Base(object):
     def send_message(self, message, dest_addr_long, dest_addr):
         # Tack on destination addresses
         message['dest_addr_long'] = dest_addr_long
-        message['dest_addr'] = dest_addr
+        message['dest_addr']      = dest_addr
         device_id = Base.pretty_mac(dest_addr_long)
 
-        self.logger.debug('Device ID: %s sent message...%s', device_id, message)
+        self.logger.debug('Device: %s Sending: %s', device_id, message)
         self.zb.send('tx_explicit', **message)
 
     def receive_message(self, message):
@@ -209,7 +210,7 @@ class Base(object):
         source_addr_long = message['source_addr_long']
         device_id = Base.pretty_mac(source_addr_long)
 
-        self.logger.debug('Device ID: %s received message...%s', device_id, message)
+        self.logger.debug('Device: %s Received: %s', device_id, message)
         self.process_message(message)
        
     def process_message(self, message):

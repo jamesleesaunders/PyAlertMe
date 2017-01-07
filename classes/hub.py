@@ -57,41 +57,42 @@ class Hub(Base):
                     # Due to timing problems with the switch itself, we don't
                     # respond to this message, we save the response for later after the
                     # Match Descriptor request comes in. You'll see it down below.
-                    self.logger.debug('Device Announce Message')
+                    self.logger.debug('Received Device Announce Message')
 
                 elif (cluster_id == b'\x80\x00'):
                     # Possibly Network (16-bit) Address Response.
                     # Not sure what this is? Only seen on the Hive ActivePlug?
                     # See: http://www.desert-home.com/2015/06/hacking-into-iris-door-sensor-part-4.html
                     # http://ftp1.digi.com/support/images/APP_NOTE_XBee_ZigBee_Device_Profile.pdf
-                    self.logger.debug('Network (16-bit) Address Response')
+                    self.logger.debug('Received Network (16-bit) Address Response')
 
                 elif (cluster_id == b'\x80\x05'):
                     # Active Endpoint Response.
                     # This message tells us what the device can do, but it isn't constructed correctly to match what
                     # the switch can do according to the spec. This is another message that gets it's response after
                     # we receive the Match Descriptor below.
-                    self.logger.debug('Active Endpoint Response')
+                    self.logger.debug('Received Active Endpoint Response')
 
                 elif (cluster_id == b'\x802'):
                     # Route Record Broadcast Response.
-                    self.logger.debug('Route Record Broadcast Response. MAC Address: %s', device_id)
+                    self.logger.debug('Received Route Record Broadcast Response')
 
                 elif (cluster_id == b'\x00\x06'):
                     # Match Descriptor Request.
+                    self.logger.debug('Received Match Descriptor Request')
                     # This is the point where we finally respond to the switch. Several messages are sent to cause
                     # the switch to join with the controller at a network level and to cause it to regard this
                     # controller as valid.
 
                     # First send the Active Endpoint Request
-                    self.logger.debug('Sent Active Endpoints Request')
                     reply = self.get_action('active_endpoints_request')
                     self.send_message(reply, source_addr_long, source_addr)
+                    self.logger.debug('Sent Active Endpoints Request')
 
                     # Now send the Match Descriptor Response
-                    self.logger.debug('Sent Match Descriptor Response')
                     reply = self.get_action('match_descriptor_response')
                     self.send_message(reply, source_addr_long, source_addr)
+                    self.logger.debug('Sent Match Descriptor Response')
 
                     # Now there are two messages directed at the hardware code (rather than the network code).
                     # The switch has to receive both of these to stay joined.
@@ -102,9 +103,9 @@ class Hub(Base):
                     self.logger.debug('Sent Hardware Join Messages')
 
                     # We are fully associated!
-                    self.logger.debug('Device Associated')
                     # Update known_devices to say it is now associated
                     self.known_devices[device_id]['associated'] = True
+                    self.logger.debug('Device Associated')
 
                 else:
                     self.logger.error('Unrecognised Cluster ID: %e', cluster_id)
@@ -187,9 +188,9 @@ class Hub(Base):
 
                 # Do we know the device type yet?
                 if (self.known_devices[device_id]['type_info'] is None):
-                    self.logger.debug('Type not known')
                     reply = self.get_action('version_info')
                     self.send_message(reply, source_addr_long, source_addr)
+                    self.logger.debug('Sent Type Request')
 
             else:
                 self.logger.error('Unrecognised Profile ID: %r', profile_id)
