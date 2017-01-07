@@ -1,23 +1,30 @@
 import sys
+
 sys.path.insert(0, '../')
 
-from classes import Sensor
+from classes import *
 import unittest
+from mock_serial import Serial
 
 class TestSensor(unittest.TestCase):
 
-    def test_parseButtonPress(self):
-        result = Sensor.parseButtonPress(b'\t\x00\x00\x00\x02\xbf\xc3\x00\x00')
-        expected = {'Counter': 50111, 'State': 0}
-        self.assertEqual(result, expected, "State 0, Conter 50111")
+    def setUp(self):
+        serialObj = Serial()
+        self.deviceObj = Sensor(serialObj)
 
-        result = Sensor.parseButtonPress(b'\t\x00\x01\x00\x01\x12\xca\x00\x00')
-        expected = {'Counter': 51730, 'State': 1}
-        self.assertEqual(result, expected, "State 1, Conter 51730")
+    def tearDown(self):
+        self.deviceObj.halt()
 
-    def test_parseStatusUpdate(self):
-        result = Sensor.parseStatusUpdate(b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00')
-        expected = {'Temp_F': 87.008, 'Type': 'Key Fob', 'Counter': 13019}
+    def test_get_type(self):
+        result = self.deviceObj.get_type()
+        expected = {
+            'description': 'Type Info',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf6',
+            'profile': b'\xc2\x16',
+            'data': '\tq\xfe+\xe8\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\nButton Device\n2010-11-15'
+        }
         self.assertEqual(result, expected)
 
 if __name__ == '__main__':
