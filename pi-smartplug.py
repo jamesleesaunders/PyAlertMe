@@ -5,7 +5,7 @@
 # Author:      James Saunders [james@saunders-family.net]
 # Copyright:   Copyright (C) 2016 James Saunders
 # License:     MIT
-# Version:     0.0.3
+# Version:     0.1.1
 
 from xbee import ZigBee
 import serial
@@ -18,6 +18,21 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4)
 logger = logging.getLogger('pihive')
 logger.setLevel(logging.DEBUG)
+
+# Speficy log message format
+formatter = logging.Formatter('%(asctime)s %(levelname)-3s %(module)-5s %(message)s')
+
+# create console handler and set level to info
+sh = logging.StreamHandler()
+sh.setLevel(logging.DEBUG)
+sh.setFormatter(formatter)
+logger.addHandler(sh)
+
+# create debug file handler and set level to debug
+fh = logging.FileHandler("debug.log")
+fh.setLevel(logging.DEBUG)
+fh.setFormatter(formatter)
+logger.addHandler(fh)
 
 # Serial Configuration
 XBEE_PORT = '/dev/tty.usbserial-A1014P7W' # MacBook Serial Port

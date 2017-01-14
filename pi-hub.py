@@ -5,7 +5,7 @@
 # Author:      James Saunders [james@saunders-family.net]
 # Copyright:   Copyright (C) 2016 James Saunders
 # License:     MIT
-# Version:     0.0.3
+# Version:     0.1.1
 
 import serial
 import logging
@@ -15,7 +15,6 @@ from classes import *
 import pprint
 
 pp = pprint.PrettyPrinter(indent=4)
-
 logger = logging.getLogger('pihive')
 logger.setLevel(logging.DEBUG)
 
@@ -33,8 +32,6 @@ fh = logging.FileHandler("debug.log")
 fh.setLevel(logging.DEBUG)
 fh.setFormatter(formatter)
 logger.addHandler(fh)
-
-
 
 # Serial Configuration
 XBEE_PORT = '/dev/tty.usbserial-A1014P7W' # MacBook Serial Port
@@ -65,15 +62,16 @@ while True:
         print("Select device:\n")
         device_id = raw_input("")
 
-        pp.pprint(hubObj.list_actions())
-        print("Select command:\n")
-        action = raw_input("")
+        while True:
+            pp.pprint(hubObj.list_actions())
+            print("Select command:\n")
+            action = raw_input("")
 
-        message = hubObj.get_action(action)
-        devices = hubObj.list_known_devices()
-        dest_addr_long = devices[device_id]['addr_long']
-        dest_addr = devices[device_id]['addr_short']
-        hubObj.send_message(message, dest_addr_long, dest_addr)
+            message = hubObj.get_action(action)
+            devices = hubObj.list_known_devices()
+            dest_addr_long = devices[device_id]['addr_long']
+            dest_addr = devices[device_id]['addr_short']
+            hubObj.send_message(message, dest_addr_long, dest_addr)
 
     except IndexError:
         print("No Command")

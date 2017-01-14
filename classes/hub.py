@@ -49,7 +49,6 @@ class Hub(Base):
                 self.known_devices[device_id]['date_last_message'] = int(time.time())
                 self.known_devices[device_id]['messages_received'] += 1
 
-
             if (profile_id == self.ZDP_PROFILE_ID):
                 # Zigbee Device Profile ID
                 if (cluster_id == b'\x13'):

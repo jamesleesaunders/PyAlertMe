@@ -55,10 +55,6 @@ class Base(object):
             'profile'       : ZDP_PROFILE_ID,
             'data'          : b'\x00\x00'
         },
-
-
-
-
         'hardware_join_1' : {
             'description'   : 'Hardware Join Messages 1',  #Device
             'src_endpoint'  : b'\x00',
@@ -68,7 +64,7 @@ class Base(object):
             'data'          : b'\x11\x01\xfc'
         },
         'hardware_join_2' : {
-            'description'   : 'Hardware Join Messages 2',  #Device (also not Version req)
+            'description'   : 'Hardware Join Messages 2',  #Device (also note Version req)
             'src_endpoint'  : b'\x00',
             'dest_endpoint' : b'\x02',
             'cluster'       : b'\x00\xf0',
@@ -184,7 +180,7 @@ class Base(object):
         self._stop.set()
 
     def xbee_error(self, error):
-        self.logger.critical('XBee Error %s', error)
+        self.logger.critical('XBee Error: %s', error)
 
     def list_actions(self):
         actions = {}

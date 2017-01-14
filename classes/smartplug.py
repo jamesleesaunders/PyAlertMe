@@ -80,6 +80,7 @@ class SmartPlug(Device):
                 self.logger.error('Unrecognised Profile ID: %r', profile_id)
 
     def set_state(self, state):
+        # This simulates the physical button being pressed
         self.state = state
         self.logger.debug('Switch State Changed to: %s', self.state)
         self.send_message(self.get_state(), self.hub_addr_long, self.hub_addr)
