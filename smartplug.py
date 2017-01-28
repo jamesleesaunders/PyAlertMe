@@ -1,11 +1,11 @@
 #! /usr/bin/python
 
-# Filename:    smartplug.py
+# Filename:    rest.py
 # Description: Communicate with Hive/AlertMe devices via a XBee
 # Author:      James Saunders [james@saunders-family.net]
-# Copyright:   Copyright (C) 2016 James Saunders
+# Copyright:   Copyright (C) 2017 James Saunders
 # License:     MIT
-# Version:     0.1.1
+# Version:     0.1.2
 
 from xbee import ZigBee
 import serial

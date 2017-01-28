@@ -1,4 +1,12 @@
-#!flask/bin/python
+#!/usr/bin/python
+
+# Filename:    smartplug.py
+# Description: Communicate with Hive/AlertMe devices via a XBee
+# Author:      James Saunders [james@saunders-family.net]
+# Copyright:   Copyright (C) 2017 James Saunders
+# License:     MIT
+# Version:     0.1.2
+
 from flask import Flask, jsonify, abort, make_response, request
 
 API_NAME    = 'pialertme'
