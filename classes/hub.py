@@ -1,6 +1,7 @@
 import pprint
 import logging
 from classes import *
+import device
 import struct
 import time
 import binascii
@@ -9,7 +10,7 @@ pp = pprint.PrettyPrinter(indent=4)
 
 class Hub(Base):
 
-    def __init__(self, serialObj):
+    def __init__(self, serialObj = False):
         Base.__init__(self, serialObj)
 
         # Type Info
@@ -19,6 +20,7 @@ class Hub(Base):
         self.version = 00001
 
         self.known_devices = {}
+        self.known_devices_objs = {}
 
     def process_message(self, message):
         super(Hub, self).process_message(message)
@@ -48,6 +50,15 @@ class Hub(Base):
             else:
                 self.known_devices[device_id]['date_last_message'] = int(time.time())
                 self.known_devices[device_id]['messages_received'] += 1
+
+
+            # Temp
+            # Add to list of known_devices if not already Objects
+            if (not device_id in self.known_devices_objs):
+                self.known_devices_objs[device_id] = device.Device()
+            # Temp
+
+            pp.pprint(self.known_devices_objs)
 
             if (profile_id == self.ZDP_PROFILE_ID):
                 # Zigbee Device Profile ID

@@ -9,7 +9,7 @@ pp = pprint.PrettyPrinter(indent=4)
 
 class Device(Base):
 
-    def __init__(self, serialObj):
+    def __init__(self, serialObj = False):
         Base.__init__(self, serialObj)
 
         # Type Info

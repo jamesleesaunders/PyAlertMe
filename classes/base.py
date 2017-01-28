@@ -5,6 +5,7 @@ import struct
 import time
 import binascii
 import threading
+import serial
 from xbee import ZigBee
 
 pp = pprint.PrettyPrinter(indent=4)
@@ -145,11 +146,12 @@ class Base(object):
         }
     }
 
-    def __init__(self, serialObj):
+    def __init__(self, serialObj = False):
         self.logger = logger or logging.getLogger(__name__)
 
         # Setup serial and xbee
-        self.zb = ZigBee(ser=serialObj, callback=self.receive_message, error_callback=self.xbee_error)
+        if(serialObj != False):
+            self.zb = ZigBee(ser=serialObj, callback=self.receive_message, error_callback=self.xbee_error)
 
         # Type Info
         self.manu = None

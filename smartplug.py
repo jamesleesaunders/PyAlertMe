@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-# Filename:    pi-smartplug.py
+# Filename:    smartplug.py
 # Description: Communicate with Hive/AlertMe devices via a XBee
 # Author:      James Saunders [james@saunders-family.net]
 # Copyright:   Copyright (C) 2016 James Saunders

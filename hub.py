@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-# Filename:    pi-hub.py
+# Filename:    hub.py
 # Description: Communicate with Hive/AlertMe devices via a XBee
 # Author:      James Saunders [james@saunders-family.net]
 # Copyright:   Copyright (C) 2016 James Saunders
@@ -91,4 +91,4 @@ while True:
 # Close up shop
 print("Closing Serial Port")
 hubObj.halt()
-serial.close()
+serialObj.close()
