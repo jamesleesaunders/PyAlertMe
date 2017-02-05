@@ -6,6 +6,7 @@ import struct
 import time
 import binascii
 import threading
+import sqlite3
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -22,6 +23,8 @@ class Hub(Base):
 
         # List of associated nodes
         self.nodes = []
+
+        self.db = sqlite3.connect('test.db')
 
     def set_node_attributes(self, node_index, attributes):
         for attribute, value in attributes.iteritems():
