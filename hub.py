@@ -58,19 +58,19 @@ while True:
     try:
         time.sleep(0.001)
 
-        pp.pprint(hubObj.list_known_devices())
+        nodes = hubObj.list_nodes()
+        pp.pprint(nodes)
         print("Select device:\n")
-        device_id = raw_input("")
+        node_id = raw_input("")
 
         while True:
             pp.pprint(hubObj.list_actions())
             print("Select command:\n")
             action = raw_input("")
-
             message = hubObj.get_action(action)
-            devices = hubObj.list_known_devices()
-            dest_addr_long = devices[device_id]['addr_long']
-            dest_addr = devices[device_id]['addr_short']
+
+            dest_addr_long = nodes[int(node_id)]['addrLong']
+            dest_addr = nodes[int(node_id)]['addrShort']
             hubObj.send_message(message, dest_addr_long, dest_addr)
 
     except IndexError:

@@ -5,6 +5,7 @@ import device
 import struct
 import time
 import binascii
+import threading
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -19,8 +20,70 @@ class Hub(Base):
         self.date = '2017-01-01'
         self.version = 00001
 
-        self.known_devices = {}
-        self.known_devices_objs = {}
+        # List of associated nodes
+        self.nodes = []
+
+    def set_node_attributes(self, node_index, attributes):
+        for attribute, value in attributes.iteritems():
+            self.set_node_attribute(node_index, attribute, value)
+
+    def set_node_attribute(self, node_index, attribute, value):
+        if not self.nodes[node_index]['attributes'].has_key(attribute):
+            self.nodes[node_index]['attributes'][attribute] = {}
+        self.nodes[node_index]['attributes'][attribute]['reportedValue'] = value
+        self.nodes[node_index]['attributes'][attribute]['reportReceivedTime'] = int(time.time())
+
+    def list_nodes(self):
+        return self.nodes
+
+    def rename_node(self, node_index, name):
+        self.nodes[node_index]['name'] = name
+
+    def command(self, node_index, attribute, value):
+        # Work out Zigbee addresses
+        dest_addr_long  = self.nodes[node_index]['addrLong']
+        dest_addr_short = self.nodes[node_index]['addrShort']
+
+        # Basic message details
+        message = {
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'profile': self.ALERTME_PROFILE_ID,
+        }
+
+        # Construct message data
+        if attribute == 'state':
+            message['data'] = b'\x00\xee'
+            message = {
+                'src_endpoint': b'\x00',
+                'dest_endpoint': b'\x02',
+                'cluster': b'\x00\xee',
+                'profile': self.ALERTME_PROFILE_ID,
+            }
+            if value == 'ON':
+                message['data'] = b'\x11\x00\x02\x01\x01'
+            if value == 'OFF':
+                message['data'] = b'\x11\x00\x02\x00\x01'
+
+        # Send message
+        self.send_message(message, dest_addr_long, dest_addr_short)
+
+    def discovery(self):
+        self.logger.debug('Discovery')
+        self.thread = threading.Thread(target=self._discovery)
+
+    def _discovery(self):
+        # Discovery Phase
+        # Send out a broadcast every 3 seconds for a minute
+        timeout = time.time() + 60
+        while True:
+            if time.time() > timeout:
+                break
+
+            message = self.get_action('routing_table_request')
+            self.send_message(message, self.BROADCAST_LONG, self.BROADCAST_SHORT)
+
+            time.sleep(3.00)
 
     def process_message(self, message):
         super(Hub, self).process_message(message)
@@ -33,32 +96,30 @@ class Hub(Base):
             source_addr_long = message['source_addr_long']
             source_addr = message['source_addr']
 
-            # Add to list of known_devices if not already
-            device_id = Base.pretty_mac(source_addr_long)
-            if (not device_id in self.known_devices):
-                self.known_devices[device_id] = {
-                    'addr_long': source_addr_long,
-                    'addr_short': source_addr,
-                    'name': 'Unknown Device',
-                    'type_info': None,
+            # Add to list of nodes if not already
+            node_id = Base.pretty_mac(source_addr_long)
+            node_index = False
+            for i, node in enumerate(self.nodes):
+                if node['id'] == node_id:
+                    node_index = i
+
+            if node_index is False:
+                self.nodes.append({
+                    'id': node_id,
+                    'addrLong': source_addr_long,
+                    'addrShort': source_addr,
                     'associated': False,
-                    'date_found': int(time.time()),
-                    'date_last_message': int(time.time()),
-                    'messages_received': 1,
-                    'messages_sent': 0
-                }
-            else:
-                self.known_devices[device_id]['date_last_message'] = int(time.time())
-                self.known_devices[device_id]['messages_received'] += 1
+                    'name': 'Unknown Device',
+                    "createdOn": int(time.time()),
+                    'lastSeen': int(time.time()),
+                    'messagesReceived': 0,
+                    'messagesSent': 0,
+                    'attributes': {}
+                })
+                node_index = len(self.nodes) - 1
 
-
-            # Temp
-            # Add to list of known_devices if not already Objects
-            if (not device_id in self.known_devices_objs):
-                self.known_devices_objs[device_id] = device.Device()
-            # Temp
-
-            pp.pprint(self.known_devices_objs)
+            self.nodes[node_index]['lastSeen'] = int(time.time())
+            self.nodes[node_index]['messagesReceived'] += 1
 
             if (profile_id == self.ZDP_PROFILE_ID):
                 # Zigbee Device Profile ID
@@ -113,8 +174,8 @@ class Hub(Base):
                     self.logger.debug('Sent Hardware Join Messages')
 
                     # We are fully associated!
-                    # Update known_devices to say it is now associated
-                    self.known_devices[device_id]['associated'] = True
+                    # Update nodes to say it is now associated
+                    self.nodes[node_index]['associated'] = True
                     self.logger.debug('Device Associated')
 
                 else:
@@ -131,51 +192,55 @@ class Hub(Base):
 
                 if (cluster_id == b'\x00\xee'):
                     if (cluster_cmd == b'\x80'):
-                        state = self.parse_switch_status(message['rf_data'])
-                        self.logger.debug('Switch Status: %s', state)
-
+                        properties = self.parse_switch_status(message['rf_data'])
+                        self.logger.debug('Switch Status: %s', properties)
+                        self.set_node_attributes(node_index, properties)
                     else:
                         self.logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
                 elif (cluster_id == b'\x00\xef'):
                     if (cluster_cmd == b'\x81'):
-                        power = self.parse_power_info(message['rf_data'])
-                        self.logger.debug('Current Instantaneous Power: %s', power)
-
+                        properties = self.parse_power_info(message['rf_data'])
+                        self.logger.debug('Current Instantaneous Power: %s', properties)
+                        self.set_node_attributes(node_index, properties)
                     elif (cluster_cmd == b'\x82'):
-                        usageInfo = self.parse_usage_info(message['rf_data'])
-                        self.logger.debug('Uptime: %s Usage: %s', usageInfo['UpTime'], usageInfo['UsageWattHours'])
-
+                        properties = self.parse_usage_info(message['rf_data'])
+                        self.logger.debug('Uptime: %s Usage: %s', properties['upTime'], properties['powerConsumption'])
+                        self.set_node_attributes(node_index, properties)
                     else:
                         self.logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
                 elif (cluster_id == b'\x00\xf0'):
                     if (cluster_cmd == b'\xfb'):
-                        vals = self.parse_status_update(message['rf_data'])
-                        self.logger.debug('Status Update: %s', vals)
+                        properties = self.parse_status_update(message['rf_data'])
+                        self.logger.debug('Status Update: %s', properties)
+                        self.set_node_attributes(node_index, properties)
                     else:
                         self.logger.error('Unrecognised Cluster Cmd: %r', cluster_cmd)
 
                 elif (cluster_id == b'\x00\xf2'):
-                    tamper = self.parse_tamper(message['rf_data'])
-                    self.logger.debug('Tamper Switch Changed State: %s', tamper)
+                    properties = self.parse_tamper(message['rf_data'])
+                    self.logger.debug('Tamper Switch Changed State: %s', properties)
+                    self.set_node_attributes(node_index, properties)
 
                 elif (cluster_id == b'\x00\xf3'):
-                    vals = self.parse_button_press(message['rf_data'])
-                    self.logger.debug('Button Press: %s', vals)
+                    properties = self.parse_button_press(message['rf_data'])
+                    self.logger.debug('Button Press: %s', properties)
+                    self.set_node_attributes(node_index, properties)
 
                 elif (cluster_id == b'\x00\xf6'):
                     if (cluster_cmd == b'\xfd'):
-                        rssi = self.parse_range_info(message['rf_data'])
-                        self.logger.debug('Range Test RSSI Value: %s', rssi)
+                        properties = self.parse_range_info(message['rf_data'])
+                        self.logger.debug('Range Test RSSI Value: %s', properties)
+                        self.set_node_attributes(node_index, properties)
 
                     elif (cluster_cmd == b'\xfe'):
-                        type_info = self.parse_version_info(message['rf_data'])
-                        self.logger.debug('Version Information: %s', type_info)
-                        # Update known_devices with the type
-                        self.known_devices[device_id]['type_info'] = type_info
+                        properties = self.parse_version_info(message['rf_data'])
+                        self.logger.debug('Version Information: %s', properties)
+                        self.set_node_attributes(node_index, properties)
+
                         # We will assume it is also associated
-                        self.known_devices[device_id]['associated'] = True
+                        self.nodes[node_index]['associated'] = True
 
                     else:
                         self.logger.error('Unrecognised Cluster Command: %e', cluster_cmd)
@@ -197,7 +262,7 @@ class Hub(Base):
                     self.logger.error('Unrecognised Cluster ID: %r', cluster_id)
 
                 # Do we know the device type yet?
-                if (self.known_devices[device_id]['type_info'] is None):
+                if (not self.nodes[node_index]['attributes'].has_key('model')):
                     reply = self.get_action('version_info')
                     self.send_message(reply, source_addr_long, source_addr)
                     self.logger.debug('Sent Type Request')
@@ -205,8 +270,7 @@ class Hub(Base):
             else:
                 self.logger.error('Unrecognised Profile ID: %r', profile_id)
 
-    def list_known_devices(self):
-        return self.known_devices
+
 
 
 
@@ -216,22 +280,22 @@ class Hub(Base):
         # length of the string which we then use in the unpack
         l = len(rf_data) - 22
         values = dict(zip(
-            ('cluster_cmd', 'version', 'string'),
+            ('cluster_cmd', 'hwVersion', 'string'),
             struct.unpack('< 2x s H 17x %ds' % l, rf_data)
         ))
 
         # Break down the version string into its component parts
         ret = {}
-        ret['version'] = values['version']
+        ret['hwVersion'] = values['hwVersion']
         ret['string']  = str(values['string'].decode())\
             .replace('\t', '\n')\
             .replace('\r', '\n')\
             .replace('\x0e', '\n')\
             .replace('\x0b', '\n')
 
-        ret['manu']    = ret['string'].split('\n')[0]
-        ret['type']    = ret['string'].split('\n')[1]
-        ret['date']    = ret['string'].split('\n')[2]
+        ret['manufacturer']    = ret['string'].split('\n')[0]
+        ret['model']           = ret['string'].split('\n')[1]
+        ret['manufactuerDate'] = ret['string'].split('\n')[2]
         del ret['string']
 
         return ret
@@ -243,8 +307,8 @@ class Hub(Base):
             ('cluster_cmd', 'RSSI'),
             struct.unpack('< 2x s B 1x', rf_data)
         ))
-        ret = values['RSSI']
-        return ret
+        rssi = values['RSSI']
+        return {'RSSI' : rssi}
 
     @staticmethod
     def parse_power_info(rf_data):
@@ -253,21 +317,18 @@ class Hub(Base):
             ('cluster_cmd', 'Power'),
             struct.unpack('< 2x s H', rf_data)
         ))
-        ret = values['Power']
-
-        return ret
+        return {'instantaneousPower' : values['Power']}
 
     @staticmethod
     def parse_usage_info(rf_data):
         # Parse Usage Stats
         ret = {}
         values = dict(zip(
-            ('cluster_cmd', 'Usage', 'UpTime'),
+            ('cluster_cmd', 'powerConsumption', 'upTime'),
             struct.unpack('< 2x s I I 1x', rf_data)
         ))
-        ret['UpTime']           = values['UpTime']
-        ret['UsageWattSeconds'] = values['Usage']
-        ret['UsageWattHours']   = values['Usage'] * 0.000277778
+        ret['powerConsumption'] = values['powerConsumption']
+        ret['upTime']           = values['upTime']
 
         return ret
 
@@ -276,21 +337,21 @@ class Hub(Base):
         # Parse Switch Status
         values = struct.unpack('< 2x b b b', rf_data)
         if (values[2] & 0x01):
-            return 1
+            return {'state' : 'ON'}
         else:
-            return 0
+            return {'state' : 'OFF'}
 
     @staticmethod
     def parse_button_press(rf_data):
         ret = {}
         if rf_data[2] == b'\x00':
-            ret['State'] = 0
+            ret['state'] = 'OFF'
         elif rf_data[2] == b'\x01':
-            ret['State'] = 1
+            ret['state'] = 'ON'
         else:
-            ret['State'] = None
+            ret['state'] = {}
 
-        ret['Counter'] = struct.unpack('<H', rf_data[5:7])[0]
+        ret['counter'] = struct.unpack('<H', rf_data[5:7])[0]
 
         return ret
 

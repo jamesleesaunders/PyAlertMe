@@ -165,25 +165,6 @@ class Base(object):
 
         self.associated = False
 
-    def halt(self):
-        self.zb.halt()
-
-    def start(self, func):
-        if callable(func):
-            self.logger.debug('Starting thread...')
-            self._stop = threading.Event()
-            self.thread = threading.Thread(target=func)
-            self.thread.start()
-        else:
-            self.logger.critical('Non callable function passed to start()')
-
-    def stop(self):
-        self.logger.debug('Stopping thread...')
-        self._stop.set()
-
-    def xbee_error(self, error):
-        self.logger.critical('XBee Error: %s', error)
-
     def list_actions(self):
         actions = {}
         for id, message in self.messages.items():
@@ -194,10 +175,10 @@ class Base(object):
         # Get the message from the dictionary
         return self.messages[type]
 
-    def send_message(self, message, dest_addr_long, dest_addr):
+    def send_message(self, message, dest_addr_long, dest_addr_short):
         # Tack on destination addresses
-        message['dest_addr_long'] = dest_addr_long
-        message['dest_addr']      = dest_addr
+        message['dest_addr_long']  = dest_addr_long
+        message['dest_addr_short'] = dest_addr_short
         device_id = Base.pretty_mac(dest_addr_long)
 
         self.logger.debug('Device: %s Sending: %s', device_id, message)
@@ -235,6 +216,24 @@ class Base(object):
     def __str__(self):
         return "Device Type: %s" % (self.type)
 
+    def halt(self):
+        self.zb.halt()
+
+    def start(self, func):
+        if callable(func):
+            self.logger.debug('Starting thread...')
+            self._stop = threading.Event()
+            self.thread = threading.Thread(target=func)
+            self.thread.start()
+        else:
+            self.logger.critical('Non callable function passed to start()')
+
+    def stop(self):
+        self.logger.debug('Stopping thread...')
+        self._stop.set()
+
+    def xbee_error(self, error):
+        self.logger.critical('XBee Error: %s', error)
 
     @staticmethod
     def pretty_mac(macString):
