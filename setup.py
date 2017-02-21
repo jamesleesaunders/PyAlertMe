@@ -2,24 +2,32 @@
 
 import sqlite3
 
-conn = sqlite3.connect('py-alertme.db')
-print "Opened database successfully"
+conn = sqlite3.connect('nodes.db')
+print "Database successfully created"
 
-conn.execute('''CREATE TABLE Nodes (
-    Id INT PRIMARY KEY      NOT NULL,
-    Name           TEXT     NOT NULL,
-    AddressLong    CHAR(50) NOT NULL,
-    AddressShort   CHAR(50),
-    Type           CHAR(50)
+conn.execute('''CREATE TABLE Node (
+    Id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    AddressLong      BLOB NOT NULL,
+    AddressShort     BLOB,
+    Name             CHAR(50) DEFAULT '',
+    Type             CHAR(50) DEFAULT '',
+    Version          INTEGER,
+    Manufacturer     CHAR(50) DEFAULT '',
+    ManufactureDate  CHAR(10) DEFAULT '',
+    FirstSeen        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    LastSeen         DATETIME,
+    MessagesReceived INT DEFAULT 0
 );''')
+conn.execute('''CREATE UNIQUE INDEX AddressLong on Node (AddressLong);''')
+print "Node table successfully created"
 
-conn.execute('''CREATE TABLE Attributes (
-    HubId          TEXT     NOT NULL,
-    Attribute      CHAR(50) NOT NULL,
-    Value          CHAR(50),
-    Time           DATETIME
+conn.execute('''CREATE TABLE NodeAttribute (
+    Id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    NodeId           INTEGER,
+    Attribute        CHAR(20) NOT NULL,
+    Value            CHAR(50) NOT NULL,
+    Time             DATETIME NOT NULL
 );''')
-
-print "Tables created successfully"
+print "NodeAttribute table successfully created"
 
 conn.close()

@@ -119,65 +119,74 @@ class TestHub(unittest.TestCase):
         message = deviceObj.get_type()
         result = Hub.parse_version_info(message['data'])
         expected = {
-            'hwVersion': 20045,
-            'manufacturer':   'AlertMe.com',
-            'model':   'SmartPlug',
-            'manufactuerDate':   '2013-09-26'
+            'Version': 20045,
+            'Manufacturer': 'AlertMe.com',
+            'Type': 'SmartPlug',
+            'ManufactureDate': '2013-09-26'
         }
         self.assertEqual(result, expected)
         deviceObj.halt()
 
         result = Hub.parse_version_info(b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\tSmartPlug\n2013-09-26')
         expected = {
-            'hwVersion': 20045,
-            'manufacturer':   'AlertMe.com',
-            'model':   'SmartPlug',
-            'manufactuerDate':   '2013-09-26'
+            'Version': 20045,
+            'Manufacturer': 'AlertMe.com',
+            'Type': 'SmartPlug',
+            'ManufactureDate': '2013-09-26'
         }
         self.assertEqual(result, expected)
 
         result = Hub.parse_version_info(b'\tp\xfebI\xb2\x8a\xc2\x00\x00o\r\x009\x10\r\x00\x03#\x01\x01\x0bAlertMe.com\x0bPower Clamp\n2010-05-19')
         expected = {
-            'hwVersion': 18786,
-            'manufacturer':   'AlertMe.com',
-            'model':   'Power Clamp',
-            'manufactuerDate':   '2010-05-19'
+            'Version': 18786,
+            'Manufacturer': 'AlertMe.com',
+            'Type': 'Power Clamp',
+            'ManufactureDate': '2010-05-19'
         }
         self.assertEqual(result, expected)
 
         result = Hub.parse_version_info(b'\tp\xfe+\xe8\xc0ax\x00\x00o\r\x009\x10\x01\x00\x01#\x00\x01\x0bAlertMe.com\rButton Device\n2010-11-15')
         expected = {
-            'hwVersion': 59435,
-            'manufacturer':   'AlertMe.com',
-            'model':   'Button Device',
-            'manufactuerDate':   '2010-11-15'
+            'Version': 59435,
+            'Manufacturer': 'AlertMe.com',
+            'Type': 'Button Device',
+            'ManufactureDate': '2010-11-15'
         }
         self.assertEqual(result, expected)
 
         result = Hub.parse_version_info(b'\tp\xfe\xb6\xb7x\x1dx\x00\x00o\r\x009\x10\x06\x00\x00#\x00\x02\x0bAlertMe.com\nPIR Device\n2010-11-24')
         expected = {
-            'hwVersion': 47030,
-            'manufacturer':   'AlertMe.com',
-            'model':   'PIR Device',
-            'manufactuerDate':   '2010-11-24'
+            'Version': 47030,
+            'Manufacturer': 'AlertMe.com',
+            'Type': 'PIR Device',
+            'ManufactureDate': '2010-11-24'
         }
         self.assertEqual(result, expected)
 
         result = Hub.parse_version_info(b'\tp\xfe\x82@\xc1e\x1d\x00\x00o\r\x009\x10\x04\x00\x01#\x00\x01\x0bAlertMe.com\x0eAlarm Detector\n2010-11-24')
         expected = {
-            'hwVersion': 16514,
-            'manufacturer':   'AlertMe.com',
-            'model':   'Alarm Detector',
-            'manufactuerDate':   '2010-11-24'
+            'Version': 16514,
+            'Manufacturer': 'AlertMe.com',
+            'Type': 'Alarm Detector',
+            'ManufactureDate': '2010-11-24'
         }
         self.assertEqual(result, expected)
 
         result = Hub.parse_version_info(b'\t0\xfe3B\x08BI\x00\x00o\r\x009\x10\x03\x00\x03#\x00\x01\x0bAlertMe.com\rKeyfob Device\n2010-11-10')
         expected = {
-            'hwVersion': 16947,
-            'manufacturer':   'AlertMe.com',
-            'model':   'Keyfob Device',
-            'manufactuerDate':   '2010-11-10'
+            'Version': 16947,
+            'Manufacturer': 'AlertMe.com',
+            'Type': 'Keyfob Device',
+            'ManufactureDate': '2010-11-10'
+        }
+        self.assertEqual(result, expected)
+
+        result = Hub.parse_version_info(b'\t\x00\xfe\x1b\x15V_\x1b\x00\x00o\r\x009\x10\x02\x00\x07\x12\x00\x02\x0bAlertMe.com\x06Beacon\n2008-07-08')
+        expected = {
+            'Version': 5403,
+            'Manufacturer': 'AlertMe.com',
+            'Type': 'Beacon',
+            'ManufactureDate': '2008-07-08'
         }
         self.assertEqual(result, expected)
 

@@ -1,4 +1,5 @@
 #! /usr/bin/python
+# coding: utf-8
 
 # Filename:    hub.py
 # Description: Communicate with Hive/AlertMe devices via a XBee
@@ -40,18 +41,8 @@ serialObj = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
 hubObj = Hub(serialObj)
 
-# Discovery Phase
-# Send out a broadcast every 30 seconds to provoke a response
-timeout = time.time() + 10
-while True:
-    test = 0
-    if time.time() > timeout:
-        break
-
-    message = hubObj.get_action('routing_table_request')
-    hubObj.send_message(message, hubObj.BROADCAST_LONG, hubObj.BROADCAST_SHORT)
-    hubObj.logger.debug('Discovery Phase')
-    time.sleep(5.00)
+# Kick off discovery thread
+hubObj.discovery()
 
 # Actions Phase
 while True:
@@ -69,9 +60,11 @@ while True:
             action = raw_input("")
             message = hubObj.get_action(action)
 
-            dest_addr_long = nodes[int(node_id)]['addrLong']
-            dest_addr = nodes[int(node_id)]['addrShort']
-            hubObj.send_message(message, dest_addr_long, dest_addr)
+            dest_addr_long = nodes[int(node_id)]['AddressLong']
+            dest_addr_short = b's\xba'
+            pp.pprint(dest_addr_long)
+            pp.pprint(dest_addr_short)
+            hubObj.send_message(message, dest_addr_long, dest_addr_short)
 
     except IndexError:
         print("No Command")

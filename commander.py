@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf_8 -*-
+
+
 '''
 Created on Aug 2, 2015
 
@@ -5,9 +9,11 @@ Created on Aug 2, 2015
 '''
 import urwid
 from collections import deque
-from threading import Thread
 import threading
+import logging
 
+logger = logging.getLogger('pihive')
+logger.setLevel(logging.DEBUG)
 
 class UnknownCommand(Exception):
     def __init__(self, cmd):
@@ -210,8 +216,6 @@ class Commander(urwid.Frame):
 
 
 
-
-
 if __name__ == '__main__':
     class TestCmd(Command):
         def do_discovery(self, *args):
@@ -229,15 +233,15 @@ if __name__ == '__main__':
             if args[0] == 'list':
                 # Construct a lise of nodes
                 output = "List of Nodes: \n"
-                i = 1
-                for node in hubObj.list_nodes():
-                    output += str(i) + ". " + node['attributes']['model']['reportedValue'] + " (" + node['name'] + ")\n"
-                    i += 1
+
+                nodes = hubObj.list_nodes()
+                for id, node in nodes.iteritems():
+                    output += str(id) + ". " + node['Type'] + " [" + node['Name'] + "] (" + Base.pretty_mac(node['AddressLong']) + ")\n"
 
                 return output
 
             if args[0].isdigit():
-                node_index = int(args[0])-1
+                node_id = int(args[0])
 
                 if args[1] == "rename":
                     # Concatenate all following params
@@ -245,21 +249,29 @@ if __name__ == '__main__':
                     if name == '':
                         raise Exception('Name too short!')
 
-                    hubObj.rename_node(node_index, name)
-                    return 'Node: ' + str(node_index) + ' Renamed: ' + name
+                    hubObj.set_node_name(node_id, name)
+                    return 'Node: ' + str(node_id) + ' Renamed: ' + name
 
                 if args[1] == "state":
                     state = args[2]
-                    hubObj.command(node_index, 'state', state)
-                    return 'Node: ' + str(node_index) + ' State Changed: ' + state
+                    hubObj.command(node_id, 'state', state)
+                    return 'Node: ' + str(node_id) + ' State Changed: ' + state
 
-            return 'unknown arg'
+                if args[1] == "type":
+                    hubObj.get_node_type(node_id)
+                    return 'Type Request Sent'
+
+                if args[1] == "detail":
+                    nodes = hubObj.list_nodes()
+                    return 'Nodes %s', nodes[node_id]
+
+            return 'Unknown Argument'
 
         def do_shutdown(self, *args):
             # Close up shop
             hubObj.halt()
             serialObj.close()
-            return 'shutdown'
+            return 'Shutdown'
 
         def do_echo(self, *args):
             return ' '.join(args)
@@ -273,6 +285,26 @@ if __name__ == '__main__':
 
     from classes import *
     import serial
+    import logging
+
+    logger = logging.getLogger('pihive')
+    logger.setLevel(logging.DEBUG)
+
+    # Speficy log message format
+    formatter = logging.Formatter('%(asctime)s %(levelname)-3s %(module)-5s %(message)s')
+
+    # create console handler and set level to info
+    sh = logging.StreamHandler()
+    sh.setLevel(logging.DEBUG)
+    sh.setFormatter(formatter)
+    logger.addHandler(sh)
+
+    # create debug file handler and set level to debug
+    fh = logging.FileHandler("debug.log")
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+
 
     # Serial Configuration
     XBEE_PORT = '/dev/tty.usbserial-A1014P7W'  # MacBook Serial Port

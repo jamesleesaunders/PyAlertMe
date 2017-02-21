@@ -22,47 +22,26 @@ class Hub(Base):
         self.version = 00001
 
         # List of associated nodes
-        self.nodes = []
+        self.addr_long_to_id = {}
 
-        self.db = sqlite3.connect('test.db')
+    def command(self, node_id, attribute, value):
+        # Lookup node
+        nodes = self.list_nodes()
 
-    def set_node_attributes(self, node_index, attributes):
-        for attribute, value in attributes.iteritems():
-            self.set_node_attribute(node_index, attribute, value)
-
-    def set_node_attribute(self, node_index, attribute, value):
-        if not self.nodes[node_index]['attributes'].has_key(attribute):
-            self.nodes[node_index]['attributes'][attribute] = {}
-        self.nodes[node_index]['attributes'][attribute]['reportedValue'] = value
-        self.nodes[node_index]['attributes'][attribute]['reportReceivedTime'] = int(time.time())
-
-    def list_nodes(self):
-        return self.nodes
-
-    def rename_node(self, node_index, name):
-        self.nodes[node_index]['name'] = name
-
-    def command(self, node_index, attribute, value):
         # Work out Zigbee addresses
-        dest_addr_long  = self.nodes[node_index]['addrLong']
-        dest_addr_short = self.nodes[node_index]['addrShort']
+        dest_addr_long = nodes[node_id]['AddressLong']
+        dest_addr_short = nodes[node_id]['AddressShort']
 
         # Basic message details
         message = {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'profile': self.ALERTME_PROFILE_ID,
+            'profile': self.ALERTME_PROFILE_ID
         }
 
         # Construct message data
         if attribute == 'state':
-            message['data'] = b'\x00\xee'
-            message = {
-                'src_endpoint': b'\x00',
-                'dest_endpoint': b'\x02',
-                'cluster': b'\x00\xee',
-                'profile': self.ALERTME_PROFILE_ID,
-            }
+            message['cluster'] = b'\x00\xee'
             if value == 'ON':
                 message['data'] = b'\x11\x00\x02\x01\x01'
             if value == 'OFF':
@@ -71,58 +50,126 @@ class Hub(Base):
         # Send message
         self.send_message(message, dest_addr_long, dest_addr_short)
 
-    def discovery(self):
-        self.logger.debug('Discovery')
-        self.thread = threading.Thread(target=self._discovery)
 
-    def _discovery(self):
-        # Discovery Phase
-        # Send out a broadcast every 3 seconds for a minute
-        timeout = time.time() + 60
-        while True:
-            if time.time() > timeout:
-                break
+    def set_node_attributes(self, node_id, attributes):
+        for attribute, value in attributes.iteritems():
+            self.set_node_attribute(node_id, attribute, value)
 
-            message = self.get_action('routing_table_request')
-            self.send_message(message, self.BROADCAST_LONG, self.BROADCAST_SHORT)
+    def set_node_attribute(self, node_id, attribute, value):
+        db = sqlite3.connect('nodes.db')
+        cursor = db.cursor()
+        cursor.execute(
+            'INSERT INTO NodeAttribute (NodeId, Attribute, Value, Time) VALUES (:NodeId, :Attribute, :Value, CURRENT_TIMESTAMP)',
+            {'NodeId': node_id, 'Attribute': attribute, 'Value': value}
+        )
+        db.commit()
 
-            time.sleep(3.00)
+    def set_node_name(self, node_id, name):
+        db = sqlite3.connect('nodes.db')
+        cursor = db.cursor()
+        cursor.execute(
+            'UPDATE Node SET Name = :Name WHERE Id = :NodeId',
+            {'Name' : name, 'NodeId' : node_id}
+        )
+        db.commit()
+
+    def set_node_type(self, node_id, details):
+        db = sqlite3.connect('nodes.db')
+        cursor = db.cursor()
+        cursor.execute(
+            'UPDATE Node SET Type = :Type, Version = :Version, Manufacturer = :Manufacturer, ManufactureDate = :ManufactureDate WHERE Id = :NodeId',
+            {'Type': details['Type'], 'Version': details['Version'], 'Manufacturer': details['Manufacturer'], 'ManufactureDate': details['ManufactureDate'], 'NodeId': node_id}
+        )
+        self.logger.debug('Setting type to %s', details)
+        db.commit()
+
+    def get_node_type(self, node_id):
+
+        # Lookup node
+        nodes = self.list_nodes()
+
+        # Work out Zigbee addresses
+        dest_addr_long = nodes[node_id]['AddressLong']
+        dest_addr_short = nodes[node_id]['AddressShort']
+
+        self.logger.debug('Sending version req to %s', node_id)
+        message = self.get_action('version_info')
+        self.send_message(message, dest_addr_long, dest_addr_short)
+
+    def list_nodes(self):
+        def dict_factory(cursor, row):
+            d = {}
+            for idx, col in enumerate(cursor.description):
+                d[col[0]] = row[idx]
+            return d
+
+        db = sqlite3.connect('nodes.db')
+        db.text_factory = str
+        db.row_factory = dict_factory
+        cursor = db.cursor()
+        cursor.execute('SELECT * FROM Node')
+
+        nodes = {}
+        for node in cursor.fetchall():
+            nodes[node['Id']] = node
+            cursor.execute(
+                'SELECT a.Id, a.Attribute, a.Value, a.Time FROM NodeAttribute a JOIN (SELECT MAX(Id) AS Id FROM NodeAttribute GROUP BY Attribute) b ON a.Id = b.id AND a.NodeId = :NodeId',
+                {'NodeId' : node['Id']}
+            )
+            nodes[node['Id']]['Attributes'] = cursor.fetchall()
+
+        return nodes
+
+    def lookup_node_id(self, addr_long):
+        db = sqlite3.connect('nodes.db')
+        db.text_factory = lambda x: unicode(x, 'utf-8', 'ignore')
+        cursor = db.cursor()
+
+        # Lookup in local cache
+        if addr_long in self.addr_long_to_id:
+            node_id = self.addr_long_to_id[addr_long]
+
+        else:
+            # Lookup in DB
+            cursor.execute('SELECT Id FROM Node WHERE AddressLong = :AddrLong', {'AddrLong': addr_long})
+            row = cursor.fetchone()
+
+            if row is not None:
+                node_id = row[0]
+            else:
+                # Create in DB
+                cursor.execute(
+                    'INSERT INTO Node (AddressLong, Name, FirstSeen, LastSeen) VALUES (:AddrLong, :Name, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)',
+                    {'AddrLong': addr_long, 'Name': 'Unnamed Device'}
+                )
+                node_id = cursor.lastrowid
+                db.commit()
+
+            # Add to local cache
+            self.addr_long_to_id[addr_long] = node_id
+
+        return node_id
 
     def process_message(self, message):
         super(Hub, self).process_message(message)
 
         # We are only interested in Zigbee Explicit packets.
-        if (message['id'] == 'rx_explicit'):
+        if message['id'] == 'rx_explicit':
             profile_id = message['profile']
             cluster_id = message['cluster']
 
             source_addr_long = message['source_addr_long']
             source_addr = message['source_addr']
+            node_id = self.lookup_node_id(source_addr_long)
 
-            # Add to list of nodes if not already
-            node_id = Base.pretty_mac(source_addr_long)
-            node_index = False
-            for i, node in enumerate(self.nodes):
-                if node['id'] == node_id:
-                    node_index = i
-
-            if node_index is False:
-                self.nodes.append({
-                    'id': node_id,
-                    'addrLong': source_addr_long,
-                    'addrShort': source_addr,
-                    'associated': False,
-                    'name': 'Unknown Device',
-                    "createdOn": int(time.time()),
-                    'lastSeen': int(time.time()),
-                    'messagesReceived': 0,
-                    'messagesSent': 0,
-                    'attributes': {}
-                })
-                node_index = len(self.nodes) - 1
-
-            self.nodes[node_index]['lastSeen'] = int(time.time())
-            self.nodes[node_index]['messagesReceived'] += 1
+            # Increment packet counter
+            db = sqlite3.connect('nodes.db')
+            cursor = db.cursor()
+            cursor.execute(
+                'UPDATE Node SET LastSeen = CURRENT_TIMESTAMP, MessagesReceived = MessagesReceived + 1 WHERE Id = :NodeId',
+                {'NodeId': node_id}
+            )
+            db.commit()
 
             if (profile_id == self.ZDP_PROFILE_ID):
                 # Zigbee Device Profile ID
@@ -177,8 +224,6 @@ class Hub(Base):
                     self.logger.debug('Sent Hardware Join Messages')
 
                     # We are fully associated!
-                    # Update nodes to say it is now associated
-                    self.nodes[node_index]['associated'] = True
                     self.logger.debug('Device Associated')
 
                 else:
@@ -197,7 +242,7 @@ class Hub(Base):
                     if (cluster_cmd == b'\x80'):
                         properties = self.parse_switch_status(message['rf_data'])
                         self.logger.debug('Switch Status: %s', properties)
-                        self.set_node_attributes(node_index, properties)
+                        self.set_node_attributes(node_id, properties)
                     else:
                         self.logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
@@ -205,11 +250,11 @@ class Hub(Base):
                     if (cluster_cmd == b'\x81'):
                         properties = self.parse_power_info(message['rf_data'])
                         self.logger.debug('Current Instantaneous Power: %s', properties)
-                        self.set_node_attributes(node_index, properties)
+                        self.set_node_attributes(node_id, properties)
                     elif (cluster_cmd == b'\x82'):
                         properties = self.parse_usage_info(message['rf_data'])
                         self.logger.debug('Uptime: %s Usage: %s', properties['upTime'], properties['powerConsumption'])
-                        self.set_node_attributes(node_index, properties)
+                        self.set_node_attributes(node_id, properties)
                     else:
                         self.logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
@@ -217,33 +262,31 @@ class Hub(Base):
                     if (cluster_cmd == b'\xfb'):
                         properties = self.parse_status_update(message['rf_data'])
                         self.logger.debug('Status Update: %s', properties)
-                        self.set_node_attributes(node_index, properties)
+                        # self.set_node_attributes(node_id, properties)
                     else:
                         self.logger.error('Unrecognised Cluster Cmd: %r', cluster_cmd)
 
                 elif (cluster_id == b'\x00\xf2'):
                     properties = self.parse_tamper(message['rf_data'])
                     self.logger.debug('Tamper Switch Changed State: %s', properties)
-                    self.set_node_attributes(node_index, properties)
+                    self.set_node_attributes(node_id, properties)
 
                 elif (cluster_id == b'\x00\xf3'):
                     properties = self.parse_button_press(message['rf_data'])
                     self.logger.debug('Button Press: %s', properties)
-                    self.set_node_attributes(node_index, properties)
+                    self.set_node_attributes(node_id, properties)
 
                 elif (cluster_id == b'\x00\xf6'):
                     if (cluster_cmd == b'\xfd'):
                         properties = self.parse_range_info(message['rf_data'])
                         self.logger.debug('Range Test RSSI Value: %s', properties)
-                        self.set_node_attributes(node_index, properties)
+                        self.set_node_attributes(node_id, properties)
 
                     elif (cluster_cmd == b'\xfe'):
                         properties = self.parse_version_info(message['rf_data'])
                         self.logger.debug('Version Information: %s', properties)
-                        self.set_node_attributes(node_index, properties)
-
-                        # We will assume it is also associated
-                        self.nodes[node_index]['associated'] = True
+                        self.set_node_attributes(node_id, properties)
+                        self.set_node_type(node_id, properties)
 
                     else:
                         self.logger.error('Unrecognised Cluster Command: %e', cluster_cmd)
@@ -264,17 +307,33 @@ class Hub(Base):
                 else:
                     self.logger.error('Unrecognised Cluster ID: %r', cluster_id)
 
-                # Do we know the device type yet?
-                if (not self.nodes[node_index]['attributes'].has_key('model')):
-                    reply = self.get_action('version_info')
-                    self.send_message(reply, source_addr_long, source_addr)
-                    self.logger.debug('Sent Type Request')
-
             else:
                 self.logger.error('Unrecognised Profile ID: %r', profile_id)
 
+    def discovery(self):
+        self.logger.debug('Discovery')
+        self.thread = threading.Thread(target=self._discovery)
 
+    def _discovery(self):
+        # First, send out a broadcast every 3 seconds for 30 seconds
+        timeout = time.time() + 30
+        i=1
+        while True:
+            if time.time() > timeout:
+                break
+            self.logger.debug('Sending discover # %s', i)
+            message = self.get_action('routing_table_request')
+            self.send_message(message, self.BROADCAST_LONG, self.BROADCAST_SHORT)
+            time.sleep(3.00)
+            i = i+1
 
+        # Next, sent out a version request to each node we have discovered above
+        nodes = self.list_nodes()
+        message = self.get_action('version_info')
+        for id, node in nodes.iteritems():
+            self.logger.debug('Sending version req to %s', id)
+            self.send_message(message, node['AddressLong'], node['AddressShort'])
+            time.sleep(1.00)
 
 
     @staticmethod
@@ -283,23 +342,24 @@ class Hub(Base):
         # length of the string which we then use in the unpack
         l = len(rf_data) - 22
         values = dict(zip(
-            ('cluster_cmd', 'hwVersion', 'string'),
+            ('cluster_cmd', 'hw_version', 'string'),
             struct.unpack('< 2x s H 17x %ds' % l, rf_data)
         ))
 
         # Break down the version string into its component parts
         ret = {}
-        ret['hwVersion'] = values['hwVersion']
-        ret['string']  = str(values['string'].decode())\
+        ret['Version'] = values['hw_version']
+        ret['String']  = str(values['string'].decode())\
             .replace('\t', '\n')\
             .replace('\r', '\n')\
             .replace('\x0e', '\n')\
-            .replace('\x0b', '\n')
+            .replace('\x0b', '\n') \
+            .replace('\x06', '\n')
 
-        ret['manufacturer']    = ret['string'].split('\n')[0]
-        ret['model']           = ret['string'].split('\n')[1]
-        ret['manufactuerDate'] = ret['string'].split('\n')[2]
-        del ret['string']
+        ret['Manufacturer']    = ret['String'].split('\n')[0]
+        ret['Type']            = ret['String'].split('\n')[1]
+        ret['ManufactureDate'] = ret['String'].split('\n')[2]
+        del ret['String']
 
         return ret
 
@@ -418,7 +478,11 @@ class Hub(Base):
     @staticmethod
     def parse_tamper(rf_data):
         # Parse Tamper Switch State Change
+        ret = {}
         if ord(rf_data[3]) == 0x02:
-            return 1
+            ret['TamperSwith'] = 'open'
         else:
-            return 0
+            ret['TamperSwith'] = 'closed'
+
+        return ret
+
