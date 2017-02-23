@@ -263,11 +263,11 @@ if __name__ == '__main__':
 
                 if args[1] == "detail":
                     nodes = hubObj.list_nodes()
-                    return 'Nodes %s', nodes[node_id]
+                    return str(nodes[node_id])
 
             return 'Unknown Argument'
 
-        def do_shutdown(self, *args):
+        def do_halt(self, *args):
             # Close up shop
             hubObj.halt()
             serialObj.close()
@@ -294,10 +294,10 @@ if __name__ == '__main__':
     formatter = logging.Formatter('%(asctime)s %(levelname)-3s %(module)-5s %(message)s')
 
     # create console handler and set level to info
-    sh = logging.StreamHandler()
-    sh.setLevel(logging.DEBUG)
-    sh.setFormatter(formatter)
-    logger.addHandler(sh)
+    #sh = logging.StreamHandler()
+    #sh.setLevel(logging.DEBUG)
+    #sh.setFormatter(formatter)
+    #logger.addHandler(sh)
 
     # create debug file handler and set level to debug
     fh = logging.FileHandler("debug.log")
@@ -305,34 +305,14 @@ if __name__ == '__main__':
     fh.setFormatter(formatter)
     logger.addHandler(fh)
 
-
     # Serial Configuration
     XBEE_PORT = '/dev/tty.usbserial-A1014P7W'  # MacBook Serial Port
     XBEE_BAUD = 9600
     serialObj = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
+    #Start hub
     hubObj = Hub(serialObj)
 
-
-
-
-
-
-
-
-
-
-    # Test asynch output -  e.g. comming from different thread
-    #import time
-    #def run():
-    #    while True:
-    #        time.sleep(1)
-    #        c.output('Tick', 'green')
-
-
-    #t = Thread(target=run)
-    #t.daemon = True
-    #t.start()
 
     # start main loop
     c.loop()

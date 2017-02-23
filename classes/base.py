@@ -214,27 +214,14 @@ class Base(object):
             else:
                 self.logger.error('Unrecognised Profile ID: %e', profile_id)
 
-    def __str__(self):
-        return "Device Type: %s" % (self.type)
-
     def halt(self):
         self.zb.halt()
 
-    def start(self, func):
-        if callable(func):
-            self.logger.debug('Starting thread...')
-            self._stop = threading.Event()
-            self.thread = threading.Thread(target=func)
-            self.thread.start()
-        else:
-            self.logger.critical('Non callable function passed to start()')
-
-    def stop(self):
-        self.logger.debug('Stopping thread...')
-        self._stop.set()
-
     def xbee_error(self, error):
         self.logger.critical('XBee Error: %s', error)
+
+    def __str__(self):
+        return "Device Type: %s" % (self.type)
 
     @staticmethod
     def pretty_mac(macString):
