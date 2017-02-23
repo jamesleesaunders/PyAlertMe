@@ -190,6 +190,16 @@ class TestHub(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
+        result = Hub.parse_version_info(b'\t\x00\xfe\xde\xa4\xeav\x1b\x00\x00o\r\x009\x10\x02\x00\x06\x12\x01\x01\x0bAlertMe.com\x04Lamp\n2008-04-17')
+        expected = {
+            'Version': 42206,
+            'Manufacturer': 'AlertMe.com',
+            'Type': 'Lamp',
+            'ManufactureDate': '2008-04-17'
+        }
+        self.assertEqual(result, expected)
+
+
     def test_parse_range_info(self):
         result = Hub.parse_range_info(b'\t+\xfd\xc5w')
         expected = {'RSSI' : 197}

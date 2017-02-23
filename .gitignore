@@ -93,3 +93,6 @@ ENV/
 
 # Intellij
 .idea/
+
+# SQLite DB 
+nodes.db

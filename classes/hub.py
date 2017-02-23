@@ -353,8 +353,9 @@ class Hub(Base):
             .replace('\t', '\n')\
             .replace('\r', '\n')\
             .replace('\x0e', '\n')\
-            .replace('\x0b', '\n') \
-            .replace('\x06', '\n')
+            .replace('\x0b', '\n')\
+            .replace('\x06', '\n')\
+            .replace('\x04', '\n')
 
         ret['Manufacturer']    = ret['String'].split('\n')[0]
         ret['Type']            = ret['String'].split('\n')[1]
