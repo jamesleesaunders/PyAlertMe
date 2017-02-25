@@ -3,9 +3,11 @@
 
 import sqlite3
 
+# Setup DB Connection
 conn = sqlite3.connect('nodes.db')
 print "Database successfully created"
 
+# Create Nodes Table
 conn.execute('''CREATE TABLE Nodes (
     Id               INTEGER PRIMARY KEY AUTOINCREMENT,
     AddressLong      BLOB NOT NULL,
@@ -19,16 +21,19 @@ conn.execute('''CREATE TABLE Nodes (
     LastSeen         DATETIME,
     MessagesReceived INT DEFAULT 0
 );''')
-conn.execute('''CREATE UNIQUE INDEX AddressLong on Node (AddressLong);''')
-print "Node table successfully created"
+conn.execute('''CREATE UNIQUE INDEX AddressLong on Nodes (AddressLong);''')
+print "Nodes table successfully created"
 
+# Create Attributes Table
 conn.execute('''CREATE TABLE Attributes (
     Id               INTEGER PRIMARY KEY AUTOINCREMENT,
     NodeId           INTEGER,
-    Attribute        CHAR(20) NOT NULL,
+    Name             CHAR(20) NOT NULL,
     Value            CHAR(50) NOT NULL,
     Time             DATETIME NOT NULL
 );''')
-print "NodeAttribute table successfully created"
+conn.execute('''CREATE UNIQUE INDEX Attribute on Attributes (NodeId, Name, Value, Time);''')
+print "Attributes table successfully created"
 
+# Close Up Shop
 conn.close()
