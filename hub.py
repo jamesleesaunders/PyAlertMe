@@ -16,19 +16,20 @@ from classes import *
 import pprint
 
 pp = pprint.PrettyPrinter(indent=4)
-logger = logging.getLogger('pihive')
+
+logger = logging.getLogger('py-alertme')
 logger.setLevel(logging.DEBUG)
 
-# Speficy log message format
+# Specify log message format
 formatter = logging.Formatter('%(asctime)s %(levelname)-3s %(module)-5s %(message)s')
 
-# create console handler and set level to info
+# Create console handler and set level to info
 sh = logging.StreamHandler()
 sh.setLevel(logging.DEBUG)
 sh.setFormatter(formatter)
 logger.addHandler(sh)
 
-# create debug file handler and set level to debug
+# Create debug file handler and set level to debug
 fh = logging.FileHandler("debug.log")
 fh.setLevel(logging.DEBUG)
 fh.setFormatter(formatter)

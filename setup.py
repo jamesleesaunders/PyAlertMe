@@ -1,11 +1,12 @@
 #!/usr/bin/python
+# coding: utf-8
 
 import sqlite3
 
 conn = sqlite3.connect('nodes.db')
 print "Database successfully created"
 
-conn.execute('''CREATE TABLE Node (
+conn.execute('''CREATE TABLE Nodes (
     Id               INTEGER PRIMARY KEY AUTOINCREMENT,
     AddressLong      BLOB NOT NULL,
     AddressShort     BLOB,
@@ -21,7 +22,7 @@ conn.execute('''CREATE TABLE Node (
 conn.execute('''CREATE UNIQUE INDEX AddressLong on Node (AddressLong);''')
 print "Node table successfully created"
 
-conn.execute('''CREATE TABLE NodeAttribute (
+conn.execute('''CREATE TABLE Attributes (
     Id               INTEGER PRIMARY KEY AUTOINCREMENT,
     NodeId           INTEGER,
     Attribute        CHAR(20) NOT NULL,

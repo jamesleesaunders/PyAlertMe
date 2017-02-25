@@ -9,7 +9,7 @@ import serial
 from xbee import ZigBee
 
 pp = pprint.PrettyPrinter(indent=4)
-logger = logging.getLogger('pihive')
+logger = logging.getLogger('py-alertme')
 
 class Base(object):
     # ZigBee Profile IDs

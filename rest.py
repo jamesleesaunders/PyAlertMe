@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# coding: utf-8
 
 # Filename:    rest.py
 # Description: Communicate with Hive/AlertMe devices via a XBee
@@ -16,26 +17,25 @@ from classes import *
 import pprint
 
 pp = pprint.PrettyPrinter(indent=4)
-logger = logging.getLogger('pihive')
+logger = logging.getLogger('py-alertme')
 logger.setLevel(logging.DEBUG)
 
-# Speficy log message format
+# Specify log message format
 formatter = logging.Formatter('%(asctime)s %(levelname)-3s %(module)-5s %(message)s')
 
-# create console handler and set level to info
-#sh = logging.StreamHandler()
-#sh.setLevel(logging.DEBUG)
-#sh.setFormatter(formatter)
-#logger.addHandler(sh)
+# Create console handler and set level to info
+sh = logging.StreamHandler()
+sh.setLevel(logging.DEBUG)
+sh.setFormatter(formatter)
+logger.addHandler(sh)
 
-# create debug file handler and set level to debug
+# Create debug file handler and set level to debug
 fh = logging.FileHandler("debug.log")
 fh.setLevel(logging.DEBUG)
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
-
-API_NAME    = 'pialertme'
+API_NAME    = 'pyalertme'
 API_VERSION = '1.0'
 API_BASE    = '/' + API_NAME + '/api/v' + API_VERSION
 

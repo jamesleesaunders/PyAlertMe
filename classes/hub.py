@@ -59,7 +59,7 @@ class Hub(Base):
         db = sqlite3.connect('nodes.db')
         cursor = db.cursor()
         cursor.execute(
-            'INSERT INTO NodeAttribute (NodeId, Attribute, Value, Time) VALUES (:NodeId, :Attribute, :Value, CURRENT_TIMESTAMP)',
+            'INSERT INTO Attributes (NodeId, Attribute, Value, Time) VALUES (:NodeId, :Attribute, :Value, CURRENT_TIMESTAMP)',
             {'NodeId': node_id, 'Attribute': attribute, 'Value': value}
         )
         db.commit()
@@ -68,7 +68,7 @@ class Hub(Base):
         db = sqlite3.connect('nodes.db')
         cursor = db.cursor()
         cursor.execute(
-            'UPDATE Node SET Name = :Name WHERE Id = :NodeId',
+            'UPDATE Nodes SET Name = :Name WHERE Id = :NodeId',
             {'Name' : name, 'NodeId' : node_id}
         )
         db.commit()
@@ -77,7 +77,7 @@ class Hub(Base):
         db = sqlite3.connect('nodes.db')
         cursor = db.cursor()
         cursor.execute(
-            'UPDATE Node SET Type = :Type, Version = :Version, Manufacturer = :Manufacturer, ManufactureDate = :ManufactureDate WHERE Id = :NodeId',
+            'UPDATE Nodes SET Type = :Type, Version = :Version, Manufacturer = :Manufacturer, ManufactureDate = :ManufactureDate WHERE Id = :NodeId',
             {'Type': details['Type'], 'Version': details['Version'], 'Manufacturer': details['Manufacturer'], 'ManufactureDate': details['ManufactureDate'], 'NodeId': node_id}
         )
         self.logger.debug('Setting type to %s', details)
@@ -107,16 +107,21 @@ class Hub(Base):
         db.text_factory = str
         db.row_factory = dict_factory
         cursor = db.cursor()
-        cursor.execute('SELECT * FROM Node')
+        cursor.execute('SELECT * FROM Nodes')
 
         nodes = {}
         for node in cursor.fetchall():
             nodes[node['Id']] = node
             cursor.execute(
-                'SELECT a.Id, a.Attribute, a.Value, a.Time FROM NodeAttribute a JOIN (SELECT MAX(Id) AS Id FROM NodeAttribute GROUP BY Attribute) b ON a.Id = b.id AND a.NodeId = :NodeId',
-                {'NodeId' : node['Id']}
+                'SELECT a.Id, a.Attribute, a.Value, a.Time FROM Attributes a JOIN (SELECT MAX(Id) AS Id FROM Attributes WHERE NodeId = :NodeId1 GROUP BY Attribute) b ON a.Id = b.Id AND a.NodeId = :NodeId2',
+                {'NodeId1' : node['Id'], 'NodeId2' : node['Id']}
             )
-            nodes[node['Id']]['Attributes'] = cursor.fetchall()
+            nodes[node['Id']]['Attributes'] = {}
+            for attribute in cursor.fetchall():
+                attrib = attribute['Attribute']
+                value = attribute['Value']
+                time = attribute['Time']
+                nodes[node['Id']]['Attributes'][attrib] = {'Value': value, 'Time': time}
 
         return nodes
 
@@ -131,7 +136,7 @@ class Hub(Base):
 
         else:
             # Lookup in DB
-            cursor.execute('SELECT Id FROM Node WHERE AddressLong = :AddrLong', {'AddrLong': addr_long})
+            cursor.execute('SELECT Id FROM Nodes WHERE AddressLong = :AddrLong', {'AddrLong': addr_long})
             row = cursor.fetchone()
 
             if row is not None:
@@ -166,7 +171,7 @@ class Hub(Base):
             db = sqlite3.connect('nodes.db')
             cursor = db.cursor()
             cursor.execute(
-                'UPDATE Node SET LastSeen = CURRENT_TIMESTAMP, MessagesReceived = MessagesReceived + 1 WHERE Id = :NodeId',
+                'UPDATE Nodes SET LastSeen = CURRENT_TIMESTAMP, MessagesReceived = MessagesReceived + 1 WHERE Id = :NodeId',
                 {'NodeId': node_id}
             )
             db.commit()
@@ -285,7 +290,6 @@ class Hub(Base):
                     elif (cluster_cmd == b'\xfe'):
                         properties = self.parse_version_info(message['rf_data'])
                         self.logger.debug('Version Information: %s', properties)
-                        self.set_node_attributes(node_id, properties)
                         self.set_node_type(node_id, properties)
 
                     else:

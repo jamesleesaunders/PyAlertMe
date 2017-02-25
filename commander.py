@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf_8 -*-
 
+# Filename:    commander.py
+# Description: Communicate with Hive/AlertMe devices via a XBee
+# Author:      James Saunders [james@saunders-family.net]
+# Copyright:   Copyright (C) 2017 James Saunders
+# License:     MIT
+# Version:     0.1.2
+
 
 '''
 Created on Aug 2, 2015
@@ -10,15 +17,10 @@ Created on Aug 2, 2015
 import urwid
 from collections import deque
 import threading
-import logging
-
-logger = logging.getLogger('pihive')
-logger.setLevel(logging.DEBUG)
 
 class UnknownCommand(Exception):
     def __init__(self, cmd):
         Exception.__init__(self, 'Unknown command: %s' % cmd)
-
 
 class Command(object):
     """
@@ -213,9 +215,6 @@ class Commander(urwid.Frame):
 
 
 
-
-
-
 if __name__ == '__main__':
     class TestCmd(Command):
         def do_discovery(self, *args):
@@ -271,7 +270,7 @@ if __name__ == '__main__':
             # Close up shop
             hubObj.halt()
             serialObj.close()
-            return 'Shutdown'
+            return Commander.Exit
 
         def do_echo(self, *args):
             return ' '.join(args)
@@ -282,24 +281,23 @@ if __name__ == '__main__':
     c = Commander('PyAlertMe', cmd_cb=TestCmd())
 
 
-
     from classes import *
     import serial
     import logging
 
-    logger = logging.getLogger('pihive')
+    logger = logging.getLogger('py-alertme')
     logger.setLevel(logging.DEBUG)
 
-    # Speficy log message format
+    # Specify log message format
     formatter = logging.Formatter('%(asctime)s %(levelname)-3s %(module)-5s %(message)s')
 
-    # create console handler and set level to info
+    # Create console handler and set level to info
     #sh = logging.StreamHandler()
     #sh.setLevel(logging.DEBUG)
     #sh.setFormatter(formatter)
     #logger.addHandler(sh)
 
-    # create debug file handler and set level to debug
+    # Create debug file handler and set level to debug
     fh = logging.FileHandler("debug.log")
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(formatter)
@@ -310,10 +308,9 @@ if __name__ == '__main__':
     XBEE_BAUD = 9600
     serialObj = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
-    #Start hub
+    # Start hub
     hubObj = Hub(serialObj)
 
-
-    # start main loop
+    # Start main loop
     c.loop()
 
