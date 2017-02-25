@@ -1,10 +1,8 @@
 import pprint
 import logging
 from classes import *
-import device
 import struct
 import time
-import binascii
 import threading
 import sqlite3
 
@@ -23,6 +21,35 @@ class Hub(Base):
 
         # List of associated nodes
         self.addr_long_to_id = {}
+
+    def discovery(self):
+        self.logger.debug('Discovery')
+        self.thread = threading.Thread(target=self._discovery)
+
+    def _discovery(self):
+        # First, send out a broadcast every 3 seconds for 30 seconds
+        timeout = time.time() + 30
+        i = 1
+        while True:
+            if time.time() > timeout:
+                break
+            self.logger.debug('Sending discovery request #%s', i)
+            message = self.get_action('routing_table_request')
+            self.send_message(message, self.BROADCAST_LONG, self.BROADCAST_SHORT)
+            time.sleep(3.00)
+            i += 1
+
+        # Next, sent out a version request to each node we have discovered above
+        nodes = self.list_nodes()
+        for id, node in nodes.iteritems():
+            self.logger.debug('Sending version request to %s', id)
+            message = self.get_action('version_info')
+            self.send_message(message, node['AddressLong'], node['AddressShort'])
+            time.sleep(0.50)
+            # I don't know if this is required... the plug only seems to associate after this is sent
+            # message = self.get_action('switch_status')
+            # self.send_message(message, node['AddressLong'], node['AddressShort'])
+            # time.sleep(0.50)
 
     def command(self, node_id, attribute, value):
         # Lookup node
@@ -52,15 +79,15 @@ class Hub(Base):
 
 
     def set_node_attributes(self, node_id, attributes):
-        for attribute, value in attributes.iteritems():
-            self.set_node_attribute(node_id, attribute, value)
+        for name, value in attributes.iteritems():
+            self.set_node_attribute(node_id, name, value)
 
-    def set_node_attribute(self, node_id, attribute, value):
+    def set_node_attribute(self, node_id, name, value):
         db = sqlite3.connect('nodes.db')
         cursor = db.cursor()
         cursor.execute(
-            'INSERT INTO Attributes (NodeId, Attribute, Value, Time) VALUES (:NodeId, :Attribute, :Value, CURRENT_TIMESTAMP)',
-            {'NodeId': node_id, 'Attribute': attribute, 'Value': value}
+            'INSERT INTO Attributes (NodeId, Name, Value, Time) VALUES (:NodeId, :Name, :Value, CURRENT_TIMESTAMP)',
+            {'NodeId': node_id, 'Name': name, 'Value': value}
         )
         db.commit()
 
@@ -83,8 +110,17 @@ class Hub(Base):
         self.logger.debug('Setting type to %s', details)
         db.commit()
 
-    def get_node_type(self, node_id):
+    def update_packet_received(self, node_id):
+        # Increment packet counter
+        db = sqlite3.connect('nodes.db')
+        cursor = db.cursor()
+        cursor.execute(
+            'UPDATE Nodes SET LastSeen = CURRENT_TIMESTAMP, MessagesReceived = MessagesReceived + 1 WHERE Id = :NodeId',
+            {'NodeId': node_id}
+        )
+        db.commit()
 
+    def get_node_type(self, node_id):
         # Lookup node
         nodes = self.list_nodes()
 
@@ -113,17 +149,18 @@ class Hub(Base):
             'SELECT Id, Name, AddressLong, AddressShort, Type, Version, Manufacturer, ManufactureDate, FirstSeen, LastSeen, MessagesReceived FROM Nodes'
         )
         for node in cursor.fetchall():
-            nodes[node['Id']] = node
-            nodes[node['Id']]['attributes'] = {}
+            node_id = node['Id']
+            nodes[node_id] = node
+            nodes[node_id]['Attributes'] = {}
             cursor.execute(
-                'SELECT a.Id, a.Attribute, a.Value, a.Time FROM Attributes a JOIN (SELECT MAX(Id) AS Id FROM Attributes WHERE NodeId = :NodeId1 GROUP BY Attribute) b ON a.Id = b.Id AND a.NodeId = :NodeId2',
-                {'NodeId1' : node['Id'], 'NodeId2' : node['Id']}
+                'SELECT a.Id, a.Name, a.Value, a.Time FROM Attributes a JOIN (SELECT MAX(Id) AS Id FROM Attributes WHERE NodeId = :NodeId1 GROUP BY Name) b ON a.Id = b.Id AND a.NodeId = :NodeId2',
+                {'NodeId1' : node_id, 'NodeId2' : node_id}
             )
             for attribute in cursor.fetchall():
-                attrib = attribute['Attribute']
+                name  = attribute['Name']
                 value = attribute['Value']
-                time = attribute['Time']
-                nodes[node['Id']]['Attributes'][attrib] = {'ReportedValue': value, 'ReportReceivedTime': time}
+                time  = attribute['Time']
+                nodes[node_id]['Attributes'][name] = {'ReportedValue': value, 'ReportReceivedTime': time}
 
         return nodes
 
@@ -146,7 +183,7 @@ class Hub(Base):
             else:
                 # Create in DB
                 cursor.execute(
-                    'INSERT INTO Node (AddressLong, Name, FirstSeen, LastSeen) VALUES (:AddrLong, :Name, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)',
+                    'INSERT INTO Nodes (AddressLong, Name, FirstSeen, LastSeen) VALUES (:AddrLong, :Name, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)',
                     {'AddrLong': addr_long, 'Name': 'Unnamed Device'}
                 )
                 node_id = cursor.lastrowid
@@ -168,15 +205,7 @@ class Hub(Base):
             source_addr_long = message['source_addr_long']
             source_addr = message['source_addr']
             node_id = self.lookup_node_id(source_addr_long)
-
-            # Increment packet counter
-            db = sqlite3.connect('nodes.db')
-            cursor = db.cursor()
-            cursor.execute(
-                'UPDATE Nodes SET LastSeen = CURRENT_TIMESTAMP, MessagesReceived = MessagesReceived + 1 WHERE Id = :NodeId',
-                {'NodeId': node_id}
-            )
-            db.commit()
+            self.update_packet_received(node_id)
 
             if (profile_id == self.ZDP_PROFILE_ID):
                 # Zigbee Device Profile ID
@@ -317,30 +346,6 @@ class Hub(Base):
             else:
                 self.logger.error('Unrecognised Profile ID: %r', profile_id)
 
-    def discovery(self):
-        self.logger.debug('Discovery')
-        self.thread = threading.Thread(target=self._discovery)
-
-    def _discovery(self):
-        # First, send out a broadcast every 3 seconds for 30 seconds
-        timeout = time.time() + 30
-        i = 1
-        while True:
-            if time.time() > timeout:
-                break
-            self.logger.debug('Sending discovery request #%s', i)
-            message = self.get_action('routing_table_request')
-            self.send_message(message, self.BROADCAST_LONG, self.BROADCAST_SHORT)
-            time.sleep(3.00)
-            i += 1
-
-        # Next, sent out a version request to each node we have discovered above
-        nodes = self.list_nodes()
-        message = self.get_action('version_info')
-        for id, node in nodes.iteritems():
-            self.logger.debug('Sending version request to %s', id)
-            self.send_message(message, node['AddressLong'], node['AddressShort'])
-            time.sleep(1.00)
 
 
     @staticmethod
@@ -398,8 +403,8 @@ class Hub(Base):
             ('cluster_cmd', 'powerConsumption', 'upTime'),
             struct.unpack('< 2x s I I 1x', rf_data)
         ))
-        ret['PowerConsumption'] = values['PowerConsumption']
-        ret['UpTime']           = values['UpTime']
+        ret['PowerConsumption'] = values['powerConsumption']
+        ret['UpTime']           = values['upTime']
         return ret
 
     @staticmethod
@@ -439,13 +444,13 @@ class Hub(Base):
         # bit 0 is the magnetic reed switch state
         # bit 3 is the tamper switch state
         ret = {}
-        switchState = ord(rf_data[3])
-        if (switchState & 0x01):
+        state = ord(rf_data[3])
+        if (state & 0x01):
             ret['ReedSwitch']  = 'OPEN'
         else:
             ret['ReedSwitch']  = 'CLOSED'
 
-        if (switchState & 0x04):
+        if (state & 0x04):
             ret['TamperSwith'] = 'CLOSED'
         else:
             ret['TamperSwith'] = 'OPEN'

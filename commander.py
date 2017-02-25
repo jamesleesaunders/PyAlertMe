@@ -292,10 +292,10 @@ if __name__ == '__main__':
     formatter = logging.Formatter('%(asctime)s %(levelname)-3s %(module)-5s %(message)s')
 
     # Create console handler and set level to info
-    #sh = logging.StreamHandler()
-    #sh.setLevel(logging.DEBUG)
-    #sh.setFormatter(formatter)
-    #logger.addHandler(sh)
+    sh = logging.StreamHandler()
+    sh.setLevel(logging.DEBUG)
+    sh.setFormatter(formatter)
+    logger.addHandler(sh)
 
     # Create debug file handler and set level to debug
     fh = logging.FileHandler("debug.log")

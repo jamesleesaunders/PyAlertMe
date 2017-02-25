@@ -49,6 +49,7 @@ hubObj = Hub(serialObj)
 hubObj.discovery()
 
 app = Flask(__name__)
+app.config['JSON_AS_ASCII'] = True
 
 @app.errorhandler(400)
 def not_found(error):
@@ -63,19 +64,23 @@ def not_found(error):
 @app.route(API_BASE + '/nodes', methods=['GET'])
 def get_nodes():
     nodes = hubObj.list_nodes()
+    for id, node in nodes.iteritems():
+        nodes[id]['AddressLong'] = ''
+        nodes[id]['AddressShort'] = ''
     return jsonify({'nodes': nodes})
 
 
 @app.route(API_BASE + '/nodes/<string:node_id>', methods=['GET'])
 def get_node(node_id):
     nodes = hubObj.list_nodes()
+    for id, node in nodes.iteritems():
+        nodes[id]['AddressLong'] = ''
+        nodes[id]['AddressShort'] = ''
 
-    matches = [node for node in nodes if node['id'] == node_id]
-    if len(matches) == 0:
+    if int(node_id) in nodes:
+        return jsonify(nodes[int(node_id)])
+    else:
         abort(404)
-    node = matches[0]
-    return jsonify(node)
-
 
 @app.route(API_BASE + '/nodes/<string:node_id>', methods=['PUT'])
 def update_node(node_id):
