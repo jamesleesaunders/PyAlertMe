@@ -107,21 +107,23 @@ class Hub(Base):
         db.text_factory = str
         db.row_factory = dict_factory
         cursor = db.cursor()
-        cursor.execute('SELECT * FROM Nodes')
 
         nodes = {}
+        cursor.execute(
+            'SELECT Id, Name, AddressLong, AddressShort, Type, Version, Manufacturer, ManufactureDate, FirstSeen, LastSeen, MessagesReceived FROM Nodes'
+        )
         for node in cursor.fetchall():
             nodes[node['Id']] = node
+            nodes[node['Id']]['attributes'] = {}
             cursor.execute(
                 'SELECT a.Id, a.Attribute, a.Value, a.Time FROM Attributes a JOIN (SELECT MAX(Id) AS Id FROM Attributes WHERE NodeId = :NodeId1 GROUP BY Attribute) b ON a.Id = b.Id AND a.NodeId = :NodeId2',
                 {'NodeId1' : node['Id'], 'NodeId2' : node['Id']}
             )
-            nodes[node['Id']]['Attributes'] = {}
             for attribute in cursor.fetchall():
                 attrib = attribute['Attribute']
                 value = attribute['Value']
                 time = attribute['Time']
-                nodes[node['Id']]['Attributes'][attrib] = {'Value': value, 'Time': time}
+                nodes[node['Id']]['Attributes'][attrib] = {'ReportedValue': value, 'ReportReceivedTime': time}
 
         return nodes
 
@@ -211,21 +213,21 @@ class Hub(Base):
                     # controller as valid.
 
                     # First send the Active Endpoint Request
-                    reply = self.get_action('active_endpoints_request')
-                    self.send_message(reply, source_addr_long, source_addr)
+                    message = self.get_action('active_endpoints_request')
+                    self.send_message(message, source_addr_long, source_addr)
                     self.logger.debug('Sent Active Endpoints Request')
 
                     # Now send the Match Descriptor Response
-                    reply = self.get_action('match_descriptor_response')
-                    self.send_message(reply, source_addr_long, source_addr)
+                    message = self.get_action('match_descriptor_response')
+                    self.send_message(message, source_addr_long, source_addr)
                     self.logger.debug('Sent Match Descriptor Response')
 
                     # Now there are two messages directed at the hardware code (rather than the network code).
                     # The switch has to receive both of these to stay joined.
-                    reply = self.get_action('hardware_join_1')
-                    self.send_message(reply, source_addr_long, source_addr)
-                    reply = self.get_action('hardware_join_2')
-                    self.send_message(reply, source_addr_long, source_addr)
+                    message = self.get_action('hardware_join_1')
+                    self.send_message(message, source_addr_long, source_addr)
+                    message = self.get_action('hardware_join_2')
+                    self.send_message(message, source_addr_long, source_addr)
                     self.logger.debug('Sent Hardware Join Messages')
 
                     # We are fully associated!
@@ -246,51 +248,51 @@ class Hub(Base):
                 if (cluster_id == b'\x00\xee'):
                     if (cluster_cmd == b'\x80'):
                         properties = self.parse_switch_status(message['rf_data'])
-                        self.logger.debug('Switch Status: %s', properties)
                         self.set_node_attributes(node_id, properties)
+                        self.logger.debug('Switch Status: %s', properties)
                     else:
                         self.logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
                 elif (cluster_id == b'\x00\xef'):
                     if (cluster_cmd == b'\x81'):
                         properties = self.parse_power_info(message['rf_data'])
-                        self.logger.debug('Current Instantaneous Power: %s', properties)
                         self.set_node_attributes(node_id, properties)
+                        self.logger.debug('Current Instantaneous Power: %s', properties)
                     elif (cluster_cmd == b'\x82'):
                         properties = self.parse_usage_info(message['rf_data'])
-                        self.logger.debug('Uptime: %s Usage: %s', properties['upTime'], properties['powerConsumption'])
                         self.set_node_attributes(node_id, properties)
+                        self.logger.debug('Uptime: %s Usage: %s', properties['upTime'], properties['powerConsumption'])
                     else:
                         self.logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
                 elif (cluster_id == b'\x00\xf0'):
                     if (cluster_cmd == b'\xfb'):
                         properties = self.parse_status_update(message['rf_data'])
-                        self.logger.debug('Status Update: %s', properties)
                         # self.set_node_attributes(node_id, properties)
+                        self.logger.debug('Status Update: %s', properties)
                     else:
                         self.logger.error('Unrecognised Cluster Cmd: %r', cluster_cmd)
 
                 elif (cluster_id == b'\x00\xf2'):
                     properties = self.parse_tamper(message['rf_data'])
-                    self.logger.debug('Tamper Switch Changed State: %s', properties)
                     self.set_node_attributes(node_id, properties)
+                    self.logger.debug('Tamper Switch Changed State: %s', properties)
 
                 elif (cluster_id == b'\x00\xf3'):
                     properties = self.parse_button_press(message['rf_data'])
-                    self.logger.debug('Button Press: %s', properties)
                     self.set_node_attributes(node_id, properties)
+                    self.logger.debug('Button Press: %s', properties)
 
                 elif (cluster_id == b'\x00\xf6'):
                     if (cluster_cmd == b'\xfd'):
                         properties = self.parse_range_info(message['rf_data'])
-                        self.logger.debug('Range Test RSSI Value: %s', properties)
                         self.set_node_attributes(node_id, properties)
+                        self.logger.debug('Range Test RSSI Value: %s', properties)
 
                     elif (cluster_cmd == b'\xfe'):
                         properties = self.parse_version_info(message['rf_data'])
-                        self.logger.debug('Version Information: %s', properties)
                         self.set_node_type(node_id, properties)
+                        self.logger.debug('Version Information: %s', properties)
 
                     else:
                         self.logger.error('Unrecognised Cluster Command: %e', cluster_cmd)
@@ -302,11 +304,12 @@ class Hub(Base):
                     # seems to take care of that. So, look at the value of the data and send the command.
                     if (message['rf_data'][3:7] == b'\x15\x00\x39\x10'):
                         self.logger.debug('Sending Security Initialization')
-                        reply = self.get_action('security_initialization')
-                        self.send_message(reply, source_addr_long, source_addr)
+                        message = self.get_action('security_initialization')
+                        self.send_message(message, source_addr_long, source_addr)
 
-                    vals = self.parse_security_device(message['rf_data'])
-                    self.logger.debug('Security Device Values: %s', vals)
+                    properties = self.parse_security_device(message['rf_data'])
+                    self.set_node_attributes(node_id, properties)
+                    self.logger.debug('Security Device Values: %s', properties)
 
                 else:
                     self.logger.error('Unrecognised Cluster ID: %r', cluster_id)
@@ -321,21 +324,21 @@ class Hub(Base):
     def _discovery(self):
         # First, send out a broadcast every 3 seconds for 30 seconds
         timeout = time.time() + 30
-        i=1
+        i = 1
         while True:
             if time.time() > timeout:
                 break
-            self.logger.debug('Sending discover # %s', i)
+            self.logger.debug('Sending discovery request #%s', i)
             message = self.get_action('routing_table_request')
             self.send_message(message, self.BROADCAST_LONG, self.BROADCAST_SHORT)
             time.sleep(3.00)
-            i = i+1
+            i += 1
 
         # Next, sent out a version request to each node we have discovered above
         nodes = self.list_nodes()
         message = self.get_action('version_info')
         for id, node in nodes.iteritems():
-            self.logger.debug('Sending version req to %s', id)
+            self.logger.debug('Sending version request to %s', id)
             self.send_message(message, node['AddressLong'], node['AddressShort'])
             time.sleep(1.00)
 
@@ -380,12 +383,12 @@ class Hub(Base):
 
     @staticmethod
     def parse_power_info(rf_data):
-        # Parse for Current Instantaneous Power value
+        # Parse for current Instantaneous Power value
         values = dict(zip(
             ('cluster_cmd', 'Power'),
             struct.unpack('< 2x s H', rf_data)
         ))
-        return {'instantaneousPower' : values['Power']}
+        return {'PowerFactor' : values['Power']}
 
     @staticmethod
     def parse_usage_info(rf_data):
@@ -395,9 +398,8 @@ class Hub(Base):
             ('cluster_cmd', 'powerConsumption', 'upTime'),
             struct.unpack('< 2x s I I 1x', rf_data)
         ))
-        ret['powerConsumption'] = values['powerConsumption']
-        ret['upTime']           = values['upTime']
-
+        ret['PowerConsumption'] = values['PowerConsumption']
+        ret['UpTime']           = values['UpTime']
         return ret
 
     @staticmethod
@@ -405,21 +407,48 @@ class Hub(Base):
         # Parse Switch Status
         values = struct.unpack('< 2x b b b', rf_data)
         if (values[2] & 0x01):
-            return {'state' : 'ON'}
+            return {'State' : 'ON'}
         else:
-            return {'state' : 'OFF'}
+            return {'State' : 'OFF'}
 
     @staticmethod
     def parse_button_press(rf_data):
         ret = {}
         if rf_data[2] == b'\x00':
-            ret['state'] = 'OFF'
+            ret['State'] = 'OFF'
         elif rf_data[2] == b'\x01':
-            ret['state'] = 'ON'
-        else:
-            ret['state'] = {}
+            ret['State'] = 'ON'
 
         ret['counter'] = struct.unpack('<H', rf_data[5:7])[0]
+        return ret
+
+    @staticmethod
+    def parse_tamper(rf_data):
+        # Parse Tamper Switch State Change
+        ret = {}
+        if ord(rf_data[3]) == 0x02:
+            ret['TamperSwitch'] = 'OPEN'
+        else:
+            ret['TamperSwitch'] = 'CLOSED'
+
+        return ret
+
+    @staticmethod
+    def parse_security_device(rf_data):
+        # The switch state is in byte [3] and is a bitfield
+        # bit 0 is the magnetic reed switch state
+        # bit 3 is the tamper switch state
+        ret = {}
+        switchState = ord(rf_data[3])
+        if (switchState & 0x01):
+            ret['ReedSwitch']  = 'OPEN'
+        else:
+            ret['ReedSwitch']  = 'CLOSED'
+
+        if (switchState & 0x04):
+            ret['TamperSwith'] = 'CLOSED'
+        else:
+            ret['TamperSwith'] = 'OPEN'
 
         return ret
 
@@ -442,14 +471,14 @@ class Hub(Base):
             # Door Sensor
             ret['Type'] = 'Door Sensor'
             if (ord(rf_data[-1]) & 0x01 == 1):
-                ret['ReedSwitch']  = 'open'
+                ret['ReedSwitch']  = 'OPEN'
             else:
-                ret['ReedSwitch']  = 'closed'
+                ret['ReedSwitch']  = 'CLOSED'
 
             if (ord(rf_data[-1]) & 0x02 == 0):
-                ret['TamperSwith'] = 'open'
+                ret['TamperSwith'] = 'OPEN'
             else:
-                ret['TamperSwith'] = 'closed'
+                ret['TamperSwith'] = 'CLOSED'
 
             if (status == b'\x1f'):
                 ret['Temp_F']      = float(struct.unpack("<h", rf_data[8:10])[0]) / 100.0 * 1.8 + 32
@@ -461,33 +490,4 @@ class Hub(Base):
 
         return ret
 
-    @staticmethod
-    def parse_security_device(rf_data):
-        # The switch state is in byte [3] and is a bitfield
-        # bit 0 is the magnetic reed switch state
-        # bit 3 is the tamper switch state
-        ret = {}
-        switchState = ord(rf_data[3])
-        if (switchState & 0x01):
-            ret['ReedSwitch']  = 'open'
-        else:
-            ret['ReedSwitch']  = 'closed'
-
-        if (switchState & 0x04):
-            ret['TamperSwith'] = 'closed'
-        else:
-            ret['TamperSwith'] = 'open'
-
-        return ret
-
-    @staticmethod
-    def parse_tamper(rf_data):
-        # Parse Tamper Switch State Change
-        ret = {}
-        if ord(rf_data[3]) == 0x02:
-            ret['TamperSwith'] = 'open'
-        else:
-            ret['TamperSwith'] = 'closed'
-
-        return ret
 
