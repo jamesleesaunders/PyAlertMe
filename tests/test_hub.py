@@ -81,8 +81,8 @@ class TestHub(unittest.TestCase):
         self.assertEqual(result, expected)
 
 
-    def test_parse_tamper(self):
-        result = Hub.parse_tamper(b'\t\x00\x00\x02\xe8\xa6\x00\x00')
+    def test_parse_tamper_state(self):
+        result = Hub.parse_tamper_state(b'\t\x00\x00\x02\xe8\xa6\x00\x00')
         expected = 1
         self.assertEqual(result, expected, "Tamper Detected")
 
@@ -90,25 +90,25 @@ class TestHub(unittest.TestCase):
         expected = 0
         self.assertEqual(result, expected, "Tamper OK")
 
-    def test_parsePowerInfo(self):
-        result = Hub.parse_power_info(b'\t\x00\x81%\x00')
+    def test_parse_power_consumption(self):
+        result = Hub.parse_power_factor(b'\t\x00\x81%\x00')
         expected = {'instantaneousPower': 37}
         self.assertEqual(result, expected)
 
-    def test_parse_usage_info(self):
-        result = Hub.parse_usage_info(b'\t\x00\x82Z\xbb\x04\x00\xdf\x86\x04\x00\x00')
+    def test_parse_power_consumption(self):
+        result = Hub.parse_power_consumption(b'\t\x00\x82Z\xbb\x04\x00\xdf\x86\x04\x00\x00')
         expected = {
             'powerConsumption': 310106,
             'upTime': 296671
         }
         self.assertEqual(result, expected)
 
-    def test_parse_switch_status(self):
-        result = Hub.parse_switch_status(b'\th\x80\x07\x01')
+    def test_parse_switch_state(self):
+        result = Hub.parse_switch_state(b'\th\x80\x07\x01')
         expected = {'state' : 'ON'}
         self.assertEqual(result, expected)
 
-        result = Hub.parse_switch_status(b'\th\x80\x06\x00')
+        result = Hub.parse_switch_state(b'\th\x80\x06\x00')
         expected = {'state' : 'OFF'}
         self.assertEqual(result, expected)
 
@@ -163,6 +163,15 @@ class TestHub(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
+        result = Hub.parse_version_info(b'\t\x00\xfe\xad\xe3jj\x1b\x00\x00o\r\x009\x10\x05\x00\x06\x12\x00\x01\x0bAlertMe.com\x12Door/Window sensor\n2008-04-17')
+        expected = {
+            'Version': 58285,
+            'Manufacturer': 'AlertMe.com',
+            'Type': 'Door/Window sensor',
+            'ManufactureDate': '2008-04-17'
+        }
+        self.assertEqual(result, expected)
+
         result = Hub.parse_version_info(b'\tp\xfe\x82@\xc1e\x1d\x00\x00o\r\x009\x10\x04\x00\x01#\x00\x01\x0bAlertMe.com\x0eAlarm Detector\n2010-11-24')
         expected = {
             'Version': 16514,
@@ -199,7 +208,6 @@ class TestHub(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-
     def test_parse_range_info(self):
         result = Hub.parse_range_info(b'\t+\xfd\xc5w')
         expected = {'RSSI' : 197}
@@ -219,8 +227,8 @@ class TestHub(unittest.TestCase):
         expected = {'Temp_F': 87.008, 'Type': 'Key Fob', 'Counter': 13019}
         self.assertEqual(result, expected)
 
-    def test_parse_security_device(self):
-        result = Hub.parse_security_device(b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00')
+    def test_parse_security_state(self):
+        result = Hub.parse_security_state(b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00')
         expected = {'ReedSwitch': 'open', 'TamperSwith': 'closed'}
         self.assertEqual(result, expected)
 
