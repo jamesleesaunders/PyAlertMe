@@ -63,7 +63,7 @@ def not_found(error):
 
 @app.route(API_BASE + '/nodes', methods=['GET'])
 def get_nodes():
-    nodes = hubObj.list_nodes()
+    nodes = hubObj.get_nodes()
     for id, node in nodes.iteritems():
         nodes[id]['AddressLong'] = ''
         nodes[id]['AddressShort'] = ''
@@ -72,7 +72,7 @@ def get_nodes():
 
 @app.route(API_BASE + '/nodes/<string:node_id>', methods=['GET'])
 def get_node(node_id):
-    nodes = hubObj.list_nodes()
+    nodes = hubObj.get_nodes()
     for id, node in nodes.iteritems():
         nodes[id]['AddressLong'] = ''
         nodes[id]['AddressShort'] = ''
@@ -88,7 +88,7 @@ def update_node(node_id):
     if not request.json or not request.json['nodes'][0].has_key('attributes'):
         abort(400)
 
-    nodes = hubObj.list_nodes()
+    nodes = hubObj.get_nodes()
 
     # Check requested node exists
     for node_index, node in enumerate(nodes):
@@ -98,7 +98,7 @@ def update_node(node_id):
                 if nodes[node_index]['attributes'].has_key(attribute):
                     for key in request.json['nodes'][0]['attributes'][attribute]:
                         nodes[node_index]['attributes'][attribute][key] = request.json['nodes'][0]['attributes'][attribute][key]
-                        hubObj.command(node_index, 'state', key)
+                        hubObj.send_attribute_change(node_index, 'state', key)
 
                 else:
                     abort(404)

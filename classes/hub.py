@@ -22,120 +22,11 @@ class Hub(Base):
         # List of associated nodes
         self.addr_long_to_id = {}
 
-    def discovery(self):
-        self.logger.debug('Discovery')
-        self.thread = threading.Thread(target=self._discovery)
+    def get_node(self, node_id):
+        nodes = self.get_nodes()
+        return nodes[node_id]
 
-    def _discovery(self):
-        # First, send out a broadcast every 3 seconds for 30 seconds
-        timeout = time.time() + 30
-        i = 1
-        while True:
-            if time.time() > timeout:
-                break
-            self.logger.debug('Sending discovery request #%s', i)
-            # message = self.get_action('routing_table_request')
-            message = self.get_action('routing_table_request')
-            self.send_message(message, self.BROADCAST_LONG, self.BROADCAST_SHORT)
-            time.sleep(3.00)
-            i += 1
-
-        # Next, sent out a version request to each node we have discovered above
-        nodes = self.list_nodes()
-        for id, node in nodes.iteritems():
-            self.logger.debug('Sending version request to %s', id)
-            message = self.get_action('version_info')
-            self.send_message(message, node['AddressLong'], node['AddressShort'])
-            time.sleep(0.50)
-            # I don't know if this is required... the plug only seems to associate after this is sent
-            message = self.get_action('switch_status')
-            self.send_message(message, node['AddressLong'], node['AddressShort'])
-            time.sleep(0.50)
-
-    def command(self, node_id, attribute, value):
-        # Lookup node
-        nodes = self.list_nodes()
-
-        # Work out Zigbee addresses
-        dest_addr_long = nodes[node_id]['AddressLong']
-        dest_addr_short = nodes[node_id]['AddressShort']
-
-        # Basic message details
-        message = {
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'profile': self.ALERTME_PROFILE_ID
-        }
-
-        # Construct message data
-        if attribute == 'state':
-            message['cluster'] = b'\x00\xee'
-            if value == 'ON':
-                message['data'] = b'\x11\x00\x02\x01\x01'
-            if value == 'OFF':
-                message['data'] = b'\x11\x00\x02\x00\x01'
-            if value == 'GET':
-                message['data'] = b'\x11\x00\x01\x01'
-
-        # Send message
-        self.send_message(message, dest_addr_long, dest_addr_short)
-
-
-    def set_node_attributes(self, node_id, attributes):
-        for name, value in attributes.iteritems():
-            self.set_node_attribute(node_id, name, value)
-
-    def set_node_attribute(self, node_id, name, value):
-        db = sqlite3.connect('nodes.db')
-        cursor = db.cursor()
-        cursor.execute(
-            'INSERT INTO Attributes (NodeId, Name, Value, Time) VALUES (:NodeId, :Name, :Value, CURRENT_TIMESTAMP)',
-            {'NodeId': node_id, 'Name': name, 'Value': value}
-        )
-        db.commit()
-
-    def set_node_name(self, node_id, name):
-        db = sqlite3.connect('nodes.db')
-        cursor = db.cursor()
-        cursor.execute(
-            'UPDATE Nodes SET Name = :Name WHERE Id = :NodeId',
-            {'Name' : name, 'NodeId' : node_id}
-        )
-        db.commit()
-
-    def set_node_type(self, node_id, details):
-        db = sqlite3.connect('nodes.db')
-        cursor = db.cursor()
-        cursor.execute(
-            'UPDATE Nodes SET Type = :Type, Version = :Version, Manufacturer = :Manufacturer, ManufactureDate = :ManufactureDate WHERE Id = :NodeId',
-            {'Type': details['Type'], 'Version': details['Version'], 'Manufacturer': details['Manufacturer'], 'ManufactureDate': details['ManufactureDate'], 'NodeId': node_id}
-        )
-        self.logger.debug('Setting type to %s', details)
-        db.commit()
-
-    def update_packet_received(self, node_id):
-        # Increment packet counter
-        db = sqlite3.connect('nodes.db')
-        cursor = db.cursor()
-        cursor.execute(
-            'UPDATE Nodes SET LastSeen = CURRENT_TIMESTAMP, MessagesReceived = MessagesReceived + 1 WHERE Id = :NodeId',
-            {'NodeId': node_id}
-        )
-        db.commit()
-
-    def get_node_type(self, node_id):
-        # Lookup node
-        nodes = self.list_nodes()
-
-        # Work out Zigbee addresses
-        dest_addr_long = nodes[node_id]['AddressLong']
-        dest_addr_short = nodes[node_id]['AddressShort']
-
-        self.logger.debug('Sending version req to %s', node_id)
-        message = self.get_action('version_info')
-        self.send_message(message, dest_addr_long, dest_addr_short)
-
-    def list_nodes(self):
+    def get_nodes(self):
         def dict_factory(cursor, row):
             d = {}
             for idx, col in enumerate(cursor.description):
@@ -154,18 +45,59 @@ class Hub(Base):
         for node in cursor.fetchall():
             node_id = node['Id']
             nodes[node_id] = node
-            nodes[node_id]['Attributes'] = {}
-            cursor.execute(
-                'SELECT a.Id, a.Name, a.Value, a.Time FROM Attributes a JOIN (SELECT MAX(Id) AS Id FROM Attributes WHERE NodeId = :NodeId1 GROUP BY Name) b ON a.Id = b.Id AND a.NodeId = :NodeId2',
-                {'NodeId1' : node_id, 'NodeId2' : node_id}
-            )
-            for attribute in cursor.fetchall():
-                name  = attribute['Name']
-                value = attribute['Value']
-                time  = attribute['Time']
-                nodes[node_id]['Attributes'][name] = {'ReportedValue': value, 'ReportReceivedTime': time}
+            nodes[node_id]['Attributes'] = self.get_node_attributes_latest(node_id)
 
         return nodes
+
+    def get_node_attributes_latest(self, node_id):
+        def dict_factory(cursor, row):
+            d = {}
+            for idx, col in enumerate(cursor.description):
+                d[col[0]] = row[idx]
+            return d
+
+        db = sqlite3.connect('nodes.db')
+        db.text_factory = str
+        db.row_factory = dict_factory
+        cursor = db.cursor()
+
+        attributes = {}
+        cursor.execute(
+            'SELECT a.Id, a.Name, a.Value, a.Time FROM Attributes a JOIN (SELECT MAX(Id) AS Id FROM Attributes WHERE NodeId = :NodeId1 GROUP BY Name) b ON a.Id = b.Id AND a.NodeId = :NodeId2',
+            {'NodeId1': node_id, 'NodeId2': node_id}
+        )
+        for attribute in cursor.fetchall():
+            name = attribute['Name']
+            value = attribute['Value']
+            time = attribute['Time']
+            attributes[name] = {'ReportedValue': value, 'ReportReceivedTime': time}
+
+        return attributes
+
+    def get_node_attribute_history(self, node_id, name, starttime, endtime):
+        def dict_factory(cursor, row):
+            d = {}
+            for idx, col in enumerate(cursor.description):
+                d[col[0]] = row[idx]
+            return d
+
+        db = sqlite3.connect('nodes.db')
+        db.text_factory = str
+        db.row_factory = dict_factory
+        cursor = db.cursor()
+
+        attributes = {'NodeId': node_id, 'Name': name, 'StartTime': starttime, 'EndTime': endtime}
+        cursor.execute(
+            'SELECT * FROM Attributes WHERE NodeId = :NodeId AND Name = :Name AND Time BETWEEN (starttime AND endtime)',
+            {'NodeId': node_id, 'Name': name}
+        )
+
+        for attribute in cursor.fetchall():
+            value = attribute['Value']
+            time = attribute['Time']
+            attributes['Values'][time] = value
+
+        return attributes
 
     def lookup_node_id(self, addr_long):
         db = sqlite3.connect('nodes.db')
@@ -197,6 +129,109 @@ class Hub(Base):
 
         return node_id
 
+    def discovery(self):
+        self.logger.debug('Discovery')
+        self.thread = threading.Thread(target=self._discovery)
+
+    def _discovery(self):
+        # First, send out a broadcast every 3 seconds for 30 seconds
+        timeout = time.time() + 30
+        i = 1
+        while time.time() < timeout:
+            self.logger.debug('Sending discovery request #%s', i)
+            message = self.get_action('routing_table_request')
+            self.send_message(message, self.BROADCAST_LONG, self.BROADCAST_SHORT)
+            i += 1
+            time.sleep(3.00)
+
+        # Next, sent out a version request to each node we have discovered above
+        nodes = self.get_nodes()
+        for node_id in nodes.iterkeys():
+            self.send_type_request(node_id)
+            time.sleep(0.50)
+
+    def set_node_type(self, node_id, details):
+        db = sqlite3.connect('nodes.db')
+        cursor = db.cursor()
+        cursor.execute(
+            'UPDATE Nodes SET Type = :Type, Version = :Version, Manufacturer = :Manufacturer, ManufactureDate = :ManufactureDate WHERE Id = :NodeId',
+            {'Type': details['Type'], 'Version': details['Version'], 'Manufacturer': details['Manufacturer'], 'ManufactureDate': details['ManufactureDate'], 'NodeId': node_id}
+        )
+        self.logger.debug('Setting type to %s', details)
+        db.commit()
+
+    def send_type_request(self, node_id):
+        # Lookup node
+        node = self.get_node(node_id)
+
+        # Work out Zigbee addresses
+        dest_addr_long = node['AddressLong']
+        dest_addr_short = node['AddressShort']
+
+        self.logger.debug('Sending version req to %s', node_id)
+        message = self.get_action('version_info')
+        self.send_message(message, dest_addr_long, dest_addr_short)
+
+    def send_attribute_change(self, node_id, name, value):
+        # Lookup node
+        node = self.get_node(node_id)
+
+        # Work out Zigbee addresses
+        dest_addr_long = node['AddressLong']
+        dest_addr_short = node['AddressShort']
+
+        # Basic message details
+        message = {
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'profile': self.ALERTME_PROFILE_ID
+        }
+
+        # Construct message data
+        if name == 'state':
+            message['cluster'] = b'\x00\xee'
+            if value == 'ON':
+                message['data'] = b'\x11\x00\x02\x01\x01'
+            if value == 'OFF':
+                message['data'] = b'\x11\x00\x02\x00\x01'
+            if value == 'GET':
+                message['data'] = b'\x11\x00\x01\x01'
+
+        # Send message
+        self.send_message(message, dest_addr_long, dest_addr_short)
+
+    def set_node_attributes(self, node_id, attributes):
+        for name, value in attributes.iteritems():
+            self.set_node_attribute(node_id, name, value)
+
+    def set_node_attribute(self, node_id, name, value):
+        db = sqlite3.connect('nodes.db')
+        cursor = db.cursor()
+        cursor.execute(
+            'INSERT INTO Attributes (NodeId, Name, Value, Time) VALUES (:NodeId, :Name, :Value, CURRENT_TIMESTAMP)',
+            {'NodeId': node_id, 'Name': name, 'Value': value}
+        )
+        db.commit()
+
+    def set_node_name(self, node_id, name):
+        db = sqlite3.connect('nodes.db')
+        cursor = db.cursor()
+        cursor.execute(
+            'UPDATE Nodes SET Name = :Name WHERE Id = :NodeId',
+            {'Name' : name, 'NodeId' : node_id}
+        )
+        db.commit()
+
+    def update_packet_counter(self, node_id):
+        # Increment packet counter
+        db = sqlite3.connect('nodes.db')
+        cursor = db.cursor()
+        cursor.execute(
+            'UPDATE Nodes SET LastSeen = CURRENT_TIMESTAMP, MessagesReceived = MessagesReceived + 1 WHERE Id = :NodeId',
+            {'NodeId': node_id}
+        )
+        db.commit()
+
     def process_message(self, message):
         super(Hub, self).process_message(message)
 
@@ -208,7 +243,7 @@ class Hub(Base):
             source_addr_long = message['source_addr_long']
             source_addr = message['source_addr']
             node_id = self.lookup_node_id(source_addr_long)
-            self.update_packet_received(node_id)
+            self.update_packet_counter(node_id)
 
             if (profile_id == self.ZDP_PROFILE_ID):
                 # Zigbee Device Profile ID
@@ -314,6 +349,7 @@ class Hub(Base):
                         properties = self.parse_switch_state(message['rf_data'])
                         self.set_node_attributes(node_id, properties)
                         self.logger.debug('Switch Status: %s', properties)
+
                     else:
                         self.logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
@@ -322,17 +358,18 @@ class Hub(Base):
                         properties = self.parse_power_factor(message['rf_data'])
                         self.set_node_attributes(node_id, properties)
                         self.logger.debug('Current Instantaneous Power: %s', properties)
+
                     elif (cluster_cmd == b'\x82'):
                         properties = self.parse_power_consumption(message['rf_data'])
                         self.set_node_attributes(node_id, properties)
                         self.logger.debug('Uptime: %s Usage: %s', properties['UpTime'], properties['PowerConsumption'])
+
                     else:
                         self.logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
                 elif (cluster_id == b'\x00\xf0'):
                     if (cluster_cmd == b'\xfb'):
                         properties = self.parse_status_update(message['rf_data'])
-                        # to finish...
                         self.set_node_attributes(node_id, properties)
                         self.logger.debug('Status Update: %s', properties)
 
@@ -443,6 +480,7 @@ class Hub(Base):
             ('cluster_cmd', 'Power'),
             struct.unpack('< 2x s H', rf_data)
         ))
+
         return {'PowerFactor' : values['Power']}
 
     @staticmethod
@@ -455,6 +493,7 @@ class Hub(Base):
         ))
         ret['PowerConsumption'] = values['powerConsumption']
         ret['UpTime']           = values['upTime']
+
         return ret
 
     @staticmethod
@@ -486,6 +525,7 @@ class Hub(Base):
             ret['State'] = 'ON'
 
         ret['counter'] = struct.unpack('<H', rf_data[5:7])[0]
+
         return ret
 
     @staticmethod
