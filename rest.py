@@ -35,11 +35,6 @@ fh.setLevel(logging.DEBUG)
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
-API_NAME    = 'pyalertme'
-API_VERSION = '1.0'
-API_BASE    = '/' + API_NAME + '/api/v' + API_VERSION
-
-
 # Serial Configuration
 XBEE_PORT = '/dev/tty.usbserial-A1014P7W' # MacBook Serial Port
 XBEE_BAUD = 9600
@@ -50,6 +45,10 @@ hubObj.discovery()
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = True
+
+API_NAME    = 'pyalertme'
+API_VERSION = '1.0'
+API_BASE    = '/' + API_NAME + '/api/v' + API_VERSION
 
 @app.errorhandler(400)
 def not_found(error):
