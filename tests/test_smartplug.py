@@ -60,7 +60,6 @@ class TestSmartPlug(unittest.TestCase):
 
 
     def test_send_message(self):
-
         message = {
             'source_addr_long': b'\x00\ro\x00\x03\xbb\xb9\xf8',
             'source_addr':      b'\x88\x9f',
@@ -74,7 +73,7 @@ class TestSmartPlug(unittest.TestCase):
         }
         self.deviceObj.receive_message(message)
         result = self.serialObj.get_data_written()
-        expected = b'~\x00\x19\x11\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x00\x02\x00\xee\xc2\x16\x00\x00\th\x80\x07\x01\x1b'
+        expected = b'~\x00\x19\x11\x00\x00\ro\x00\x03\xbb\xb9\xf8\xff\xfe\x00\x02\x00\xee\xc2\x16\x00\x00\th\x80\x07\x01E'
         self.assertEqual(result, expected)
 
     def test_get_state(self):

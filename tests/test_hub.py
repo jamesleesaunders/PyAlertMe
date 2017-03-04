@@ -34,21 +34,24 @@ class TestHub(unittest.TestCase):
         result = self.hubObj.get_nodes()
         expected = {
             1: {
-                'MessagesReceived': 4,
+                'Id': 1,
                 'Name': 'Unspecified',
-                'ManufactureDate': '2013-09-26',
                 'AddressLong': '\x00\ro\x00\x03\xbb\xb9\xf8',
-                'Version': 20045,
-                'LastSeen': '2017-03-04 19:58:49',
-                'Attributes': {},
                 'AddressShort': None,
                 'Type': 'SmartPlug',
-                'Id': 1,
+                'Manufacturer': 'AlertMe.com',
+                'Version': 20045,
+                'ManufactureDate': '2013-09-26',
                 'FirstSeen': '2017-03-04 19:57:39',
-                'Manufacturer': 'AlertMe.com'
+                'LastSeen': '2017-03-04 19:58:49',
+                'MessagesReceived': 4,
+                'Attributes': {}
             }
         }
-        self.assertEqual(result.keys(), expected.keys())
+        a = result[1].keys().sort()
+        b = expected[1].keys().sort()
+
+        self.assertEqual(a, b)
 
     def test_endpoint_request(self):
         message = {
