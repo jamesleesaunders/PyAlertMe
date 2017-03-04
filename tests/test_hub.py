@@ -1,6 +1,4 @@
 import sys
-import time
-import logging
 sys.path.insert(0, '../')
 
 from classes import *
@@ -67,7 +65,7 @@ class TestHub(unittest.TestCase):
         }
         self.hubObj.receive_message(message)
         result = self.serialObj.get_data_written()
-        expected = b'~\x00\x17\x11\x00\x00\ro\x00\x03\xbb\xb9\xf8\xff\xfe\x02\x02\x00\xf6\xc2\x16\x00\x00\x11\x01\xfc&'
+        expected = b'~\x00\x17\x11\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x02\x02\x00\xf6\xc2\x16\x00\x00\x11\x01\xfc\xfc'
         self.assertEqual(result, expected)
 
 
