@@ -22,6 +22,27 @@ class Hub(Base):
         # List of associated nodes
         self.addr_long_to_id = {}
 
+    def discovery(self):
+        self.logger.debug('Discovery')
+        self.thread = threading.Thread(target=self._discovery)
+
+    def _discovery(self):
+        # First, send out a broadcast every 3 seconds for 30 seconds
+        timeout = time.time() + 30
+        i = 1
+        while time.time() < timeout:
+            self.logger.debug('Sending discovery request #%s', i)
+            message = self.get_action('routing_table_request')
+            self.send_message(message, self.BROADCAST_LONG, self.BROADCAST_SHORT)
+            i += 1
+            time.sleep(3.00)
+
+        # Next, sent out a version request to each node we have discovered above
+        nodes = self.get_nodes()
+        for node_id in nodes.iterkeys():
+            self.send_type_request(node_id)
+            time.sleep(0.50)
+
     def get_node(self, node_id):
         nodes = self.get_nodes()
         return nodes[node_id]
@@ -67,14 +88,14 @@ class Hub(Base):
             {'NodeId1': node_id, 'NodeId2': node_id}
         )
         for attribute in cursor.fetchall():
-            name = attribute['Name']
+            attrib_name = attribute['Name']
             value = attribute['Value']
             time = attribute['Time']
-            attributes[name] = {'ReportedValue': value, 'ReportReceivedTime': time}
+            attributes[attrib_name] = {'ReportedValue': value, 'ReportReceivedTime': time}
 
         return attributes
 
-    def get_node_attribute_history(self, node_id, name, starttime, endtime):
+    def get_node_attribute_history(self, node_id, attrib_name, starttime, endtime):
         def dict_factory(cursor, row):
             d = {}
             for idx, col in enumerate(cursor.description):
@@ -86,18 +107,25 @@ class Hub(Base):
         db.row_factory = dict_factory
         cursor = db.cursor()
 
-        attributes = {'NodeId': node_id, 'Name': name, 'StartTime': starttime, 'EndTime': endtime}
         cursor.execute(
-            'SELECT * FROM Attributes WHERE NodeId = :NodeId AND Name = :Name AND Time BETWEEN (starttime AND endtime)',
-            {'NodeId': node_id, 'Name': name}
+            'SELECT * FROM Attributes WHERE NodeId = :NodeId AND Name = :Name AND Time BETWEEN DATETIME(:StartTime, \'unixepoch\', \'localtime\') AND DATETIME(:EndTime, \'unixepoch\', \'localtime\')',
+            {'NodeId': node_id, 'Name': attrib_name, 'StartTime': starttime, 'EndTime': endtime}
         )
 
+        history = {
+            attrib_name: {
+                'NodeId': node_id,
+                'StartTime': starttime,
+                'EndTime': endtime,
+                'Values': {}
+            }
+        }
         for attribute in cursor.fetchall():
             value = attribute['Value']
             time = attribute['Time']
-            attributes['Values'][time] = value
+            history[attrib_name]['Values'][time] = value
 
-        return attributes
+        return history
 
     def lookup_node_id(self, addr_long):
         db = sqlite3.connect('nodes.db')
@@ -119,7 +147,7 @@ class Hub(Base):
                 # Create in DB
                 cursor.execute(
                     'INSERT INTO Nodes (AddressLong, Name, Type, FirstSeen, LastSeen) VALUES (:AddrLong, :Name, :Type, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)',
-                    {'AddrLong': addr_long, 'Name': 'Unnamed Device', 'Type': 'Unknown Type'}
+                    {'AddrLong': addr_long, 'Name': 'Unspecified', 'Type': 'Unknown'}
                 )
                 node_id = cursor.lastrowid
                 db.commit()
@@ -128,27 +156,6 @@ class Hub(Base):
             self.addr_long_to_id[addr_long] = node_id
 
         return node_id
-
-    def discovery(self):
-        self.logger.debug('Discovery')
-        self.thread = threading.Thread(target=self._discovery)
-
-    def _discovery(self):
-        # First, send out a broadcast every 3 seconds for 30 seconds
-        timeout = time.time() + 30
-        i = 1
-        while time.time() < timeout:
-            self.logger.debug('Sending discovery request #%s', i)
-            message = self.get_action('routing_table_request')
-            self.send_message(message, self.BROADCAST_LONG, self.BROADCAST_SHORT)
-            i += 1
-            time.sleep(3.00)
-
-        # Next, sent out a version request to each node we have discovered above
-        nodes = self.get_nodes()
-        for node_id in nodes.iterkeys():
-            self.send_type_request(node_id)
-            time.sleep(0.50)
 
     def set_node_type(self, node_id, details):
         db = sqlite3.connect('nodes.db')
@@ -172,7 +179,7 @@ class Hub(Base):
         message = self.get_action('version_info')
         self.send_message(message, dest_addr_long, dest_addr_short)
 
-    def send_attribute_change(self, node_id, name, value):
+    def send_state_request(self, node_id, state):
         # Lookup node
         node = self.get_node(node_id)
 
@@ -184,32 +191,32 @@ class Hub(Base):
         message = {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'profile': self.ALERTME_PROFILE_ID
+            'profile': self.ALERTME_PROFILE_ID,
+            'cluster': b'\x00\xee'
         }
 
-        # Construct message data
-        if name == 'state':
-            message['cluster'] = b'\x00\xee'
-            if value == 'ON':
-                message['data'] = b'\x11\x00\x02\x01\x01'
-            if value == 'OFF':
-                message['data'] = b'\x11\x00\x02\x00\x01'
-            if value == 'GET':
-                message['data'] = b'\x11\x00\x01\x01'
+        if state == 'ON':
+            message['data'] = b'\x11\x00\x02\x01\x01'
+        elif state == 'OFF':
+            message['data'] = b'\x11\x00\x02\x00\x01'
+        elif state == 'CHECK':
+            message['data'] = b'\x11\x00\x01\x01'
+        else:
+            self.logger.error('Invalid state request %s', state)
 
         # Send message
         self.send_message(message, dest_addr_long, dest_addr_short)
 
     def set_node_attributes(self, node_id, attributes):
-        for name, value in attributes.iteritems():
-            self.set_node_attribute(node_id, name, value)
+        for attrib_name, value in attributes.iteritems():
+            self.set_node_attribute(node_id, attrib_name, value)
 
-    def set_node_attribute(self, node_id, name, value):
+    def set_node_attribute(self, node_id, attrib_name, value):
         db = sqlite3.connect('nodes.db')
         cursor = db.cursor()
         cursor.execute(
             'INSERT INTO Attributes (NodeId, Name, Value, Time) VALUES (:NodeId, :Name, :Value, CURRENT_TIMESTAMP)',
-            {'NodeId': node_id, 'Name': name, 'Value': value}
+            {'NodeId': node_id, 'Name': attrib_name, 'Value': value}
         )
         db.commit()
 
@@ -376,13 +383,13 @@ class Hub(Base):
                         # This may be the missing link to this thing
                         self.logger.debug('Sending Missing Link')
                         self.zb.send('tx_explicit',
-                                dest_addr_long=source_addr_long,
-                                dest_addr=source_addr,
-                                src_endpoint=message['dest_endpoint'],
-                                dest_endpoint=message['source_endpoint'],
-                                cluster='\x00\xf0',
-                                profile=self.ALERTME_PROFILE_ID,
-                                data='\x11\x39\xfd'
+                            dest_addr_long = source_addr_long,
+                            dest_addr = source_addr,
+                            src_endpoint = message['dest_endpoint'],
+                            dest_endpoint = message['source_endpoint'],
+                            cluster = '\x00\xf0',
+                            profile = self.ALERTME_PROFILE_ID,
+                            data = '\x11\x39\xfd'
                         )
 
                     else:
@@ -501,9 +508,9 @@ class Hub(Base):
         # Parse Switch Status
         values = struct.unpack('< 2x b b b', rf_data)
         if (values[2] & 0x01):
-            return {'State' : 'ON'}
+            return {'State': 'ON'}
         else:
-            return {'State' : 'OFF'}
+            return {'State': 'OFF'}
 
     @staticmethod
     def parse_tamper_state(rf_data):
@@ -541,9 +548,9 @@ class Hub(Base):
             ret['ReedSwitch']  = 'CLOSED'
 
         if (state & 0x04):
-            ret['TamperSwith'] = 'CLOSED'
+            ret['TamperSwitch'] = 'CLOSED'
         else:
-            ret['TamperSwith'] = 'OPEN'
+            ret['TamperSwitch'] = 'OPEN'
 
         return ret
 
@@ -568,9 +575,9 @@ class Hub(Base):
                 ret['ReedSwitch']  = 'CLOSED'
 
             if (ord(rf_data[-1]) & 0x02 == 0):
-                ret['TamperSwith'] = 'OPEN'
+                ret['TamperSwitch'] = 'OPEN'
             else:
-                ret['TamperSwith'] = 'CLOSED'
+                ret['TamperSwitch'] = 'CLOSED'
 
         if ((status == b'\x1f') or (status == b'\x1d')):
             # Door Sensor & Key Fob

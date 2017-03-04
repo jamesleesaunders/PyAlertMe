@@ -69,16 +69,15 @@ def get_nodes():
         nodes[id]['AddressShort'] = ''
     return jsonify({'nodes': nodes})
 
-
-@app.route(API_BASE + '/nodes/<string:node_id>', methods=['GET'])
+@app.route(API_BASE + '/nodes/<int:node_id>', methods=['GET'])
 def get_node(node_id):
-    nodes = hubObj.get_nodes()
-    for id, node in nodes.iteritems():
-        nodes[id]['AddressLong'] = ''
-        nodes[id]['AddressShort'] = ''
+    node = hubObj.get_node(node_id)
 
-    if int(node_id) in nodes:
-        return jsonify(nodes[int(node_id)])
+    if node:
+        # Blank out the addresses for now
+        node['AddressLong'] = ''
+        node['AddressShort'] = ''
+        return jsonify(node)
     else:
         abort(404)
 
@@ -98,7 +97,7 @@ def update_node(node_id):
                 if nodes[node_index]['attributes'].has_key(attribute):
                     for key in request.json['nodes'][0]['attributes'][attribute]:
                         nodes[node_index]['attributes'][attribute][key] = request.json['nodes'][0]['attributes'][attribute][key]
-                        hubObj.send_attribute_change(node_index, 'state', key)
+                        hubObj.send_state_request(node_index, '')
 
                 else:
                     abort(404)

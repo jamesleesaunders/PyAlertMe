@@ -213,8 +213,6 @@ class Commander(urwid.Frame):
 
 
 
-
-
 if __name__ == '__main__':
     class TestCmd(Command):
         def do_discovery(self, *args):
@@ -253,8 +251,12 @@ if __name__ == '__main__':
 
                 if args[1] == "state":
                     state = args[2]
-                    hubObj.send_attribute_change(node_id, 'state', state)
+                    hubObj.send_state_request(node_id, 'state', state)
                     return 'Node: ' + str(node_id) + ' State Changed: ' + state
+
+                if args[1] == "attributes":
+                    attrib_name = args[2]
+                    return hubObj.get_node_attribute_history(node_id, attrib_name, 1485645112, 1488644112)
 
                 if args[1] == "type":
                     hubObj.send_type_request(node_id)

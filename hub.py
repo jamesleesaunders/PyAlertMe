@@ -50,7 +50,7 @@ while True:
     try:
         time.sleep(0.001)
 
-        nodes = hubObj.list_nodes()
+        nodes = hubObj.get_nodes()
         pp.pprint(nodes)
         print("Select device:\n")
         node_id = raw_input("")
