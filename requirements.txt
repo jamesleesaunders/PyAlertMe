@@ -1,4 +1,3 @@
 pyserial
 xbee
 flask
-sqlite3
