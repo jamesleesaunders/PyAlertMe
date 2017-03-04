@@ -78,7 +78,7 @@ class TestHub(unittest.TestCase):
         expected = {'TamperSwitch': 'CLOSED'}
         self.assertEqual(result, expected, "Tamper OK")
 
-    def test_parse_power_consumption(self):
+    def test_parse_power_factor(self):
         result = Hub.parse_power_factor(b'\t\x00\x81%\x00')
         expected = {'instantaneousPower': 37}
         self.assertEqual(result, expected)
