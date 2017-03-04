@@ -80,7 +80,7 @@ class TestHub(unittest.TestCase):
 
     def test_parse_power_factor(self):
         result = Hub.parse_power_factor(b'\t\x00\x81%\x00')
-        expected = {'instantaneousPower': 37}
+        expected = {'PowerFactor': 37}
         self.assertEqual(result, expected)
 
     def test_parse_power_consumption(self):
