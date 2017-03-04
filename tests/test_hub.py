@@ -1,6 +1,4 @@
 import sys
-import time
-import logging
 sys.path.insert(0, '../')
 
 from classes import *
@@ -31,85 +29,75 @@ class TestHub(unittest.TestCase):
             'src_endpoint':     b'\x02'
         }
         self.hubObj.receive_message(message)
-        result = self.hubObj.list_nodes()
-        expected = [{
-            'messagesReceived': 1,
-            'associated': True,
-            'addrLong': '\x00\ro\x00\x03\xbb\xb9\xf8',
-            'addrShort': '\x88\x9f',
-            'name': 'Unknown Device',
-            'createdOn': int(time.time()),
-            'messagesSent': 0,
-            'id': '00:0d:6f:00:03:bb:b9:f8',
-            'lastSeen': int(time.time()),
-            'attributes': {
-                'hwVersion': {
-                    'reportReceivedTime': int(time.time()),
-                    'reportedValue': 20045
-                },
-                'manufactuerDate': {
-                    'reportReceivedTime': int(time.time()),
-                    'reportedValue': '2013-09-26'
-                },
-                'manufacturer': {
-                    'reportReceivedTime': int(time.time()),
-                    'reportedValue': 'AlertMe.com'
-                },
-                'model': {
-                    'reportReceivedTime': int(time.time()),
-                    'reportedValue': 'SmartPlug'
-                }
+        result = self.hubObj.get_nodes()
+        expected = {
+            1: {
+                'Id': 1,
+                'Name': 'Unspecified',
+                'AddressLong': '\x00\ro\x00\x03\xbb\xb9\xf8',
+                'AddressShort': None,
+                'Type': 'SmartPlug',
+                'Manufacturer': 'AlertMe.com',
+                'Version': 20045,
+                'ManufactureDate': '2013-09-26',
+                'FirstSeen': '2017-03-04 19:57:39',
+                'LastSeen': '2017-03-04 19:58:49',
+                'MessagesReceived': 4,
+                'Attributes': {}
             }
-        }]
-        self.assertEqual(result, expected)
+        }
+        a = result[1].keys().sort()
+        b = expected[1].keys().sort()
+
+        self.assertEqual(a, b)
 
     def test_endpoint_request(self):
         message = {
-            'cluster':          b'\x00\x06',
-            'dest_endpoint':    b'\x02',
-            'id':               'rx_explicit',
-            'options':          b'\x01',
-            'profile':          b'\x00\x00',
-            'rf_data':          b'',
-            'source_addr':      b'\x88\x9f',
+            'source_addr': b'\x88\x9f',
             'source_addr_long': b'\x00\ro\x00\x03\xbb\xb9\xf8',
-            'src_endpoint':     b'\x02'
+            'src_endpoint': b'\x02',
+            'profile': b'\x00\x00',
+            'cluster': b'\x00\x06',
+            'dest_endpoint': b'\x02',
+            'rf_data': b'',
+            'id': 'rx_explicit',
+            'options': b'\x01',
         }
         self.hubObj.receive_message(message)
         result = self.serialObj.get_data_written()
-        expected = b'~\x00\x19\x11\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x00\x02\x00\xf0\xc2\x16\x00\x00\x19\x01\xfa\x00\x01\xfd'
+        expected = b'~\x00\x17\x11\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x02\x02\x00\xf6\xc2\x16\x00\x00\x11\x01\xfc\xfc'
         self.assertEqual(result, expected)
 
 
     def test_parse_tamper_state(self):
         result = Hub.parse_tamper_state(b'\t\x00\x00\x02\xe8\xa6\x00\x00')
-        expected = 1
+        expected = {'TamperSwitch': 'OPEN'}
         self.assertEqual(result, expected, "Tamper Detected")
 
-        result = Hub.parse_tamper(b'\t\x00\x01\x01+\xab\x00\x00')
-        expected = 0
+        result = Hub.parse_tamper_state(b'\t\x00\x01\x01+\xab\x00\x00')
+        expected = {'TamperSwitch': 'CLOSED'}
         self.assertEqual(result, expected, "Tamper OK")
 
-    def test_parse_power_consumption(self):
+    def test_parse_power_factor(self):
         result = Hub.parse_power_factor(b'\t\x00\x81%\x00')
-        expected = {'instantaneousPower': 37}
+        expected = {'PowerFactor': 37}
         self.assertEqual(result, expected)
 
     def test_parse_power_consumption(self):
         result = Hub.parse_power_consumption(b'\t\x00\x82Z\xbb\x04\x00\xdf\x86\x04\x00\x00')
         expected = {
-            'powerConsumption': 310106,
-            'upTime': 296671
+            'PowerConsumption': 310106,
+            'UpTime': 296671
         }
         self.assertEqual(result, expected)
 
     def test_parse_switch_state(self):
         result = Hub.parse_switch_state(b'\th\x80\x07\x01')
-        expected = {'state' : 'ON'}
+        expected = {'State' : 'ON'}
         self.assertEqual(result, expected)
 
         result = Hub.parse_switch_state(b'\th\x80\x06\x00')
-        expected = {'state' : 'OFF'}
+        expected = {'State' : 'OFF'}
         self.assertEqual(result, expected)
 
     def test_parse_version_info(self):
@@ -215,21 +203,21 @@ class TestHub(unittest.TestCase):
 
     def test_parse_button_press(self):
         result = Hub.parse_button_press(b'\t\x00\x00\x00\x02\xbf\xc3\x00\x00')
-        expected = {'counter': 50111, 'state': 'OFF'}
-        self.assertEqual(result, expected, "State 0, Conter 50111")
+        expected = {'Counter': 50111, 'State': 'OFF'}
+        self.assertEqual(result, expected, "State OFF, Counter 50111")
 
         result = Hub.parse_button_press(b'\t\x00\x01\x00\x01\x12\xca\x00\x00')
-        expected = {'counter': 51730, 'state': 'ON'}
-        self.assertEqual(result, expected, "State 1, Conter 51730")
+        expected = {'Counter': 51730, 'State': 'ON'}
+        self.assertEqual(result, expected, "State ON, Counter 51730")
 
     def test_parse_status_update(self):
         result = Hub.parse_status_update(b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00')
-        expected = {'Temp_F': 87.008, 'Type': 'Key Fob', 'Counter': 13019}
+        expected = {'TempFahrenheit': 87.008, 'Counter': 13019}
         self.assertEqual(result, expected)
 
     def test_parse_security_state(self):
         result = Hub.parse_security_state(b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00')
-        expected = {'ReedSwitch': 'open', 'TamperSwith': 'closed'}
+        expected = {'ReedSwitch': 'OPEN', 'TamperSwitch': 'CLOSED'}
         self.assertEqual(result, expected)
 
 if __name__ == '__main__':

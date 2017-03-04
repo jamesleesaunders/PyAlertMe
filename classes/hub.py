@@ -531,7 +531,7 @@ class Hub(Base):
         elif rf_data[2] == b'\x01':
             ret['State'] = 'ON'
 
-        ret['counter'] = struct.unpack('<H', rf_data[5:7])[0]
+        ret['Counter'] = struct.unpack('<H', rf_data[5:7])[0]
 
         return ret
 

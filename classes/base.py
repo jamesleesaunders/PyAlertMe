@@ -175,10 +175,9 @@ class Base(object):
         return self.messages[type]
 
     def send_message(self, message, dest_addr_long, dest_addr_short):
-        self.logger.debug('sending message..')
         # Tack on destination addresses
         message['dest_addr_long']  = dest_addr_long
-        message['dest_addr_short'] = dest_addr_short
+        message['dest_addr'] = dest_addr_short
         device_id = Base.pretty_mac(dest_addr_long)
 
         self.logger.debug('Device: %s Sending: %s', device_id, message)

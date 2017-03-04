@@ -1,5 +1,4 @@
 import sys
-
 sys.path.insert(0, '../')
 
 from classes import *
@@ -60,7 +59,6 @@ class TestSmartPlug(unittest.TestCase):
 
 
     def test_send_message(self):
-
         message = {
             'source_addr_long': b'\x00\ro\x00\x03\xbb\xb9\xf8',
             'source_addr':      b'\x88\x9f',

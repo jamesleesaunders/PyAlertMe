@@ -1,5 +1,4 @@
 import sys
-
 sys.path.insert(0, '../')
 
 from classes import *
@@ -31,7 +30,7 @@ class TestBase(unittest.TestCase):
         expected = {
             'routing_table_request'     : 'Management Rtg (Routing Table) Request',
             'permit_join_request'       : 'Management Permit Join Request',
-            'match_descriptor_response' : 'Match Descriptor Response',
+            # 'match_descriptor_response' : 'Match Descriptor Response',
             'hardware_join_1'           : 'Hardware Join Messages 1',
             'hardware_join_2'           : 'Hardware Join Messages 2',
             'active_endpoints_request'  : 'Active Endpoints Request',
