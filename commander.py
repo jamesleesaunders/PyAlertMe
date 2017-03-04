@@ -213,8 +213,6 @@ class Commander(urwid.Frame):
 
 
 
-
-
 if __name__ == '__main__':
     class TestCmd(Command):
         def do_discovery(self, *args):
@@ -233,7 +231,7 @@ if __name__ == '__main__':
                 # Construct a lise of nodes
                 output = "List of Nodes: \n"
 
-                nodes = hubObj.list_nodes()
+                nodes = hubObj.get_nodes()
                 for id, node in nodes.iteritems():
                     output += str(id) + ". " + node['Type'] + " [" + node['Name'] + "] (" + Base.pretty_mac(node['AddressLong']) + ")\n"
 
@@ -253,16 +251,19 @@ if __name__ == '__main__':
 
                 if args[1] == "state":
                     state = args[2]
-                    hubObj.command(node_id, 'state', state)
+                    hubObj.send_state_request(node_id, 'state', state)
                     return 'Node: ' + str(node_id) + ' State Changed: ' + state
 
+                if args[1] == "attributes":
+                    attrib_name = args[2]
+                    return hubObj.get_node_attribute_history(node_id, attrib_name, 1485645112, 1488644112)
+
                 if args[1] == "type":
-                    hubObj.get_node_type(node_id)
+                    hubObj.send_type_request(node_id)
                     return 'Type Request Sent'
 
                 if args[1] == "detail":
-                    nodes = hubObj.list_nodes()
-                    return str(nodes[node_id])
+                    return hubObj.get_node(node_id)
 
             return 'Unknown Argument'
 
@@ -292,10 +293,10 @@ if __name__ == '__main__':
     formatter = logging.Formatter('%(asctime)s %(levelname)-3s %(module)-5s %(message)s')
 
     # Create console handler and set level to info
-    #sh = logging.StreamHandler()
-    #sh.setLevel(logging.DEBUG)
-    #sh.setFormatter(formatter)
-    #logger.addHandler(sh)
+    sh = logging.StreamHandler()
+    sh.setLevel(logging.DEBUG)
+    sh.setFormatter(formatter)
+    logger.addHandler(sh)
 
     # Create debug file handler and set level to debug
     fh = logging.FileHandler("debug.log")

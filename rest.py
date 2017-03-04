@@ -49,6 +49,7 @@ hubObj = Hub(serialObj)
 hubObj.discovery()
 
 app = Flask(__name__)
+app.config['JSON_AS_ASCII'] = True
 
 @app.errorhandler(400)
 def not_found(error):
@@ -62,20 +63,23 @@ def not_found(error):
 
 @app.route(API_BASE + '/nodes', methods=['GET'])
 def get_nodes():
-    nodes = hubObj.list_nodes()
+    nodes = hubObj.get_nodes()
+    for id, node in nodes.iteritems():
+        nodes[id]['AddressLong'] = ''
+        nodes[id]['AddressShort'] = ''
     return jsonify({'nodes': nodes})
 
-
-@app.route(API_BASE + '/nodes/<string:node_id>', methods=['GET'])
+@app.route(API_BASE + '/nodes/<int:node_id>', methods=['GET'])
 def get_node(node_id):
-    nodes = hubObj.list_nodes()
+    node = hubObj.get_node(node_id)
 
-    matches = [node for node in nodes if node['id'] == node_id]
-    if len(matches) == 0:
+    if node:
+        # Blank out the addresses for now
+        node['AddressLong'] = ''
+        node['AddressShort'] = ''
+        return jsonify(node)
+    else:
         abort(404)
-    node = matches[0]
-    return jsonify(node)
-
 
 @app.route(API_BASE + '/nodes/<string:node_id>', methods=['PUT'])
 def update_node(node_id):
@@ -83,7 +87,7 @@ def update_node(node_id):
     if not request.json or not request.json['nodes'][0].has_key('attributes'):
         abort(400)
 
-    nodes = hubObj.list_nodes()
+    nodes = hubObj.get_nodes()
 
     # Check requested node exists
     for node_index, node in enumerate(nodes):
@@ -93,7 +97,7 @@ def update_node(node_id):
                 if nodes[node_index]['attributes'].has_key(attribute):
                     for key in request.json['nodes'][0]['attributes'][attribute]:
                         nodes[node_index]['attributes'][attribute][key] = request.json['nodes'][0]['attributes'][attribute][key]
-                        hubObj.command(node_index, 'state', key)
+                        hubObj.send_state_request(node_index, '')
 
                 else:
                     abort(404)

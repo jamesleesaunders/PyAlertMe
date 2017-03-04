@@ -39,15 +39,14 @@ class Base(object):
             'profile'       : ZDP_PROFILE_ID,
             'data'          : '\xff\x00'
         },
-        'match_descriptor_response': {
-            'description'   : 'Match Descriptor Response',
-            'src_endpoint'  : b'\x00',
-            'dest_endpoint' : b'\x00',
-            'cluster'       : b'\x80\x06',
-            'profile'       : ZDP_PROFILE_ID,
-            'data'          : b'\x00\x00\x00\x00\x01\x02'
-            #'data'          : '\x03\xfd\xff\x16\xc2\x00\x01\xf0\x00' // SmartPlug
-        },
+        # 'match_descriptor_response': {      <--- specific in Hub.py
+        #    'description'   : 'Match Descriptor Response',
+        #    'src_endpoint'  : b'\x00',
+        #    'dest_endpoint' : b'\x00',
+        #    'cluster'       : b'\x80\x06',
+        #    'profile'       : ZDP_PROFILE_ID,
+        #    'data'          : b'\x00\x00\x00\x00\x01\x02'
+        #},
         'active_endpoints_request': {
             'description'   : 'Active Endpoints Request',  #Device
             'src_endpoint'  : b'\x00',
@@ -58,7 +57,7 @@ class Base(object):
         },
         'hardware_join_1' : {
             'description'   : 'Hardware Join Messages 1',  #Device
-            'src_endpoint'  : b'\x00',
+            'src_endpoint'  : b'\x02',
             'dest_endpoint' : b'\x02',
             'cluster'       : b'\x00\xf6',
             'profile'       : ALERTME_PROFILE_ID, 
