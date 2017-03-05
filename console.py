@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf_8 -*-
 
-# Filename:    commander.py
+# Filename:    console.py
 # Description: Communicate with Hive/AlertMe devices via a XBee
 # Author:      James Saunders [james@saunders-family.net]
 # Copyright:   Copyright (C) 2017 James Saunders
@@ -217,7 +217,7 @@ if __name__ == '__main__':
     class TestCmd(Command):
         def do_discovery(self, *args):
             # Discovery
-            hubObj.discovery()
+            hubObj._discovery()
             return 'Discovery Started'
 
         def do_broadcast(self, *args):
@@ -285,7 +285,9 @@ if __name__ == '__main__':
     from classes import *
     import serial
     import logging
+    import pprint
 
+    pp = pprint.PrettyPrinter(indent=4)
     logger = logging.getLogger('py-alertme')
     logger.setLevel(logging.DEBUG)
 

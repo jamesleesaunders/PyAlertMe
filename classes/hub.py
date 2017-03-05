@@ -39,9 +39,9 @@ class Hub(Base):
 
         # Next, sent out a version request to each node we have discovered above
         nodes = self.get_nodes()
-        for node_id in nodes.iterkeys():
+        for node_id in nodes.keys():
             self.send_type_request(node_id)
-            time.sleep(0.50)
+            time.sleep(1.00)
 
     def get_node(self, node_id):
         nodes = self.get_nodes()
@@ -127,7 +127,7 @@ class Hub(Base):
 
         return history
 
-    def lookup_node_id(self, addr_long):
+    def lookup_node_id(self, addr_long, addr_short):
         db = sqlite3.connect('nodes.db')
         db.text_factory = lambda x: unicode(x, 'utf-8', 'ignore')
         cursor = db.cursor()
@@ -146,11 +146,14 @@ class Hub(Base):
             else:
                 # Create in DB
                 cursor.execute(
-                    'INSERT INTO Nodes (AddressLong, Name, Type, FirstSeen, LastSeen) VALUES (:AddrLong, :Name, :Type, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)',
-                    {'AddrLong': addr_long, 'Name': 'Unspecified', 'Type': 'Unknown'}
+                    'INSERT INTO Nodes (AddressLong, Name, Type, FirstSeen, LastSeen) VALUES (:AddressLong, :Name, :Type, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)',
+                    {'AddressLong': addr_long, 'Name': 'Unspecified', 'Type': 'Unknown'}
                 )
                 node_id = cursor.lastrowid
                 db.commit()
+
+            # Ensure we also have saved the latest short address
+            self.set_node_short_address(node_id, addr_short)
 
             # Add to local cache
             self.addr_long_to_id[addr_long] = node_id
@@ -175,7 +178,7 @@ class Hub(Base):
         dest_addr_long = node['AddressLong']
         dest_addr_short = node['AddressShort']
 
-        self.logger.debug('Sending version req to %s', node_id)
+        self.logger.debug('Sending Version Request to %s', node_id)
         message = self.get_action('version_info')
         self.send_message(message, dest_addr_long, dest_addr_short)
 
@@ -220,12 +223,23 @@ class Hub(Base):
         )
         db.commit()
 
+    def set_node_short_address(self, node_id, addr_short):
+        db = sqlite3.connect('nodes.db')
+        cursor = db.cursor()
+        db.text_factory = str
+
+        cursor.execute(
+            'UPDATE Nodes SET AddressShort = :AddressShort WHERE Id = :NodeId',
+            {'AddressShort': addr_short, 'NodeId': node_id}
+        )
+        db.commit()
+
     def set_node_name(self, node_id, name):
         db = sqlite3.connect('nodes.db')
         cursor = db.cursor()
         cursor.execute(
             'UPDATE Nodes SET Name = :Name WHERE Id = :NodeId',
-            {'Name' : name, 'NodeId' : node_id}
+            {'Name': name, 'NodeId': node_id}
         )
         db.commit()
 
@@ -249,7 +263,7 @@ class Hub(Base):
 
             source_addr_long = message['source_addr_long']
             source_addr = message['source_addr']
-            node_id = self.lookup_node_id(source_addr_long)
+            node_id = self.lookup_node_id(source_addr_long, source_addr)
             self.update_packet_counter(node_id)
 
             if (profile_id == self.ZDP_PROFILE_ID):
