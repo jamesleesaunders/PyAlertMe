@@ -23,7 +23,7 @@ class Hub(Base):
         self.addr_long_to_id = {}
 
     def discovery(self):
-        self.logger.debug('Discovery')
+        self.logger.debug('Discovery mode started')
         self.thread = threading.Thread(target=self._discovery)
 
     def _discovery(self):
