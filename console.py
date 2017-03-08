@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf_8 -*-
 
-# Filename:    commander.py
+# Filename:    console.py
 # Description: Communicate with Hive/AlertMe devices via a XBee
 # Author:      James Saunders [james@saunders-family.net]
 # Copyright:   Copyright (C) 2017 James Saunders
@@ -251,7 +251,7 @@ if __name__ == '__main__':
 
                 if args[1] == "state":
                     state = args[2]
-                    hubObj.send_state_request(node_id, 'state', state)
+                    hubObj.send_state_request(node_id, state)
                     return 'Node: ' + str(node_id) + ' State Changed: ' + state
 
                 if args[1] == "attributes":
@@ -285,7 +285,9 @@ if __name__ == '__main__':
     from classes import *
     import serial
     import logging
+    import pprint
 
+    pp = pprint.PrettyPrinter(indent=4)
     logger = logging.getLogger('py-alertme')
     logger.setLevel(logging.DEBUG)
 

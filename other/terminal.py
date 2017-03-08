@@ -1,4 +1,4 @@
-from commander import Commander
+from console import Commander
 
 if __name__ == '__main__':
     class TestCmd(Command):

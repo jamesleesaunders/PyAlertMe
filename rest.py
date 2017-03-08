@@ -41,7 +41,6 @@ XBEE_BAUD = 9600
 serialObj = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
 hubObj = Hub(serialObj)
-hubObj.discovery()
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = True
@@ -108,7 +107,7 @@ def update_node(node_id):
 
 @app.route(API_BASE + '/discovery', methods=['POST'])
 def discovery():
-    hubObj.discovery()
+    hubObj._discovery()
     return jsonify({'discovery': 1})
 
 if __name__ == '__main__':
