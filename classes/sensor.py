@@ -1,11 +1,10 @@
-import pprint
 import logging
 from classes import *
 import struct
 import time
 import binascii
+import threading
 
-pp = pprint.PrettyPrinter(indent=4)
 
 class Sensor(Device):
 

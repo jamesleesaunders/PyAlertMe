@@ -1,12 +1,10 @@
-import pprint
 import logging
 from classes import *
 import struct
 import time
+import binascii
 import threading
 import sqlite3
-
-pp = pprint.PrettyPrinter(indent=4)
 
 class Hub(Base):
 
@@ -18,24 +16,25 @@ class Hub(Base):
         self.type = 'Nano Hub'
         self.date = '2017-01-01'
         self.version = 00001
+        self.discovery_thread = threading.Thread(target=self._discovery)
 
         # List of associated nodes
         self.addr_long_to_id = {}
 
     def discovery(self):
         self.logger.debug('Discovery mode started')
-        self.thread = threading.Thread(target=self._discovery)
+        self.discovery_thread.start()
 
     def _discovery(self):
-        # First, send out a broadcast every 3 seconds for 30 seconds
+        # First, send out a broadcast every 2 seconds for 30 seconds
         timeout = time.time() + 30
         i = 1
         while time.time() < timeout:
-            self.logger.debug('Sending discovery request #%s', i)
+            self.logger.debug('Sending Discovery Request #%s', i)
             message = self.get_action('routing_table_request')
             self.send_message(message, self.BROADCAST_LONG, self.BROADCAST_SHORT)
             i += 1
-            time.sleep(3.00)
+            time.sleep(2.00)
 
         # Next, sent out a version request to each node we have discovered above
         nodes = self.get_nodes()
