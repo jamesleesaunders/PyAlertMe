@@ -217,7 +217,7 @@ if __name__ == '__main__':
     class TestCmd(Command):
         def do_discovery(self, *args):
             # Discovery
-            hubObj._discovery()
+            hubObj.discovery()
             return 'Discovery Started'
 
         def do_broadcast(self, *args):
@@ -251,7 +251,7 @@ if __name__ == '__main__':
 
                 if args[1] == "state":
                     state = args[2]
-                    hubObj.send_state_request(node_id, 'state', state)
+                    hubObj.send_state_request(node_id, state)
                     return 'Node: ' + str(node_id) + ' State Changed: ' + state
 
                 if args[1] == "attributes":
