@@ -1,17 +1,13 @@
-import pprint
 import logging
 from classes import *
 import struct
 import time
 import binascii
 import threading
-import serial
 from xbee import ZigBee
 
-pp = pprint.PrettyPrinter(indent=4)
-logger = logging.getLogger('py-alertme')
-
 class Base(object):
+
     # ZigBee Profile IDs
     ZDP_PROFILE_ID     = b'\x00\x00'  # Zigbee Device Profile
     HA_PROFILE_ID      = b'\x01\x04'  # HA Device Profile
@@ -146,7 +142,7 @@ class Base(object):
     }
 
     def __init__(self, serialObj = False):
-        self.logger = logger or logging.getLogger(__name__)
+        self.logger = logging.getLogger('py-alertme')
 
         # Setup serial and xbee
         if(serialObj != False):
