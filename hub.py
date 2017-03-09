@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#!/usr/bin/python
 # coding: utf-8
 
 # Filename:    hub.py
@@ -6,7 +6,7 @@
 # Author:      James Saunders [james@saunders-family.net]
 # Copyright:   Copyright (C) 2017 James Saunders
 # License:     MIT
-# Version:     0.1.2
+# Version:     0.1.3
 
 import serial
 import logging

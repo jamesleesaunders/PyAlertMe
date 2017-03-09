@@ -6,7 +6,7 @@
 # Author:      James Saunders [james@saunders-family.net]
 # Copyright:   Copyright (C) 2017 James Saunders
 # License:     MIT
-# Version:     0.1.2
+# Version:     0.1.3
 
 from flask import Flask, jsonify, abort, make_response, request
 import serial

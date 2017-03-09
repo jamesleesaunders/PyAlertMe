@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-# -*- coding: utf_8 -*-
+# coding: utf-8
 
 # Filename:    console.py
 # Description: Communicate with Hive/AlertMe devices via a XBee
 # Author:      James Saunders [james@saunders-family.net]
 # Copyright:   Copyright (C) 2017 James Saunders
 # License:     MIT
-# Version:     0.1.2
+# Version:     0.1.3
 
 
 '''
