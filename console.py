@@ -282,13 +282,13 @@ if __name__ == '__main__':
     c = Commander('PyAlertMe', cmd_cb=TestCmd())
 
 
-    from classes import *
+    from pyalertme import *
     import serial
     import logging
     import pprint
 
     pp = pprint.PrettyPrinter(indent=4)
-    logger = logging.getLogger('py-alertme')
+    logger = logging.getLogger('pyalertme')
     logger.setLevel(logging.DEBUG)
 
     # Specify log message format

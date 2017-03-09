@@ -13,11 +13,11 @@ import serial
 import time
 import logging
 import sys
-from classes import *
+from pyalertme import *
 import pprint
 
 pp = pprint.PrettyPrinter(indent=4)
-logger = logging.getLogger('py-alertme')
+logger = logging.getLogger('pyalertme')
 logger.setLevel(logging.DEBUG)
 
 # Specify log message format
