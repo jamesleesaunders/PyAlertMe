@@ -18,11 +18,16 @@ class Hub(Base):
         self.version = 00001
         self.discovery_thread = threading.Thread(target=self._discovery)
 
+        self.db = sqlite3.connect('nodes.db', check_same_thread=False)
+        self.db.text_factory = str
+        self.db.row_factory = self.dict_factory
+        self.cursor = self.db.cursor()
+
         # List of associated nodes
         self.addr_long_to_id = {}
 
     def discovery(self):
-        self.logger.debug('Discovery mode started')
+        self.logger.debug('Discovery Mode Started')
         self.discovery_thread.start()
 
     def _discovery(self):
@@ -47,22 +52,11 @@ class Hub(Base):
         return nodes[node_id]
 
     def get_nodes(self):
-        def dict_factory(cursor, row):
-            d = {}
-            for idx, col in enumerate(cursor.description):
-                d[col[0]] = row[idx]
-            return d
-
-        db = sqlite3.connect('nodes.db')
-        db.text_factory = str
-        db.row_factory = dict_factory
-        cursor = db.cursor()
-
         nodes = {}
-        cursor.execute(
+        self.cursor.execute(
             'SELECT Id, Name, AddressLong, AddressShort, Type, Version, Manufacturer, ManufactureDate, FirstSeen, LastSeen, MessagesReceived FROM Nodes'
         )
-        for node in cursor.fetchall():
+        for node in self.cursor.fetchall():
             node_id = node['Id']
             nodes[node_id] = node
             nodes[node_id]['Attributes'] = self.get_node_attributes_latest(node_id)
@@ -70,23 +64,12 @@ class Hub(Base):
         return nodes
 
     def get_node_attributes_latest(self, node_id):
-        def dict_factory(cursor, row):
-            d = {}
-            for idx, col in enumerate(cursor.description):
-                d[col[0]] = row[idx]
-            return d
-
-        db = sqlite3.connect('nodes.db')
-        db.text_factory = str
-        db.row_factory = dict_factory
-        cursor = db.cursor()
-
         attributes = {}
-        cursor.execute(
+        self.cursor.execute(
             'SELECT a.Id, a.Name, a.Value, a.Time FROM Attributes a JOIN (SELECT MAX(Id) AS Id FROM Attributes WHERE NodeId = :NodeId1 GROUP BY Name) b ON a.Id = b.Id AND a.NodeId = :NodeId2',
             {'NodeId1': node_id, 'NodeId2': node_id}
         )
-        for attribute in cursor.fetchall():
+        for attribute in self.cursor.fetchall():
             attrib_name = attribute['Name']
             value = attribute['Value']
             time = attribute['Time']
@@ -95,22 +78,6 @@ class Hub(Base):
         return attributes
 
     def get_node_attribute_history(self, node_id, attrib_name, starttime, endtime):
-        def dict_factory(cursor, row):
-            d = {}
-            for idx, col in enumerate(cursor.description):
-                d[col[0]] = row[idx]
-            return d
-
-        db = sqlite3.connect('nodes.db')
-        db.text_factory = str
-        db.row_factory = dict_factory
-        cursor = db.cursor()
-
-        cursor.execute(
-            'SELECT * FROM Attributes WHERE NodeId = :NodeId AND Name = :Name AND Time BETWEEN DATETIME(:StartTime, \'unixepoch\', \'localtime\') AND DATETIME(:EndTime, \'unixepoch\', \'localtime\')',
-            {'NodeId': node_id, 'Name': attrib_name, 'StartTime': starttime, 'EndTime': endtime}
-        )
-
         history = {
             attrib_name: {
                 'NodeId': node_id,
@@ -119,7 +86,11 @@ class Hub(Base):
                 'Values': {}
             }
         }
-        for attribute in cursor.fetchall():
+        self.cursor.execute(
+            'SELECT * FROM Attributes WHERE NodeId = :NodeId AND Name = :Name AND Time BETWEEN DATETIME(:StartTime, \'unixepoch\', \'localtime\') AND DATETIME(:EndTime, \'unixepoch\', \'localtime\')',
+            {'NodeId': node_id, 'Name': attrib_name, 'StartTime': starttime, 'EndTime': endtime}
+        )
+        for attribute in self.cursor.fetchall():
             value = attribute['Value']
             time = attribute['Time']
             history[attrib_name]['Values'][time] = value
@@ -127,29 +98,27 @@ class Hub(Base):
         return history
 
     def lookup_node_id(self, addr_long, addr_short):
-        db = sqlite3.connect('nodes.db')
-        db.text_factory = lambda x: unicode(x, 'utf-8', 'ignore')
-        cursor = db.cursor()
-
         # Lookup in local cache
         if addr_long in self.addr_long_to_id:
             node_id = self.addr_long_to_id[addr_long]
 
         else:
             # Lookup in DB
-            cursor.execute('SELECT Id FROM Nodes WHERE AddressLong = :AddrLong', {'AddrLong': addr_long})
-            row = cursor.fetchone()
+            self.cursor.execute('SELECT Id FROM Nodes WHERE AddressLong = :AddrLong LIMIT 1', {'AddrLong': addr_long})
+            row = self.cursor.fetchone()
 
             if row is not None:
-                node_id = row[0]
+                self.logger.debug('Row %s', row)
+                node_id = row['Id']
+
             else:
                 # Create in DB
-                cursor.execute(
+                self.cursor.execute(
                     'INSERT INTO Nodes (AddressLong, Name, Type, FirstSeen, LastSeen) VALUES (:AddressLong, :Name, :Type, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)',
                     {'AddressLong': addr_long, 'Name': 'Unspecified', 'Type': 'Unknown'}
                 )
-                node_id = cursor.lastrowid
-                db.commit()
+                node_id = self.cursor.lastrowid
+                self.db.commit()
 
             # Ensure we also have saved the latest short address
             self.set_node_short_address(node_id, addr_short)
@@ -160,14 +129,12 @@ class Hub(Base):
         return node_id
 
     def set_node_type(self, node_id, details):
-        db = sqlite3.connect('nodes.db')
-        cursor = db.cursor()
-        cursor.execute(
+        self.logger.debug('Setting Device Type to %s', details)
+        self.db.execute(
             'UPDATE Nodes SET Type = :Type, Version = :Version, Manufacturer = :Manufacturer, ManufactureDate = :ManufactureDate WHERE Id = :NodeId',
             {'Type': details['Type'], 'Version': details['Version'], 'Manufacturer': details['Manufacturer'], 'ManufactureDate': details['ManufactureDate'], 'NodeId': node_id}
         )
-        self.logger.debug('Setting type to %s', details)
-        db.commit()
+        self.db.commit()
 
     def send_type_request(self, node_id):
         # Lookup node
@@ -210,47 +177,37 @@ class Hub(Base):
         self.send_message(message, dest_addr_long, dest_addr_short)
 
     def set_node_attributes(self, node_id, attributes):
+        self.logger.error('Updating Attributes: %s', attributes)
         for attrib_name, value in attributes.iteritems():
             self.set_node_attribute(node_id, attrib_name, value)
 
     def set_node_attribute(self, node_id, attrib_name, value):
-        db = sqlite3.connect('nodes.db')
-        cursor = db.cursor()
-        cursor.execute(
+        self.db.execute(
             'INSERT INTO Attributes (NodeId, Name, Value, Time) VALUES (:NodeId, :Name, :Value, CURRENT_TIMESTAMP)',
             {'NodeId': node_id, 'Name': attrib_name, 'Value': value}
         )
-        db.commit()
+        self.db.commit()
 
     def set_node_short_address(self, node_id, addr_short):
-        db = sqlite3.connect('nodes.db')
-        cursor = db.cursor()
-        db.text_factory = str
-
-        cursor.execute(
+        self.db.execute(
             'UPDATE Nodes SET AddressShort = :AddressShort WHERE Id = :NodeId',
             {'AddressShort': addr_short, 'NodeId': node_id}
         )
-        db.commit()
+        self.db.commit()
 
     def set_node_name(self, node_id, name):
-        db = sqlite3.connect('nodes.db')
-        cursor = db.cursor()
-        cursor.execute(
+        self.db.execute(
             'UPDATE Nodes SET Name = :Name WHERE Id = :NodeId',
             {'Name': name, 'NodeId': node_id}
         )
-        db.commit()
+        self.db.commit()
 
     def update_packet_counter(self, node_id):
-        # Increment packet counter
-        db = sqlite3.connect('nodes.db')
-        cursor = db.cursor()
-        cursor.execute(
+        self.db.execute(
             'UPDATE Nodes SET LastSeen = CURRENT_TIMESTAMP, MessagesReceived = MessagesReceived + 1 WHERE Id = :NodeId',
             {'NodeId': node_id}
         )
-        db.commit()
+        self.db.commit()
 
     def process_message(self, message):
         super(Hub, self).process_message(message)
@@ -263,6 +220,7 @@ class Hub(Base):
             source_addr_long = message['source_addr_long']
             source_addr = message['source_addr']
             node_id = self.lookup_node_id(source_addr_long, source_addr)
+            # node_id = 1
             self.update_packet_counter(node_id)
 
             if (profile_id == self.ZDP_PROFILE_ID):
@@ -601,4 +559,9 @@ class Hub(Base):
 
         return ret
 
-
+    @staticmethod
+    def dict_factory(cursor, row):
+        d = {}
+        for idx, col in enumerate(cursor.description):
+            d[col[0]] = row[idx]
+        return d
