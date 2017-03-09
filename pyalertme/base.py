@@ -1,5 +1,5 @@
 import logging
-from classes import *
+from pyalertme import *
 import struct
 import time
 import binascii
@@ -142,7 +142,7 @@ class Base(object):
     }
 
     def __init__(self, serialObj = False):
-        self.logger = logging.getLogger('py-alertme')
+        self.logger = logging.getLogger('pyalertme')
 
         # Setup serial and xbee
         if(serialObj != False):

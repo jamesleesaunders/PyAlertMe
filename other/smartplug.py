@@ -12,7 +12,7 @@ import serial
 import logging
 import time
 import sys
-from classes import *
+from pyalertme import *
 import pprint
 
 pp = pprint.PrettyPrinter(indent=4)

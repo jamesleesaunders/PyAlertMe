@@ -1,5 +1,5 @@
 import logging
-from classes import *
+from pyalertme import *
 import struct
 import time
 import binascii
