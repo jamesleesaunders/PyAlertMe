@@ -1,46 +1,15 @@
-#!/usr/bin/python
-# coding: utf-8
+from setuptools import setup
 
-# Filename:    setup.py
-# Description: Sets up DB used by hub.py
-# Author:      James Saunders [james@saunders-family.net]
-# Copyright:   Copyright (C) 2017 James Saunders
-# License:     MIT
-# Version:     0.1.3
-
-import sqlite3
-
-# Setup DB Connection
-conn = sqlite3.connect('nodes.db')
-print "Database successfully created"
-
-# Create Nodes Table
-conn.execute('''CREATE TABLE Nodes (
-    Id               INTEGER PRIMARY KEY AUTOINCREMENT,
-    AddressLong      BLOB NOT NULL,
-    AddressShort     BLOB,
-    Name             CHAR(50) DEFAULT '',
-    Type             CHAR(50) DEFAULT '',
-    Version          INTEGER,
-    Manufacturer     CHAR(50) DEFAULT '',
-    ManufactureDate  CHAR(10) DEFAULT '',
-    FirstSeen        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    LastSeen         DATETIME,
-    MessagesReceived INT DEFAULT 0
-);''')
-conn.execute('''CREATE UNIQUE INDEX AddressLong on Nodes (AddressLong);''')
-print "Nodes table successfully created"
-
-# Create Attributes Table
-conn.execute('''CREATE TABLE Attributes (
-    Id               INTEGER PRIMARY KEY AUTOINCREMENT,
-    NodeId           INTEGER,
-    Name             CHAR(20) NOT NULL,
-    Value            CHAR(50) NOT NULL,
-    Time             DATETIME NOT NULL
-);''')
-conn.execute('''CREATE UNIQUE INDEX Attribute on Attributes (NodeId, Name, Value, Time);''')
-print "Attributes table successfully created"
-
-# Close Up Shop
-conn.close()
+setup(name='PyAlertme',
+      version='0.1.3',
+      description='Python AlertMe',
+      url='https://github.com/jamesleesaunders/pyalertme',
+      author='James Saunders',
+      author_email='james@saunders-family.net',
+      license='MIT',
+      packages=['pyalertme'],
+      zip_safe=False,
+      install_requires=['pyserial', 'xbee'],
+      test_suite='nose.collector',
+      tests_require=['nose']
+)

@@ -6,7 +6,7 @@
 import sys
 import time
 
-from other.daemon import Daemon
+from examples.daemon import Daemon
 
 
 class MyDaemon(Daemon):
