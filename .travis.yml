@@ -5,5 +5,5 @@ python:
 before_script:
   - sudo apt-get update
   - sudo apt-get install sqlite3
-  - python setup.py
+  - python examples/setup.py
 script: nosetests
