@@ -1,9 +1,9 @@
 from setuptools import setup
 
-setup(name='PyAlertme',
+setup(name='PyAlertMe',
       version='0.1.3',
       description='Python AlertMe',
-      url='https://github.com/jamesleesaunders/pyalertme',
+      url='https://github.com/jamesleesaunders/PyAlertMe',
       author='James Saunders',
       author_email='james@saunders-family.net',
       license='MIT',
