@@ -137,26 +137,21 @@ class Hub(Base):
         )
         self.db.commit()
 
-    def send_type_request(self, node_id):
+    def send_node_message(self, node_id, message):
         # Lookup node
         node = self.get_node(node_id)
-
         # Work out Zigbee addresses
         dest_addr_long = node['AddressLong']
         dest_addr_short = node['AddressShort']
-
-        self.logger.debug('Sending Version Request to %s', node_id)
-        message = self.get_action('version_info')
         self.send_message(message, dest_addr_long, dest_addr_short)
 
+    def send_type_request(self, node_id):
+        self.logger.debug('Sending Version Request to %s', node_id)
+        message = self.get_action('version_info')
+        self.send_node_message(node_id, message)
+
     def send_state_request(self, node_id, state):
-        # Lookup node
-        node = self.get_node(node_id)
-
-        # Work out Zigbee addresses
-        dest_addr_long = node['AddressLong']
-        dest_addr_short = node['AddressShort']
-
+        self.logger.debug('Sending State Request %s', state)
         # Basic message details
         message = {
             'src_endpoint': b'\x00',
@@ -175,10 +170,34 @@ class Hub(Base):
             self.logger.error('Invalid state request %s', state)
 
         # Send message
-        self.send_message(message, dest_addr_long, dest_addr_short)
+        self.send_node_message(node_id, message)
+
+    def send_active_endpoint_request(self, node_id, source_addr):
+        self.logger.debug('Sending Active Endpoint Request')
+        data = b'\xaa' + source_addr[1] + source_addr[0]
+        message = {
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'profile': self.HA_PROFILE_ID,
+            'cluster': b'\x00\x05',
+            'data': data
+        }
+        self.send_node_message(node_id, message)
+
+    def send_match_descriptor_response(self, node_id, rf_data):
+        self.logger.debug('Sending Match Descriptor Response')
+        data = rf_data[0:1] + b'\x00\x00\x00\x01\x02'
+        message = {
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'profile': self.HA_PROFILE_ID,
+            'cluster': b'\x80\x06',
+            'data': data
+        }
+        self.send_node_message(node_id, message)
 
     def set_node_attributes(self, node_id, attributes):
-        self.logger.error('Updating Attributes: %s', attributes)
+        self.logger.debug('Updating Attributes: %s', attributes)
         for attrib_name, value in attributes.iteritems():
             self.set_node_attribute(node_id, attrib_name, value)
 
@@ -233,19 +252,8 @@ class Hub(Base):
                     # Device Announce Message.
                     self.logger.debug('Received Device Announce Message')
                     # This will tell me the address of the new thing
-                    # so I'm going to send an active endpoint request
-                    self.logger.debug('Sending Active Endpoint Request')
-                    epc = '\xaa'+message['source_addr'][1]+message['source_addr'][0]
-                    self.zb.send('tx_explicit',
-                        dest_addr_long = source_addr_long,
-                        dest_addr = source_addr,
-                        src_endpoint = '\x00',
-                        dest_endpoint = '\x00',
-                        cluster = '\x00\x05',
-                        profile = self.HA_PROFILE_ID,
-                        options = '\x01',
-                        data = epc
-                    )
+                    # so we're going to send an active endpoint request
+                    self.send_active_endpoint_request(node_id, source_addr)
 
                 elif (cluster_id == b'\x00\x00'):
                     # Network (16-bit) Address Request.
@@ -289,26 +297,16 @@ class Hub(Base):
 
                     # First send the Match Descriptor Response
                     # message = self.get_action('match_descriptor_response')
-                    # self.send_message(message, source_addr_long, source_addr)
-                    self.zb.send('tx_explicit',
-                        dest_addr_long = source_addr_long,
-                        dest_addr = source_addr,
-                        src_endpoint = '\x00',
-                        dest_endpoint = '\x00',
-                        cluster = '\x80\x06',
-                        profile = self.HA_PROFILE_ID,
-                        options = '\x01',
-                        data = message['rf_data'][0:1] + '\x00\x00\x00\x01\x02'
-                    )
-                    self.logger.debug('Sent Match Descriptor Response')
+                    # self.send_node_message(node_id, message)
+                    self.send_match_descriptor_response(node_id, message['rf_data'])
                     time.sleep(2)
 
                     # Now there are two messages directed at the hardware code (rather than the network code).
                     # The switch has to receive both of these to stay joined.
                     message = self.get_action('hardware_join_1')
-                    self.send_message(message, source_addr_long, source_addr)
+                    self.send_node_message(node_id, message)
                     # message = self.get_action('hardware_join_2')
-                    # self.send_message(message, source_addr_long, source_addr)
+                    # self.send_node_message(node_id, message)
                     self.logger.debug('Sent Hardware Join Message(s)')
 
                     # We are fully associated!
@@ -402,7 +400,7 @@ class Hub(Base):
                     if (message['rf_data'][3:7] == b'\x15\x00\x39\x10'):
                         self.logger.debug('Sending Security Initialization')
                         message = self.get_action('security_initialization')
-                        self.send_message(message, source_addr_long, source_addr)
+                        self.send_node_message(node_id, message)
 
                     properties = self.parse_security_state(message['rf_data'])
                     self.set_node_attributes(node_id, properties)
