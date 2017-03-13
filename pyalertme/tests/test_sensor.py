@@ -8,8 +8,9 @@ from mock_serial import Serial
 class TestSensor(unittest.TestCase):
 
     def setUp(self):
-        serialObj = Serial()
-        self.deviceObj = Sensor(serialObj)
+        self.serialObj = Serial()
+        self.deviceObj = Sensor()
+        self.deviceObj.start(self.serialObj)
 
     def tearDown(self):
         self.deviceObj.halt()

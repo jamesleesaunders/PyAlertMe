@@ -9,7 +9,8 @@ class TestSmartPlug(unittest.TestCase):
 
     def setUp(self):
         self.serialObj = Serial()
-        self.deviceObj = SmartPlug(self.serialObj)
+        self.deviceObj = SmartPlug()
+        self.deviceObj.start(self.serialObj)
 
     def tearDown(self):
         self.deviceObj.halt()

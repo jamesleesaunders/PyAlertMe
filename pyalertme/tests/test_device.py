@@ -9,7 +9,8 @@ class TestDevice(unittest.TestCase):
 
     def setUp(self):
         self.serialObj = Serial()
-        self.deviceObj = Device(self.serialObj)
+        self.deviceObj = Device()
+        self.deviceObj.start(self.serialObj)
 
     def tearDown(self):
         self.deviceObj.halt()
