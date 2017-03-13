@@ -12,6 +12,7 @@ import serial
 import logging
 import time
 import sys
+sys.path.insert(0, '../')
 from pyalertme import *
 import pprint
 
@@ -40,10 +41,14 @@ XBEE_PORT = '/dev/tty.usbserial-A1014P7W' # MacBook Serial Port
 XBEE_BAUD = 9600
 serialObj = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
-hubObj = Hub(serialObj)
+def callback(attrib_name, value):
+    print("Attribute: " + str(attrib_name) + "  Value: " + str(value))
+
+hubObj = Hub(callback)
+hubObj.start(serialObj)
 
 # Kick off discovery thread
-hubObj.discovery()
+# hubObj.discovery()
 
 # Actions Phase
 while True:
@@ -85,4 +90,3 @@ while True:
 # Close up shop
 print("Closing Serial Port")
 hubObj.halt()
-serialObj.close()

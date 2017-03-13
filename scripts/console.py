@@ -270,7 +270,6 @@ if __name__ == '__main__':
         def do_halt(self, *args):
             # Close up shop
             hubObj.halt()
-            serialObj.close()
             return Commander.Exit
 
         def do_echo(self, *args):
@@ -281,7 +280,8 @@ if __name__ == '__main__':
 
     c = Commander('PyAlertMe', cmd_cb=TestCmd())
 
-
+    import sys
+    sys.path.insert(0, '../')
     from pyalertme import *
     import serial
     import logging
@@ -312,7 +312,8 @@ if __name__ == '__main__':
     serialObj = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
     # Start hub
-    hubObj = Hub(serialObj)
+    hubObj = Hub()
+    hubObj.start(serialObj)
 
     # Start main loop
     c.loop()
