@@ -8,8 +8,8 @@ import threading
 
 class SmartPlug(Device):
 
-    def __init__(self, serialObj = False):
-        Device.__init__(self, serialObj)
+    def __init__(self):
+        Device.__init__(self)
 
         # Type Info
         self.manu = 'AlertMe.com'

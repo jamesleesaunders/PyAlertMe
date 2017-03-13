@@ -8,8 +8,8 @@ import threading
 
 class Device(Base):
 
-    def __init__(self, serialObj = False):
-        Base.__init__(self, serialObj)
+    def __init__(self):
+        Base.__init__(self)
 
         # Type Info
         self.manu = 'AlertMe.com'

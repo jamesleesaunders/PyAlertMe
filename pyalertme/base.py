@@ -141,12 +141,10 @@ class Base(object):
         }
     }
 
-    def __init__(self, serialObj = False):
+    def __init__(self):
         self.logger = logging.getLogger('pyalertme')
 
-        # Setup serial and xbee
-        if(serialObj != False):
-            self.zb = ZigBee(ser=serialObj, callback=self.receive_message, error_callback=self.xbee_error)
+        self.zb = None
 
         # Type Info
         self.manu = None
@@ -159,6 +157,18 @@ class Base(object):
         self.incoming_messages = []
 
         self.associated = False
+
+    def start(self, serial):
+        if(serial != None):
+            self.serial = serial
+            self.zb = ZigBee(ser=serial, callback=self.receive_message, error_callback=self.xbee_error)
+
+    def halt(self):
+        self.zb.halt()
+        self.serial.close()
+
+    def xbee_error(self, error):
+        self.logger.critical('XBee Error: %s', error)
 
     def list_actions(self):
         actions = {}
@@ -207,12 +217,6 @@ class Base(object):
 
             else:
                 self.logger.error('Unrecognised Profile ID: %e', profile_id)
-
-    def halt(self):
-        self.zb.halt()
-
-    def xbee_error(self, error):
-        self.logger.critical('XBee Error: %s', error)
 
     def __str__(self):
         return "Device Type: %s" % (self.type)

@@ -8,8 +8,8 @@ import sqlite3
 
 class Hub(Base):
 
-    def __init__(self, serialObj = False):
-        Base.__init__(self, serialObj)
+    def __init__(self, callback = False):
+        Base.__init__(self)
 
         # Type Info
         self.manu = 'AlertMe.com'
@@ -17,6 +17,7 @@ class Hub(Base):
         self.date = '2017-01-01'
         self.version = 00001
         self.discovery_thread = threading.Thread(target=self._discovery)
+        self.callback = callback
 
         self.db = sqlite3.connect('nodes.db', check_same_thread=False)
         self.db.text_factory = str
@@ -182,6 +183,9 @@ class Hub(Base):
             self.set_node_attribute(node_id, attrib_name, value)
 
     def set_node_attribute(self, node_id, attrib_name, value):
+        if self.callback:
+            self.callback(attrib_name, value)
+
         self.db.execute(
             'INSERT INTO Attributes (NodeId, Name, Value, Time) VALUES (:NodeId, :Name, :Value, CURRENT_TIMESTAMP)',
             {'NodeId': node_id, 'Name': attrib_name, 'Value': value}

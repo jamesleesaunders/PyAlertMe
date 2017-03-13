@@ -8,8 +8,8 @@ import threading
 
 class Sensor(Device):
 
-    def __init__(self, serialObj):
-        Device.__init__(self, serialObj)
+    def __init__(self):
+        Device.__init__(self)
 
         # Type Info
         self.manu = 'AlertMe.com'
