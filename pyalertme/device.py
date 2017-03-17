@@ -31,7 +31,7 @@ class Device(Base):
 
             # Take note of hub address
             self.hub_addr_long = message['source_addr_long']
-            self.hub_addr = message['source_addr']
+            self.hub_addr_short = message['source_addr']
 
             if (profile_id == self.ZDP_PROFILE_ID):
                 # Zigbee Device Profile ID
@@ -60,7 +60,7 @@ class Device(Base):
                 elif (cluster_id == b'\x00\xf6'):
                     # b'\x11\x00\xfc\x00\x01'
                     self.logger.debug('Version Request')
-                    self.send_message(self.get_type(), self.hub_addr_long, self.hub_addr)
+                    self.send_message(self.get_type(), self.hub_addr_long, self.hub_addr_short)
 
                 elif (cluster_id == b'\x00\xf0'):
                     self.logger.debug('Hardware Join Messages 2')
@@ -70,7 +70,7 @@ class Device(Base):
                 elif (cluster_id == b'\x00\xee'):
                     if (cluster_cmd == b'\xfa'):
                         self.logger.debug('Range Test')
-                        self.send_message(self.get_range(), self.hub_addr_long, self.hub_addr)
+                        self.send_message(self.get_range(), self.hub_addr_long, self.hub_addr_short)
 
             else:
                 self.logger.error('Unrecognised Profile ID: %e', profile_id)

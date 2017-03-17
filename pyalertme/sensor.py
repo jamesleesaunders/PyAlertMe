@@ -30,7 +30,7 @@ class Sensor(Device):
             cluster_id = message['cluster']
 
             source_addr_long = message['source_addr_long']
-            source_addr = message['source_addr']
+            source_addr_short = message['source_addr']
 
             if (profile_id == self.ALERTME_PROFILE_ID):
                 # AlertMe Profile ID

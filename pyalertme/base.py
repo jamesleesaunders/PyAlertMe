@@ -192,9 +192,9 @@ class Base(object):
     def receive_message(self, message):
         # Grab source address, work out device ID
         source_addr_long = message['source_addr_long']
-        device_id = Base.pretty_mac(source_addr_long)
+        pretty_addr = Base.pretty_mac(source_addr_long)
 
-        self.logger.debug('Device: %s Received: %s', device_id, message)
+        self.logger.debug('Device: %s Received: %s', pretty_addr, message)
         self.process_message(message)
        
     def process_message(self, message):

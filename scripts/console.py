@@ -246,13 +246,20 @@ if __name__ == '__main__':
                     if name == '':
                         raise Exception('Name too short!')
 
-                    hubObj.set_node_name(node_id, name)
+                    hubObj.save_node_name(node_id, name)
                     return 'Node: ' + str(node_id) + ' Renamed: ' + name
 
                 if args[1] == "state":
-                    state = args[2]
-                    hubObj.send_state_request(node_id, state)
-                    return 'Node: ' + str(node_id) + ' State Changed: ' + state
+                    value = args[2]
+                    hubObj.send_node_command(node_id, 'State', value)
+                    # hubObj.send_state_request(node_id, value)
+                    return 'Node: ' + str(node_id) + ' State Changed: ' + value
+
+                if args[1] == "mode":
+                    value = args[2]
+                    hubObj.send_node_command(node_id, 'Mode', value)
+                    # hubObj.send_mode_request(node_id, value)
+                    return 'Node: ' + str(node_id) + ' Mode: ' + value
 
                 if args[1] == "attributes":
                     attrib_name = args[2]

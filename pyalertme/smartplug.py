@@ -42,7 +42,7 @@ class SmartPlug(Device):
                         # State Request
                         # b'\x11\x00\x01\x01'
                         self.logger.debug('Switch State is: %s', self.state)
-                        self.send_message(self.get_state(), self.hub_addr_long, self.hub_addr)
+                        self.send_message(self.get_state(), self.hub_addr_long, self.hub_addr_short)
 
                     elif (cluster_cmd == b'\02'):
                         # Change State
@@ -50,7 +50,7 @@ class SmartPlug(Device):
                         # b'\x11\x00\x02\x00\x01' Off
                         self.state = self.parse_switch_state_change(message['rf_data'])
                         self.logger.debug('Switch State Changed to: %s', self.state)
-                        self.send_message(self.get_state(), self.hub_addr_long, self.hub_addr)
+                        self.send_message(self.get_state(), self.hub_addr_long, self.hub_addr_short)
 
                     elif (cluster_cmd == b'\xfa'):
                         # Set Mode
@@ -82,7 +82,7 @@ class SmartPlug(Device):
         # This simulates the physical button being pressed
         self.state = state
         self.logger.debug('Switch State Changed to: %s', self.state)
-        self.send_message(self.get_state(), self.hub_addr_long, self.hub_addr)
+        self.send_message(self.get_state(), self.hub_addr_long, self.hub_addr_short)
 
 
     def get_state(self):
