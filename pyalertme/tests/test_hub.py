@@ -9,7 +9,8 @@ class TestHub(unittest.TestCase):
 
     def setUp(self):
         self.serialObj = Serial()
-        self.hubObj = Hub(self.serialObj)
+        self.hubObj = Hub()
+        self.hubObj.start(self.serialObj)
 
     def tearDown(self):
         self.hubObj.halt()
@@ -102,7 +103,8 @@ class TestHub(unittest.TestCase):
 
     def test_parse_version_info(self):
         serialObj2 = Serial()
-        deviceObj = SmartPlug(serialObj2)
+        deviceObj = SmartPlug()
+        deviceObj.start(serialObj2)
 
         message = deviceObj.get_type()
         result = Hub.parse_version_info(message['data'])

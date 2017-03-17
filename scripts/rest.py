@@ -10,9 +10,9 @@
 
 from flask import Flask, jsonify, abort, make_response, request
 import serial
-import time
 import logging
 import sys
+sys.path.insert(0, '../')
 from pyalertme import *
 import pprint
 

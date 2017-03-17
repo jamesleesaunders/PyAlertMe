@@ -246,13 +246,20 @@ if __name__ == '__main__':
                     if name == '':
                         raise Exception('Name too short!')
 
-                    hubObj.set_node_name(node_id, name)
+                    hubObj.save_node_name(node_id, name)
                     return 'Node: ' + str(node_id) + ' Renamed: ' + name
 
                 if args[1] == "state":
-                    state = args[2]
-                    hubObj.send_state_request(node_id, state)
-                    return 'Node: ' + str(node_id) + ' State Changed: ' + state
+                    value = args[2]
+                    hubObj.send_node_command(node_id, 'State', value)
+                    # hubObj.send_state_request(node_id, value)
+                    return 'Node: ' + str(node_id) + ' State Changed: ' + value
+
+                if args[1] == "mode":
+                    value = args[2]
+                    hubObj.send_node_command(node_id, 'Mode', value)
+                    # hubObj.send_mode_request(node_id, value)
+                    return 'Node: ' + str(node_id) + ' Mode: ' + value
 
                 if args[1] == "attributes":
                     attrib_name = args[2]
@@ -270,7 +277,6 @@ if __name__ == '__main__':
         def do_halt(self, *args):
             # Close up shop
             hubObj.halt()
-            serialObj.close()
             return Commander.Exit
 
         def do_echo(self, *args):
@@ -281,7 +287,8 @@ if __name__ == '__main__':
 
     c = Commander('PyAlertMe', cmd_cb=TestCmd())
 
-
+    import sys
+    sys.path.insert(0, '../')
     from pyalertme import *
     import serial
     import logging
@@ -312,7 +319,8 @@ if __name__ == '__main__':
     serialObj = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
     # Start hub
-    hubObj = Hub(serialObj)
+    hubObj = Hub()
+    hubObj.start(serialObj)
 
     # Start main loop
     c.loop()
