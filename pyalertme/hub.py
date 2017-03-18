@@ -149,7 +149,7 @@ class Hub(Base):
         """
         # Lookup in local cache
         addr_long_to_id = dict((addresses['addr_long'], id) for id, addresses in self.nodes.iteritems())
-        if addr_long in self.addr_long_to_id:
+        if addr_long in addr_long_to_id:
             node_id = addr_long_to_id[addr_long]
 
         else:
