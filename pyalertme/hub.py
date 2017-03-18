@@ -30,7 +30,6 @@ class Hub(Base):
         self.cursor = self.db.cursor()
 
         # List of associated nodes
-        self.addr_long_to_id = {}
         self.nodes = {}
 
     def discovery(self):
