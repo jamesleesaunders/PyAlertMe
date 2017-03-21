@@ -20,7 +20,7 @@ class Base(object):
 
     messages = {
         'routing_table_request': {
-            'description'   : 'Management Rtg (Routing Table) Request',
+            'description'   : 'Management Routing Table Request',
             'src_endpoint'  : b'\x00',
             'dest_endpoint' : b'\x00',
             'cluster'       : b'\x00\x32',
@@ -35,28 +35,12 @@ class Base(object):
             'profile'       : ZDP_PROFILE_ID,
             'data'          : '\xff\x00'
         },
-        # 'match_descriptor_response': {      <--- specific in Hub.py
-        #    'description'   : 'Match Descriptor Response',
-        #    'src_endpoint'  : b'\x00',
-        #    'dest_endpoint' : b'\x00',
-        #    'cluster'       : b'\x80\x06',
-        #    'profile'       : ZDP_PROFILE_ID,
-        #    'data'          : b'\x00\x00\x00\x00\x01\x02'
-        #},
-        'active_endpoints_request': {
-            'description'   : 'Active Endpoints Request',  #Device
-            'src_endpoint'  : b'\x00',
-            'dest_endpoint' : b'\x00',
-            'cluster'       : b'\x00\x05',
-            'profile'       : ZDP_PROFILE_ID,
-            'data'          : b'\x00\x00'
-        },
         'hardware_join_1' : {
             'description'   : 'Hardware Join Messages 1',  #Device
             'src_endpoint'  : b'\x02',
             'dest_endpoint' : b'\x02',
             'cluster'       : b'\x00\xf6',
-            'profile'       : ALERTME_PROFILE_ID, 
+            'profile'       : ALERTME_PROFILE_ID,
             'data'          : b'\x11\x01\xfc'
         },
         'hardware_join_2' : {
@@ -64,16 +48,43 @@ class Base(object):
             'src_endpoint'  : b'\x00',
             'dest_endpoint' : b'\x02',
             'cluster'       : b'\x00\xf0',
-            'profile'       : ALERTME_PROFILE_ID, 
+            'profile'       : ALERTME_PROFILE_ID,
             'data'          : b'\x19\x01\xfa\x00\x01'
+        }
+    }
+
+    retired = {
+        'test': {
+            'description': 'test',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf0',
+            'profile': ALERTME_PROFILE_ID,
+            'data': lambda self, int: int + 1
         },
-        'version_info' : {
-            'description'   : 'Version Request',   #Device
-            'src_endpoint'  : b'\x00',
-            'dest_endpoint' : b'\x02', 
-            'cluster'       : b'\x00\xf6', 
-            'profile'       : ALERTME_PROFILE_ID, 
-            'data'          : b'\x11\x00\xfc\x00\x01'
+        'active_endpoint_request': {
+            'description': 'Active Endpoint Request',  # Device
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'cluster': b'\x00\x05',
+            'profile': ZDP_PROFILE_ID,
+            'data': b'\x00\x00'
+        },
+        'match_descriptor_response': {  # Hub
+            'description': 'Match Descriptor Response',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'cluster': b'\x80\x06',
+            'profile': ZDP_PROFILE_ID,
+            'data': b'\x00\x00\x00\x00\x01\x02'
+        },
+        'version_info': {
+            'description': 'Version Request',  # Device
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf6',
+            'profile': ALERTME_PROFILE_ID,
+            'data': b'\x11\x00\xfc\x00\x01'
         },
         'plug_off': {
             'description'   : 'Switch Plug Off',  #SmartPlug
@@ -132,12 +143,12 @@ class Base(object):
             'data'          : b'\x11\x00\xfa\x03\x01'
         },
         'security_initialization': {
-           'description'    : 'Security Initialization',   #Sensor
-           'src_endpoint'   : b'\x00',
-           'dest_endpoint'  : b'\x02',
-           'cluster'        : b'\x05\x00',
-           'profile'        : ALERTME_PROFILE_ID,
-           'data'           : b'\x11\x80\x00\x00\x05'
+            'description': 'Security Initialization',  # Sensor
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x05\x00',
+            'profile': ALERTME_PROFILE_ID,
+            'data': b'\x11\x80\x00\x00\x05'
         }
     }
 

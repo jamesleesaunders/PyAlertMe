@@ -221,10 +221,13 @@ class Hub(Base):
         }
 
         if state == 'ON':
+            message['description'] = 'Switch Plug On'
             message['data'] = b'\x11\x00\x02\x01\x01'
         elif state == 'OFF':
+            message['description'] = 'Switch Plug Off'
             message['data'] = b'\x11\x00\x02\x00\x01'
         elif state == 'CHECK':
+            message['description'] = 'Switch Status'
             message['data'] = b'\x11\x00\x01\x01'
         else:
             message = None
@@ -243,14 +246,25 @@ class Hub(Base):
         """
         self.logger.debug('Sending Mode Request %s', mode)
 
+        message = {
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'profile': self.ALERTME_PROFILE_ID,
+            'cluster': b'\x00\xee'
+        }
+
         if mode == 'NORMAL':
-            message = self.get_action('normal_mode')
+            message['description'] = 'Normal Mode'
+            message['data'] = b'\x11\x00\xfa\x00\x01'
         elif mode == 'RANGE':
-            message = self.get_action('range_test')
+            message['description'] = 'Range Test'
+            message['data'] = b'\x11\x00\xfa\x01\x01'
         elif mode == 'LOCKED':
-            message = self.get_action('locked_mode')
+            message['description'] = 'Locked Mode'
+            message['data'] = b'\x11\x00\xfa\x02\x01'
         elif mode == 'SILENT':
-            message = self.get_action('silent_mode')
+            message['description'] = 'Silent Mode'
+            message['data'] = b'\x11\x00\xfa\x03\x01'
         else:
             message = None
             self.logger.error('Invalid mode request %s', mode)
@@ -266,7 +280,14 @@ class Hub(Base):
         :param node_id:  Integer Short Node ID
         """
         self.logger.debug('Sending Version Request to %s', node_id)
-        message = self.get_action('version_info')
+        message = {
+            'description': 'Version Request',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf6',
+            'profile': self.ALERTME_PROFILE_ID,
+            'data': b'\x19\x01\xfa\x00\x01'
+        }
         self.send_message(message, *self.node_id_to_addrs(node_id))
 
     def save_node_type(self, node_id, details):
@@ -293,9 +314,10 @@ class Hub(Base):
         self.logger.debug('Sending Active Endpoint Request')
         data = b'\xaa' + source_addr[1] + source_addr[0]
         message = {
+            'description': 'Active Endpoint Request',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x00',
-            'profile': self.HA_PROFILE_ID,
+            'profile': self.ZDP_PROFILE_ID,
             'cluster': b'\x00\x05',
             'data': data
         }
@@ -311,11 +333,29 @@ class Hub(Base):
         self.logger.debug('Sending Match Descriptor Response')
         data = rf_data[0:1] + b'\x00\x00\x00\x01\x02'
         message = {
+            'description': 'Match Descriptor Response',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x00',
-            'profile': self.HA_PROFILE_ID,
+            'profile': self.ZDP_PROFILE_ID,
             'cluster': b'\x80\x06',
             'data': data
+        }
+        self.send_message(message, *self.node_id_to_addrs(node_id))
+
+    def send_security_init(self, node_id):
+        """
+        Send Security Initialization
+
+        :param node_id:
+        """
+        self.logger.debug('Sending Security Initialization')
+        message = {
+           'description'    : 'Security Initialization',
+           'src_endpoint'   : b'\x00',
+           'dest_endpoint'  : b'\x02',
+           'cluster'        : b'\x05\x00',
+           'profile'        : self.ALERTME_PROFILE_ID,
+           'data'           : b'\x11\x80\x00\x00\x05'
         }
         self.send_message(message, *self.node_id_to_addrs(node_id))
 
@@ -459,8 +499,6 @@ class Hub(Base):
                     # controller as valid.
 
                     # First send the Match Descriptor Response
-                    # message = self.get_action('match_descriptor_response')
-                    # self.send_message(message, source_addr_long, source_addr_short)
                     self.send_match_descriptor_response(node_id, message['rf_data'])
                     time.sleep(2)
 
@@ -558,12 +596,10 @@ class Hub(Base):
                 elif (cluster_id == b'\x05\x00'):
                     self.logger.debug('Security Event')
                     # Security Cluster.
-                    # When the device first connects, it come up in a state that needs initialization, this command
+                    # When the device first connects, it comes up in a state that needs initialization, this command
                     # seems to take care of that. So, look at the value of the data and send the command.
                     if (message['rf_data'][3:7] == b'\x15\x00\x39\x10'):
-                        self.logger.debug('Sending Security Initialization')
-                        message = self.get_action('security_initialization')
-                        self.send_message(message, source_addr_long, source_addr_short)
+                        self.send_security_init(node_id)
 
                     properties = self.parse_security_state(message['rf_data'])
                     self.save_node_attributes(node_id, properties)
