@@ -50,7 +50,14 @@ class Hub(Base):
         i = 1
         while time.time() < timeout:
             self.logger.debug('Sending Discovery Request #%s', i)
-            message = self.get_action('routing_table_request')
+            message = {
+                'description': 'Management Routing Table Request',
+                'src_endpoint': b'\x00',
+                'dest_endpoint': b'\x00',
+                'cluster': b'\x00\x32',
+                'profile': self.ZDP_PROFILE_ID,
+                'data': '\x12\x01'
+            }
             self.send_message(message, self.BROADCAST_LONG, self.BROADCAST_SHORT)
             i += 1
             time.sleep(2.00)
@@ -342,6 +349,23 @@ class Hub(Base):
         }
         self.send_message(message, *self.node_id_to_addrs(node_id))
 
+    def send_hardware_join(self, node_id):
+        """
+        Send Hardware Join
+
+        :param node_id:
+        """
+        self.logger.debug('Sending Hardware Join 1')
+        message = {
+            'description'   : 'Hardware Join Messages 1',
+            'src_endpoint'  : b'\x02',
+            'dest_endpoint' : b'\x02',
+            'cluster'       : b'\x00\xf6',
+            'profile'       : self.ALERTME_PROFILE_ID,
+            'data'          : b'\x11\x01\xfc'
+        }
+        self.send_message(message, *self.node_id_to_addrs(node_id))
+
     def send_security_init(self, node_id):
         """
         Send Security Initialization
@@ -356,6 +380,25 @@ class Hub(Base):
            'cluster'        : b'\x05\x00',
            'profile'        : self.ALERTME_PROFILE_ID,
            'data'           : b'\x11\x80\x00\x00\x05'
+        }
+        self.send_message(message, *self.node_id_to_addrs(node_id))
+
+    def send_missing_link(self, node_id,  dest_endpoint, source_endpoint):
+        """
+        Send 'Missing Link'
+
+        :param node_id:
+        :param dest_endpoint:
+        :param source_endpoint:
+        """
+        self.logger.debug('Sending Missing Link')
+        message = {
+           'description'    : 'Missing Link',
+           'src_endpoint'   : dest_endpoint,
+           'dest_endpoint'  : source_endpoint,
+           'cluster'        : b'\x00\xf0',
+           'profile'        : self.ALERTME_PROFILE_ID,
+           'data'           : b'\x11\x39\xfd'
         }
         self.send_message(message, *self.node_id_to_addrs(node_id))
 
@@ -494,21 +537,17 @@ class Hub(Base):
                 elif (cluster_id == b'\x00\x06'):
                     # Match Descriptor Request.
                     self.logger.debug('Received Match Descriptor Request')
-                    # This is the point where we finally respond to the switch. Several messages are sent to cause
-                    # the switch to join with the controller at a network level and to cause it to regard this
-                    # controller as valid.
+                    # This is the point where we finally respond to the switch. A couple os messages are sent
+                    # to cause the switch to join with the controller at a network level and to cause it to
+                    # regard this controller as valid.
 
                     # First send the Match Descriptor Response
                     self.send_match_descriptor_response(node_id, message['rf_data'])
                     time.sleep(2)
 
-                    # Now there are two messages directed at the hardware code (rather than the network code).
-                    # The switch has to receive both of these to stay joined.
-                    message = self.get_action('hardware_join_1')
-                    self.send_message(message, source_addr_long, source_addr_short)
-                    # message = self.get_action('hardware_join_2')
-                    # self.send_message(message, source_addr_long, source_addr_short)
-                    self.logger.debug('Sent Hardware Join Message(s)')
+                    # The next message is directed at the hardware code (rather than the network code).
+                    # The device has to receive this message to stay joined.
+                    self.send_hardware_join(node_id)
 
                     # We are fully associated!
                     self.logger.debug('Device should now be Associated')
@@ -554,17 +593,9 @@ class Hub(Base):
                         self.save_node_attributes(node_id, properties)
                         self.logger.debug('Status Update: %s', properties)
 
-                        # This may be the missing link to this thing
+                        # This may be the missing link to this thing?
                         self.logger.debug('Sending Missing Link')
-                        self.zb.send('tx_explicit',
-                            dest_addr_long = source_addr_long,
-                            dest_addr = source_addr_short,
-                            src_endpoint = message['dest_endpoint'],
-                            dest_endpoint = message['source_endpoint'],
-                            cluster = '\x00\xf0',
-                            profile = self.ALERTME_PROFILE_ID,
-                            data = '\x11\x39\xfd'
-                        )
+                        self.send_missing_link(node_id, message['dest_endpoint'], message['source_endpoint'])
 
                     else:
                         self.logger.error('Unrecognised Cluster Cmd: %r', cluster_cmd)

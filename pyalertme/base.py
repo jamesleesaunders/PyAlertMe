@@ -18,42 +18,39 @@ class Base(object):
     BROADCAST_LONG  = b'\x00\x00\x00\x00\x00\x00\xff\xff'
     BROADCAST_SHORT = b'\xff\xfe'
 
-    messages = {
+    retired = {
         'routing_table_request': {
-            'description'   : 'Management Routing Table Request',
-            'src_endpoint'  : b'\x00',
-            'dest_endpoint' : b'\x00',
-            'cluster'       : b'\x00\x32',
-            'profile'       : ZDP_PROFILE_ID,
-            'data'          : '\x12\x01'
+            'description': 'Management Routing Table Request',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'cluster': b'\x00\x32',
+            'profile': ZDP_PROFILE_ID,
+            'data': '\x12\x01'
         },
         'permit_join_request': {
-            'description'   : 'Management Permit Join Request',
-            'src_endpoint'  : b'\x00',
-            'dest_endpoint' : b'\x00',
-            'cluster'       : b'\x00\x36',
-            'profile'       : ZDP_PROFILE_ID,
-            'data'          : '\xff\x00'
+            'description': 'Management Permit Join Request',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'cluster': b'\x00\x36',
+            'profile': ZDP_PROFILE_ID,
+            'data': '\xff\x00'
         },
-        'hardware_join_1' : {
-            'description'   : 'Hardware Join Messages 1',  #Device
-            'src_endpoint'  : b'\x02',
-            'dest_endpoint' : b'\x02',
-            'cluster'       : b'\x00\xf6',
-            'profile'       : ALERTME_PROFILE_ID,
-            'data'          : b'\x11\x01\xfc'
+        'hardware_join_1': {
+            'description': 'Hardware Join Messages 1',  # Device
+            'src_endpoint': b'\x02',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf6',
+            'profile': ALERTME_PROFILE_ID,
+            'data': b'\x11\x01\xfc'
         },
-        'hardware_join_2' : {
-            'description'   : 'Hardware Join Messages 2',  #Device (also note Version req)
-            'src_endpoint'  : b'\x00',
-            'dest_endpoint' : b'\x02',
-            'cluster'       : b'\x00\xf0',
-            'profile'       : ALERTME_PROFILE_ID,
-            'data'          : b'\x19\x01\xfa\x00\x01'
-        }
-    }
-
-    retired = {
+        'hardware_join_2': {
+            'description': 'Hardware Join Messages 2',  # Device (also note Version req)
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf0',
+            'profile': ALERTME_PROFILE_ID,
+            'data': b'\x19\x01\xfa\x00\x01'
+        },
         'test': {
             'description': 'test',
             'src_endpoint': b'\x00',

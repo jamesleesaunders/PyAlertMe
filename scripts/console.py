@@ -263,7 +263,7 @@ if __name__ == '__main__':
 
                 if args[1] == "attributes":
                     attrib_name = args[2]
-                    return hubObj.get_node_attribute_history(node_id, attrib_name, 1485645112, 1488644112)
+                    return hubObj.get_node_attribute_history(node_id, attrib_name, 338083200, 1537228800)
 
                 if args[1] == "type":
                     hubObj.send_type_request(node_id)
