@@ -192,7 +192,10 @@ class Hub(Base):
         :param node_id:  Integer Short Node ID
         :return: Tuple of long and short addresses
         """
-        return self.nodes[node_id]['addr_long'], self.nodes[node_id]['addr_short']
+        addr_long = self.nodes[node_id]['addr_long'] or Base.BROADCAST_LONG
+        addr_short = self.nodes[node_id]['addr_short'] or Base.BROADCAST_SHORT
+
+        return addr_long, addr_short
 
     def send_node_command(self, node_id, command, value):
         """
@@ -293,7 +296,7 @@ class Hub(Base):
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xf6',
             'profile': self.ALERTME_PROFILE_ID,
-            'data': b'\x19\x01\xfa\x00\x01'
+            'data': b'\x11\x00\xfc\x00\x01'
         }
         self.send_message(message, *self.node_id_to_addrs(node_id))
 
@@ -330,25 +333,6 @@ class Hub(Base):
         }
         self.send_message(message, *self.node_id_to_addrs(node_id))
 
-    def send_match_descriptor_response(self, node_id, rf_data):
-        """
-        Send Match Descriptor Response
-
-        :param node_id:
-        :param rf_data:
-        """
-        self.logger.debug('Sending Match Descriptor Response')
-        data = rf_data[0:1] + b'\x00\x00\x00\x01\x02'
-        message = {
-            'description': 'Match Descriptor Response',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x00',
-            'profile': self.ZDP_PROFILE_ID,
-            'cluster': b'\x80\x06',
-            'data': data
-        }
-        self.send_message(message, *self.node_id_to_addrs(node_id))
-
     def send_hardware_join(self, node_id):
         """
         Send Hardware Join
@@ -363,6 +347,17 @@ class Hub(Base):
             'cluster'       : b'\x00\xf6',
             'profile'       : self.ALERTME_PROFILE_ID,
             'data'          : b'\x11\x01\xfc'
+        }
+        self.send_message(message, *self.node_id_to_addrs(node_id))
+
+        self.logger.debug('Sending Hardware Join 2')
+        message = {
+            'description': 'Hardware Join Messages 2',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf0',
+            'profile': self.ALERTME_PROFILE_ID,
+            'data': b'\x19\x01\xfa\x00\x01'
         }
         self.send_message(message, *self.node_id_to_addrs(node_id))
 
@@ -383,19 +378,39 @@ class Hub(Base):
         }
         self.send_message(message, *self.node_id_to_addrs(node_id))
 
-    def send_missing_link(self, node_id,  dest_endpoint, source_endpoint):
+
+    def send_match_descriptor_response(self, node_id, received_message):
+        """
+        Send Match Descriptor Response
+
+        :param node_id:
+        :param received_message:
+        """
+        self.logger.debug('Sending Match Descriptor Response')
+        rf_data = received_message['rf_data']
+        data = rf_data[0:1] + b'\x00\x00\x00\x01\x02'
+        message = {
+            'description': 'Match Descriptor Response',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'profile': self.ZDP_PROFILE_ID,
+            'cluster': b'\x80\x06',
+            'data': data
+        }
+        self.send_message(message, *self.node_id_to_addrs(node_id))
+
+    def send_missing_link(self, node_id, received_message):
         """
         Send 'Missing Link'
 
         :param node_id:
-        :param dest_endpoint:
-        :param source_endpoint:
+        :param received_message:
         """
         self.logger.debug('Sending Missing Link')
         message = {
            'description'    : 'Missing Link',
-           'src_endpoint'   : dest_endpoint,
-           'dest_endpoint'  : source_endpoint,
+           'src_endpoint'   : received_message['dest_endpoint'],
+           'dest_endpoint'  : received_message['source_endpoint'],
            'cluster'        : b'\x00\xf0',
            'profile'        : self.ALERTME_PROFILE_ID,
            'data'           : b'\x11\x39\xfd'
@@ -542,7 +557,7 @@ class Hub(Base):
                     # regard this controller as valid.
 
                     # First send the Match Descriptor Response
-                    self.send_match_descriptor_response(node_id, message['rf_data'])
+                    self.send_match_descriptor_response(node_id, message)
                     time.sleep(2)
 
                     # The next message is directed at the hardware code (rather than the network code).
@@ -595,7 +610,7 @@ class Hub(Base):
 
                         # This may be the missing link to this thing?
                         self.logger.debug('Sending Missing Link')
-                        self.send_missing_link(node_id, message['dest_endpoint'], message['source_endpoint'])
+                        self.send_missing_link(node_id, message)
 
                     else:
                         self.logger.error('Unrecognised Cluster Cmd: %r', cluster_cmd)
