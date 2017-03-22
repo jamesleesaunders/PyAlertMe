@@ -134,7 +134,7 @@ class Hub(Base):
             }
         }
         self.cursor.execute(
-            'SELECT * FROM Attributes WHERE NodeId = :NodeId AND Name = :Name AND Time BETWEEN DATETIME(:StartTime, \'unixepoch\', \'localtime\') AND DATETIME(:EndTime, \'unixepoch\', \'localtime\')',
+            'SELECT * FROM Attributes WHERE NodeId = :NodeId AND Name = :Name AND Time BETWEEN DATETIME(:StartTime, \'unixepoch\', \'localtime\') AND DATETIME(:EndTime, \'unixepoch\', \'localtime\') ORDER BY Time',
             {'NodeId': node_id, 'Name': attrib_name, 'StartTime': starttime, 'EndTime': endtime}
         )
         for attribute in self.cursor.fetchall():
@@ -802,7 +802,7 @@ class Hub(Base):
             ret['TempFahrenheit'] = float(struct.unpack("<h", rf_data[8:10])[0]) / 100.0 * 1.8 + 32
 
         else:
-            logging.error('Unrecognised Device Status')
+            logging.error('Unrecognised Device Status %s', rf_data)
 
         return ret
 

@@ -40,7 +40,8 @@ XBEE_PORT = '/dev/tty.usbserial-A1014P7W' # MacBook Serial Port
 XBEE_BAUD = 9600
 serialObj = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
-hubObj = Hub(serialObj)
+hubObj = Hub()
+hubObj.start(serialObj)
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = True
@@ -78,6 +79,12 @@ def get_node(node_id):
         return jsonify(node)
     else:
         abort(404)
+
+@app.route(API_BASE + '/history/<int:node_id>', methods=['GET'])
+def attribute_history(node_id):
+    attrib_name = 'PowerFactor'
+    history = hubObj.get_node_attribute_history(node_id, attrib_name, 338083200, 1537228800)
+    return jsonify(history)
 
 @app.route(API_BASE + '/nodes/<string:node_id>', methods=['PUT'])
 def update_node(node_id):
