@@ -9,6 +9,10 @@ import threading
 class Sensor(Device):
 
     def __init__(self):
+        """
+        Sensor Constructor
+
+        """
         Device.__init__(self)
 
         # Type Info
@@ -22,6 +26,12 @@ class Sensor(Device):
         self.triggered = 0
 
     def process_message(self, message):
+        """
+        Process incoming message
+
+        :param message: Dict of message
+        :return:
+        """
         super(Sensor, self).process_message(message)
 
         # We are only interested in Zigbee Explicit packets.

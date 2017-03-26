@@ -9,6 +9,10 @@ import threading
 class Device(Base):
 
     def __init__(self):
+        """
+        Device Constructor
+
+        """
         Base.__init__(self)
 
         # Type Info
@@ -23,6 +27,12 @@ class Device(Base):
         self.rssi = 197
 
     def process_message(self, message):
+        """
+        Process incoming message
+
+        :param message: Dict of message
+        :return:
+        """
         super(Device, self).process_message(message)
         # We are only interested in Zigbee Explicit packets.
         if (message['id'] == 'rx_explicit'):
@@ -75,10 +85,12 @@ class Device(Base):
             else:
                 self.logger.error('Unrecognised Profile ID: %e', profile_id)
 
-    def __str__(self):
-        return "Device Type: %s" % (self.type)
-
     def get_type(self):
+        """
+        Generate type message
+
+        :return: Message of device type
+        """
         checksum = b'\tq'
         cluster_cmd = b'\xfe'
         data = \
@@ -100,6 +112,11 @@ class Device(Base):
         return(message)
 
     def get_range(self):
+        """
+        Generate range message
+
+        :return: Message of range value
+        """
         # 197
         # cluster_cmd == b'\xfd'
         # data = b'\t+\xfd\xc5w'

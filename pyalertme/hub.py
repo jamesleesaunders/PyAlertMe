@@ -10,7 +10,7 @@ class Hub(Base):
 
     def __init__(self, callback = lambda attrib_name, value: None):
         """
-        Constructor
+        Hub Constructor
 
         :param callback: Optional
         """
@@ -490,7 +490,7 @@ class Hub(Base):
 
     def process_message(self, message):
         """
-        Process Message
+        Process incoming message
 
         :param message:
         :return:
@@ -661,6 +661,13 @@ class Hub(Base):
 
     @staticmethod
     def parse_version_info(rf_data):
+        """
+        Process message, parse for version information:
+        Type, Version, Manufacturer and Manufacturer Date
+
+        :param rf_data: Message data
+        :return: Parameter dict of version info
+        """
         # The version string is variable length. We therefore have to calculate the
         # length of the string which we then use in the unpack
         l = len(rf_data) - 22
@@ -690,7 +697,12 @@ class Hub(Base):
 
     @staticmethod
     def parse_range_info(rf_data):
-        # Parse for RSSI Range Test value
+        """
+        Process message, parse for RSSI range test value
+
+        :param rf_data: Message data
+        :return: Parameter dict of RSSI value
+        """
         values = dict(zip(
             ('cluster_cmd', 'RSSI'),
             struct.unpack('< 2x s B 1x', rf_data)
@@ -700,7 +712,12 @@ class Hub(Base):
 
     @staticmethod
     def parse_power_factor(rf_data):
-        # Parse for current Instantaneous Power value
+        """
+        Process message, parse for current instantaneous power value
+
+        :param rf_data: Message data
+        :return: Parameter dict of power value
+        """
         values = dict(zip(
             ('cluster_cmd', 'Power'),
             struct.unpack('< 2x s H', rf_data)
@@ -710,7 +727,12 @@ class Hub(Base):
 
     @staticmethod
     def parse_power_consumption(rf_data):
-        # Parse Usage Stats
+        """
+        Process message, parse for usage stats
+
+        :param rf_data: Message data
+        :return: Parameter dict of usage stats
+        """
         ret = {}
         values = dict(zip(
             ('cluster_cmd', 'powerConsumption', 'upTime'),
@@ -723,7 +745,12 @@ class Hub(Base):
 
     @staticmethod
     def parse_switch_state(rf_data):
-        # Parse Switch Status
+        """
+        Process message, parse for switch status
+
+        :param rf_data: Message data
+        :return: Parameter dict of switch status
+        """
         values = struct.unpack('< 2x b b b', rf_data)
         if (values[2] & 0x01):
             return {'State': 'ON'}
@@ -732,7 +759,12 @@ class Hub(Base):
 
     @staticmethod
     def parse_tamper_state(rf_data):
-        # Parse Tamper Switch State Change
+        """
+        Process message, parse for Tamper Switch State Change
+
+        :param rf_data: Message data
+        :return: Parameter dict of tamper status
+        """
         ret = {}
         if ord(rf_data[3]) == 0x02:
             ret['TamperSwitch'] = 'OPEN'
@@ -743,6 +775,12 @@ class Hub(Base):
 
     @staticmethod
     def parse_button_press(rf_data):
+        """
+        Process message, parse for button press status
+
+        :param rf_data: Message data
+        :return: Parameter dict of button status
+        """
         ret = {}
         if rf_data[2] == b'\x00':
             ret['State'] = 'OFF'
@@ -755,10 +793,16 @@ class Hub(Base):
 
     @staticmethod
     def parse_security_state(rf_data):
+        """
+        Process message, parse for security state
+
+        :param rf_data: Message data
+        :return: Parameter dict of security state
+        """
+        ret = {}
         # The switch state is in byte [3] and is a bitfield
         # bit 0 is the magnetic reed switch state
         # bit 3 is the tamper switch state
-        ret = {}
         state = ord(rf_data[3])
         if (state & 0x01):
             ret['ReedSwitch']  = 'OPEN'
@@ -774,6 +818,12 @@ class Hub(Base):
 
     @staticmethod
     def parse_status_update(rf_data):
+        """
+        Process message, parse for status update
+
+        :param rf_data: Message data
+        :return: Parameter dict of state
+        """
         ret = {}
         status = rf_data[3]
         if (status == b'\x1c'):
@@ -808,6 +858,13 @@ class Hub(Base):
 
     @staticmethod
     def dict_factory(cursor, row):
+        """
+        Dict factory, used by SQLLite
+
+        :param cursor:
+        :param row:
+        :return:
+        """
         d = {}
         for idx, col in enumerate(cursor.description):
             d[col[0]] = row[idx]

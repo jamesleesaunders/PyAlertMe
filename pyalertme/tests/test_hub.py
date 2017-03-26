@@ -69,7 +69,6 @@ class TestHub(unittest.TestCase):
         expected = b'~\x00\x17\x11\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x02\x02\x00\xf6\xc2\x16\x00\x00\x11\x01\xfc\xfc'
         self.assertEqual(result, expected)
 
-
     def test_parse_tamper_state(self):
         result = Hub.parse_tamper_state(b'\t\x00\x00\x02\xe8\xa6\x00\x00')
         expected = {'TamperSwitch': 'OPEN'}

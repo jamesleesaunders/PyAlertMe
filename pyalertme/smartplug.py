@@ -9,6 +9,10 @@ import threading
 class SmartPlug(Device):
 
     def __init__(self):
+        """
+        SmartPlug Constructor
+
+        """
         Device.__init__(self)
 
         # Type Info
@@ -21,6 +25,12 @@ class SmartPlug(Device):
         self.state = 0
 
     def process_message(self, message):
+        """
+        Process incoming message
+
+        :param message: Dict of message
+        :return:
+        """
         super(SmartPlug, self).process_message(message)
 
         # We are only interested in Zigbee Explicit packets.
@@ -79,13 +89,23 @@ class SmartPlug(Device):
                 self.logger.error('Unrecognised Profile ID: %r', profile_id)
 
     def set_state(self, state):
-        # This simulates the physical button being pressed
+        """
+        This simulates the physical button being pressed
+
+        :param state:
+        :return:
+        """
         self.state = state
         self.logger.debug('Switch State Changed to: %s', self.state)
         self.send_message(self.get_state(), self.hub_addr_long, self.hub_addr_short)
 
 
     def get_state(self):
+        """
+        Generte State Message
+
+        :return: Message of switch state
+        """
         # cluster_cmd == b'\x80'
         if(self.state):
             data = b'\th\x80\x06\x00'
@@ -103,6 +123,12 @@ class SmartPlug(Device):
 
     @staticmethod
     def parse_switch_state_change(rf_data):
+        """
+        Process message, parse for state change request
+
+        :param rf_data:
+        :return: Bool 1 = On, 0 = Off
+        """
         # Parse Switch State Request
         if (rf_data == b'\x11\x00\x02\x01\x01'):
             return 1

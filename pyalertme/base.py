@@ -18,7 +18,143 @@ class Base(object):
     BROADCAST_LONG  = b'\x00\x00\x00\x00\x00\x00\xff\xff'
     BROADCAST_SHORT = b'\xff\xfe'
 
-    retired = {
+    def __init__(self):
+        """
+        Base Constructor
+
+        """
+        self.logger = logging.getLogger('pyalertme')
+
+        self.zb = None
+
+        # Type Info
+        self.manu = None
+        self.type = None
+        self.date = None
+        self.version = None
+
+        # Received and Sent Messages
+        self.outgoing_messages = []
+        self.incoming_messages = []
+
+        self.associated = False
+
+    def start(self, serial):
+        """
+        Start Device
+        Initiate Serial and XBee
+
+        :param serial: Serial Object
+        :return:
+        """
+        if(serial != None):
+            self.serial = serial
+            self.zb = ZigBee(ser=serial, callback=self.receive_message, error_callback=self.xbee_error)
+
+    def halt(self):
+        """
+        Halt Device
+        Close XBee and Serial
+
+        :return:
+        """
+        self.zb.halt()
+        self.serial.close()
+
+    def xbee_error(self, error):
+        """
+        On XBee error this function is called
+
+        :param error:
+        :return:
+        """
+        self.logger.critical('XBee Error: %s', error)
+
+    def send_message(self, message, dest_addr_long, dest_addr_short):
+        """
+        Send message to XBee
+
+
+        :param message: Dict message
+        :param dest_addr_long: 48-bits Long Address
+        :param dest_addr_short: 16-bit Short Address
+        :return:
+        """
+        # Tack on destination addresses
+        message['dest_addr_long']  = dest_addr_long
+        message['dest_addr'] = dest_addr_short
+        device_id = Base.pretty_mac(dest_addr_long)
+
+        self.logger.debug('Device: %s Sending: %s', device_id, message)
+        self.zb.send('tx_explicit', **message)
+
+    def receive_message(self, message):
+        """
+        Receive message from XBee
+        Calls process message
+
+        :param message: Dict of message
+        :return:
+        """
+        # Grab source address, work out device ID
+        source_addr_long = message['source_addr_long']
+        pretty_addr = Base.pretty_mac(source_addr_long)
+
+        self.logger.debug('Device: %s Received: %s', pretty_addr, message)
+        self.process_message(message)
+       
+    def process_message(self, message):
+        """
+        Process incoming message
+
+        :param message: Dict of message
+        :return:
+        """
+        # We are only interested in Zigbee Explicit packets.
+        if (message['id'] == 'rx_explicit'):
+            profile_id = message['profile']
+            cluster_id = message['cluster']
+
+            if (profile_id == self.ZDP_PROFILE_ID):
+                # Zigbee Device Profile ID
+                self.logger.debug('Zigbee Device Profile Packet Receieved')
+
+            elif (profile_id == self.ALERTME_PROFILE_ID):
+                # AlertMe Profile ID
+                self.logger.debug('AlertMe Specific Profile Packet Received')
+
+            elif (profile_id == self.HA_PROFILE_ID):
+                # HA Profile ID
+                self.logger.debug('HA Profile Packet Received')
+
+            else:
+                self.logger.error('Unrecognised Profile ID: %e', profile_id)
+
+    def __str__(self):
+        """
+        Object to String
+
+        :return: String
+        """
+        return "Device Type: %s" % (self.type)
+
+    @staticmethod
+    def pretty_mac(address_long):
+        """
+        Convert long address to pretty mac address string
+        TODO: This may be a little over complicated at the moment,
+        I was struggling to get this to work for both Python2 and Python3.
+        I am sure this could be simplified... but for now - this works!
+
+        :param address_long:
+        :return:
+        """
+        str1 = str(binascii.b2a_hex(address_long).decode())
+        arr1 = [str1[i:i+2] for i in range(0, len(str1), 2)]
+        ret1 = ':'.join(b for b in arr1)
+        return ret1
+
+    messages = {
         'routing_table_request': {
             'description': 'Management Routing Table Request',
             'src_endpoint': b'\x00',
@@ -149,92 +285,22 @@ class Base(object):
         }
     }
 
-    def __init__(self):
-        self.logger = logging.getLogger('pyalertme')
-
-        self.zb = None
-
-        # Type Info
-        self.manu = None
-        self.type = None
-        self.date = None
-        self.version = None
-
-        # Received and Sent Messages
-        self.outgoing_messages = []
-        self.incoming_messages = []
-
-        self.associated = False
-
-    def start(self, serial):
-        if(serial != None):
-            self.serial = serial
-            self.zb = ZigBee(ser=serial, callback=self.receive_message, error_callback=self.xbee_error)
-
-    def halt(self):
-        self.zb.halt()
-        self.serial.close()
-
-    def xbee_error(self, error):
-        self.logger.critical('XBee Error: %s', error)
-
     def list_actions(self):
+        """
+        List Actions
+
+        :return:
+        """
         actions = {}
         for id, message in self.messages.items():
             actions[id] = message['description']
         return actions
 
     def get_action(self, type):
-        # Get the message from the dictionary
+        """
+        Get the message from the dictionary
+
+        :param type:
+        :return:
+        """
         return self.messages[type]
-
-    def send_message(self, message, dest_addr_long, dest_addr_short):
-        # Tack on destination addresses
-        message['dest_addr_long']  = dest_addr_long
-        message['dest_addr'] = dest_addr_short
-        device_id = Base.pretty_mac(dest_addr_long)
-
-        self.logger.debug('Device: %s Sending: %s', device_id, message)
-        self.zb.send('tx_explicit', **message)
-
-    def receive_message(self, message):
-        # Grab source address, work out device ID
-        source_addr_long = message['source_addr_long']
-        pretty_addr = Base.pretty_mac(source_addr_long)
-
-        self.logger.debug('Device: %s Received: %s', pretty_addr, message)
-        self.process_message(message)
-       
-    def process_message(self, message):
-        # We are only interested in Zigbee Explicit packets.
-        if (message['id'] == 'rx_explicit'):
-            profile_id = message['profile']
-            cluster_id = message['cluster']
-
-            if (profile_id == self.ZDP_PROFILE_ID):
-                # Zigbee Device Profile ID
-                self.logger.debug('Zigbee Device Profile Packet Receieved')
-
-            elif (profile_id == self.ALERTME_PROFILE_ID):
-                # AlertMe Profile ID
-                self.logger.debug('AlertMe Specific Profile Packet Received')
-
-            elif (profile_id == self.HA_PROFILE_ID):
-                # HA Profile ID
-                self.logger.debug('HA Profile Packet Received')
-
-            else:
-                self.logger.error('Unrecognised Profile ID: %e', profile_id)
-
-    def __str__(self):
-        return "Device Type: %s" % (self.type)
-
-    @staticmethod
-    def pretty_mac(macString):
-        # TODO: This may be a little over complicated at the moment,
-        # I was struggling to get this to work for both Python2 and Python3.
-        # I am sure this could be simplified... but for now - this works!
-        str1 = str(binascii.b2a_hex(macString).decode())
-        arr1 = [str1[i:i+2] for i in range(0, len(str1), 2)]
-        ret1 = ':'.join(b for b in arr1)
-        return ret1
