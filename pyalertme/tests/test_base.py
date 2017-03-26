@@ -15,9 +15,6 @@ class TestBase(unittest.TestCase):
     def tearDown(self):
         self.deviceObj.halt()
 
-    def test_test(self):
-        self.assertEqual(Base.retired['test']['data'](self, 1), 2)
-
     def test_pretty_mac(self):
         result = Base.pretty_mac(b'\x00\ro\x00\x03\xbb\xb9\xf8')
         expected = '00:0d:6f:00:03:bb:b9:f8'

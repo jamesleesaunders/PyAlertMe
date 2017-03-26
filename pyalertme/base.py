@@ -187,14 +187,6 @@ class Base(object):
             'profile': ALERTME_PROFILE_ID,
             'data': b'\x19\x01\xfa\x00\x01'
         },
-        'test': {
-            'description': 'test',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf0',
-            'profile': ALERTME_PROFILE_ID,
-            'data': lambda self, int: int + 1
-        },
         'active_endpoint_request': {
             'description': 'Active Endpoint Request',  # Device
             'src_endpoint': b'\x00',
