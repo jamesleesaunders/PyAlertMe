@@ -65,7 +65,8 @@ class Hub(Base):
         # Next, sent out a version request to each node we have discovered above
         nodes = self.get_nodes()
         for node_id in nodes.keys():
-            self.send_type_request(node_id)
+            message = self.render_type_request_message()
+            self.send_message(message, *self.node_id_to_addrs(node_id))
             time.sleep(1.00)
 
     def get_node(self, node_id):
@@ -197,7 +198,7 @@ class Hub(Base):
 
         return addr_long, addr_short
 
-    def send_node_command(self, node_id, command, value):
+    def call_node_command(self, node_id, command, value):
         """
         Shortcut function to set node state, mode etc.
         Calls send_state_request, send_mode_request etc.
@@ -207,98 +208,13 @@ class Hub(Base):
         :param value: Value, state, mode
         """
         if command == 'State':
-            self.send_state_request(node_id, value)
+            message = self.render_state_change_message(value)
+            self.send_message(message, *self.node_id_to_addrs(node_id))
         elif command == 'Mode':
-            self.send_mode_request(node_id, value)
+            message = self.render_mode_change_message(value)
+            self.send_message(message, *self.node_id_to_addrs(node_id))
         else:
             self.logger.error('Invalid Attribute Request')
-
-    def send_state_request(self, node_id, state):
-        """
-        Send Node State Change. States:
-            ON, OFF, CHECK
-
-        :param node_id: Integer Short Node ID
-        :param state: Switch State
-        """
-        self.logger.debug('Sending State Request %s', state)
-        # Basic message details
-        message = {
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'profile': self.ALERTME_PROFILE_ID,
-            'cluster': b'\x00\xee'
-        }
-
-        if state == 'ON':
-            message['description'] = 'Switch Plug On'
-            message['data'] = b'\x11\x00\x02\x01\x01'
-        elif state == 'OFF':
-            message['description'] = 'Switch Plug Off'
-            message['data'] = b'\x11\x00\x02\x00\x01'
-        elif state == 'CHECK':
-            message['description'] = 'Switch Status'
-            message['data'] = b'\x11\x00\x01\x01'
-        else:
-            message = None
-            self.logger.error('Invalid state request %s', state)
-
-        # Send message
-        self.send_message(message, *self.node_id_to_addrs(node_id))
-
-    def send_mode_request(self, node_id, mode):
-        """
-        Send Node Mode Change. Modes:
-            NORMAL, RANGE, LOCKED, SILENT
-
-        :param node_id: Integer Short Node ID
-        :param mode: Switch Mode
-        """
-        self.logger.debug('Sending Mode Request %s', mode)
-
-        message = {
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'profile': self.ALERTME_PROFILE_ID,
-            'cluster': b'\x00\xee'
-        }
-
-        if mode == 'NORMAL':
-            message['description'] = 'Normal Mode'
-            message['data'] = b'\x11\x00\xfa\x00\x01'
-        elif mode == 'RANGE':
-            message['description'] = 'Range Test'
-            message['data'] = b'\x11\x00\xfa\x01\x01'
-        elif mode == 'LOCKED':
-            message['description'] = 'Locked Mode'
-            message['data'] = b'\x11\x00\xfa\x02\x01'
-        elif mode == 'SILENT':
-            message['description'] = 'Silent Mode'
-            message['data'] = b'\x11\x00\xfa\x03\x01'
-        else:
-            message = None
-            self.logger.error('Invalid mode request %s', mode)
-
-        # Send message
-        if(message):
-            self.send_message(message, *self.node_id_to_addrs(node_id))
-
-    def send_type_request(self, node_id):
-        """
-        Request Node Type (Version, Manufacturer etc).
-
-        :param node_id:  Integer Short Node ID
-        """
-        self.logger.debug('Sending Version Request to %s', node_id)
-        message = {
-            'description': 'Version Request',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf6',
-            'profile': self.ALERTME_PROFILE_ID,
-            'data': b'\x11\x00\xfc\x00\x01'
-        }
-        self.send_message(message, *self.node_id_to_addrs(node_id))
 
     def save_node_type(self, node_id, details):
         """
@@ -313,109 +229,6 @@ class Hub(Base):
             {'Type': details['Type'], 'Version': details['Version'], 'Manufacturer': details['Manufacturer'], 'ManufactureDate': details['ManufactureDate'], 'NodeId': node_id}
         )
         self.db.commit()
-
-    def send_active_endpoint_request(self, node_id, source_addr):
-        """
-        Send Active Endpoint Request
-
-        :param node_id:
-        :param source_addr:
-        """
-        self.logger.debug('Sending Active Endpoint Request')
-        data = b'\xaa' + source_addr[1] + source_addr[0]
-        message = {
-            'description': 'Active Endpoint Request',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x00',
-            'profile': self.ZDP_PROFILE_ID,
-            'cluster': b'\x00\x05',
-            'data': data
-        }
-        self.send_message(message, *self.node_id_to_addrs(node_id))
-
-    def send_hardware_join(self, node_id):
-        """
-        Send Hardware Join
-
-        :param node_id:
-        """
-        self.logger.debug('Sending Hardware Join 1')
-        message = {
-            'description'   : 'Hardware Join Messages 1',
-            'src_endpoint'  : b'\x02',
-            'dest_endpoint' : b'\x02',
-            'cluster'       : b'\x00\xf6',
-            'profile'       : self.ALERTME_PROFILE_ID,
-            'data'          : b'\x11\x01\xfc'
-        }
-        self.send_message(message, *self.node_id_to_addrs(node_id))
-
-        self.logger.debug('Sending Hardware Join 2')
-        message = {
-            'description': 'Hardware Join Messages 2',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf0',
-            'profile': self.ALERTME_PROFILE_ID,
-            'data': b'\x19\x01\xfa\x00\x01'
-        }
-        self.send_message(message, *self.node_id_to_addrs(node_id))
-
-    def send_security_init(self, node_id):
-        """
-        Send Security Initialization
-
-        :param node_id:
-        """
-        self.logger.debug('Sending Security Initialization')
-        message = {
-           'description'    : 'Security Initialization',
-           'src_endpoint'   : b'\x00',
-           'dest_endpoint'  : b'\x02',
-           'cluster'        : b'\x05\x00',
-           'profile'        : self.ALERTME_PROFILE_ID,
-           'data'           : b'\x11\x80\x00\x00\x05'
-        }
-        self.send_message(message, *self.node_id_to_addrs(node_id))
-
-
-    def send_match_descriptor_response(self, node_id, received_message):
-        """
-        Send Match Descriptor Response
-
-        :param node_id:
-        :param received_message:
-        """
-        self.logger.debug('Sending Match Descriptor Response')
-        rf_data = received_message['rf_data']
-        data = rf_data[0:1] + b'\x00\x00\x00\x01\x02'
-        message = {
-            'description': 'Match Descriptor Response',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x00',
-            'profile': self.ZDP_PROFILE_ID,
-            'cluster': b'\x80\x06',
-            'data': data
-        }
-        self.send_message(message, *self.node_id_to_addrs(node_id))
-
-    def send_missing_link(self, node_id, received_message):
-        """
-        Send 'Missing Link'
-
-        :param node_id:
-        :param received_message:
-        """
-        self.logger.debug('Sending Missing Link')
-        message = {
-           'description'    : 'Missing Link',
-           'src_endpoint'   : received_message['dest_endpoint'],
-           'dest_endpoint'  : received_message['source_endpoint'],
-           'cluster'        : b'\x00\xf0',
-           'profile'        : self.ALERTME_PROFILE_ID,
-           'data'           : b'\x11\x39\xfd'
-        }
-        self.send_message(message, *self.node_id_to_addrs(node_id))
 
     def save_node_attributes(self, node_id, attributes):
         """
@@ -657,7 +470,184 @@ class Hub(Base):
             else:
                 self.logger.error('Unrecognised Profile ID: %r', profile_id)
 
+    def render_state_change_message(self, state):
+        """
+        Generate Node State Change. States:
+            ON, OFF, CHECK
 
+        :param state: Switch State
+        :return: message
+        """
+        message = {
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'profile': self.ALERTME_PROFILE_ID,
+            'cluster': b'\x00\xee'
+        }
+
+        if state == 'ON':
+            message['description'] = 'Switch Plug On'
+            message['data'] = b'\x11\x00\x02\x01\x01'
+        elif state == 'OFF':
+            message['description'] = 'Switch Plug Off'
+            message['data'] = b'\x11\x00\x02\x00\x01'
+        elif state == 'CHECK':
+            message['description'] = 'Switch Status'
+            message['data'] = b'\x11\x00\x01\x01'
+        else:
+            self.logger.error('Invalid state request %s', state)
+
+        return message
+
+    def render_mode_change_message(self, mode):
+        """
+        Generate Mode Change Request. Modes:
+            NORMAL, RANGE, LOCKED, SILENT
+
+        :param mode: Switch Mode
+        :return: message
+        """
+        message = {
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'profile': self.ALERTME_PROFILE_ID,
+            'cluster': b'\x00\xf0'
+        }
+
+        if mode == 'NORMAL':
+            message['description'] = 'Normal Mode'
+            message['data'] = b'\x11\x00\xfa\x00\x01'
+        elif mode == 'RANGE':
+            message['description'] = 'Range Test'
+            message['data'] = b'\x11\x00\xfa\x01\x01'
+        elif mode == 'LOCKED':
+            message['description'] = 'Locked Mode'
+            message['data'] = b'\x11\x00\xfa\x02\x01'
+        elif mode == 'SILENT':
+            message['description'] = 'Silent Mode'
+            message['data'] = b'\x11\x00\xfa\x03\x01'
+        else:
+            self.logger.error('Invalid mode request %s', mode)
+
+        return message
+
+    def render_type_request_message(self):
+        """
+        Request Node Type (Version, Manufacturer etc).
+
+        :return: Message
+        """
+        message = {
+            'description': 'Version Request',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf6',
+            'profile': self.ALERTME_PROFILE_ID,
+            'data': b'\x11\x00\xfc\x00\x01'
+        }
+        return message
+
+    def send_active_endpoint_request(self, node_id, source_addr):
+        """
+        Send Active Endpoint Request
+
+        :param node_id:
+        :param source_addr:
+        """
+        self.logger.debug('Sending Active Endpoint Request')
+        data = b'\xaa' + source_addr[1] + source_addr[0]
+        message = {
+            'description': 'Active Endpoint Request',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'profile': self.ZDP_PROFILE_ID,
+            'cluster': b'\x00\x05',
+            'data': data
+        }
+        self.send_message(message, *self.node_id_to_addrs(node_id))
+
+    def send_hardware_join(self, node_id):
+        """
+        Send Hardware Join
+
+        :param node_id:
+        """
+        self.logger.debug('Sending Hardware Join 1')
+        message = {
+            'description'   : 'Hardware Join Messages 1',
+            'src_endpoint'  : b'\x02',
+            'dest_endpoint' : b'\x02',
+            'cluster'       : b'\x00\xf6',
+            'profile'       : self.ALERTME_PROFILE_ID,
+            'data'          : b'\x11\x01\xfc'
+        }
+        self.send_message(message, *self.node_id_to_addrs(node_id))
+
+        self.logger.debug('Sending Hardware Join 2')
+        message = {
+            'description': 'Hardware Join Messages 2',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf0',
+            'profile': self.ALERTME_PROFILE_ID,
+            'data': b'\x19\x01\xfa\x00\x01'
+        }
+        self.send_message(message, *self.node_id_to_addrs(node_id))
+
+    def send_security_init(self, node_id):
+        """
+        Send Security Initialization
+
+        :param node_id:
+        """
+        self.logger.debug('Sending Security Initialization')
+        message = {
+           'description'    : 'Security Initialization',
+           'src_endpoint'   : b'\x00',
+           'dest_endpoint'  : b'\x02',
+           'cluster'        : b'\x05\x00',
+           'profile'        : self.ALERTME_PROFILE_ID,
+           'data'           : b'\x11\x80\x00\x00\x05'
+        }
+        self.send_message(message, *self.node_id_to_addrs(node_id))
+
+    def send_match_descriptor_response(self, node_id, received_message):
+        """
+        Send Match Descriptor Response
+
+        :param node_id:
+        :param received_message:
+        """
+        self.logger.debug('Sending Match Descriptor Response')
+        rf_data = received_message['rf_data']
+        data = rf_data[0:1] + b'\x00\x00\x00\x01\x02'
+        message = {
+            'description': 'Match Descriptor Response',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'profile': self.ZDP_PROFILE_ID,
+            'cluster': b'\x80\x06',
+            'data': data
+        }
+        self.send_message(message, *self.node_id_to_addrs(node_id))
+
+    def send_missing_link(self, node_id, received_message):
+        """
+        Send 'Missing Link'
+
+        :param node_id:
+        :param received_message:
+        """
+        self.logger.debug('Sending Missing Link')
+        message = {
+           'description'    : 'Missing Link',
+           'src_endpoint'   : received_message['dest_endpoint'],
+           'dest_endpoint'  : received_message['source_endpoint'],
+           'cluster'        : b'\x00\xf0',
+           'profile'        : self.ALERTME_PROFILE_ID,
+           'data'           : b'\x11\x39\xfd'
+        }
+        self.send_message(message, *self.node_id_to_addrs(node_id))
 
     @staticmethod
     def parse_version_info(rf_data):

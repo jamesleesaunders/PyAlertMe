@@ -251,14 +251,12 @@ if __name__ == '__main__':
 
                 if args[1] == "state":
                     value = args[2]
-                    hubObj.send_node_command(node_id, 'State', value)
-                    # hubObj.send_state_request(node_id, value)
+                    hubObj.call_node_command(node_id, 'State', value)
                     return 'Node: ' + str(node_id) + ' State Changed: ' + value
 
                 if args[1] == "mode":
                     value = args[2]
-                    hubObj.send_node_command(node_id, 'Mode', value)
-                    # hubObj.send_mode_request(node_id, value)
+                    hubObj.call_node_command(node_id, 'Mode', value)
                     return 'Node: ' + str(node_id) + ' Mode: ' + value
 
                 if args[1] == "attributes":
