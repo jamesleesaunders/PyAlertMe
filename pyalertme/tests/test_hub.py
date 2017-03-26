@@ -105,7 +105,7 @@ class TestHub(unittest.TestCase):
         deviceObj = SmartPlug()
         deviceObj.start(serialObj2)
 
-        message = deviceObj.get_type()
+        message = deviceObj.render_type_message()
         result = Hub.parse_version_info(message['data'])
         expected = {
             'Version': 20045,
