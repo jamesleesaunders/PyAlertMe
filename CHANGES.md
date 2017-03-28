@@ -27,3 +27,9 @@ v0.1.4 - 18 Mar 2017
 * Renaming folder from examples to scripts
 * Added start() function.
 * Improved node_id to address and vice versa resolution.
+
+v0.1.5 - 28 Mar 2017
+* Moved to use of generate_xxx functions to generate packets.
+* Added Python Docs comment blocks to all class functions.
+* Added new attribute history function.
+* Fixed Version request.
