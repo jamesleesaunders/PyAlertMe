@@ -327,7 +327,8 @@ class Hub(Base):
                     self.logger.debug('Received Device Announce Message')
                     # This will tell me the address of the new thing
                     # so we're going to send an active endpoint request
-                    self.send_active_endpoint_request(node_id, source_addr_short)
+                    message = self.render_active_endpoints_request(source_addr_short)
+                    self.send_message(message, source_addr_long, source_addr_short)
 
                 elif (cluster_id == b'\x00\x00'):
                     # Network (16-bit) Address Request.
@@ -365,12 +366,13 @@ class Hub(Base):
                 elif (cluster_id == b'\x00\x06'):
                     # Match Descriptor Request.
                     self.logger.debug('Received Match Descriptor Request')
-                    # This is the point where we finally respond to the switch. A couple os messages are sent
+                    # This is the point where we finally respond to the switch. A couple of messages are sent
                     # to cause the switch to join with the controller at a network level and to cause it to
                     # regard this controller as valid.
 
                     # First send the Match Descriptor Response
-                    self.send_match_descriptor_response(node_id, message)
+                    message = self.render_match_descriptor_response(message)
+                    self.send_message(message, source_addr_long, source_addr_short)
                     time.sleep(2)
 
                     # The next message is directed at the hardware code (rather than the network code).
@@ -470,6 +472,63 @@ class Hub(Base):
             else:
                 self.logger.error('Unrecognised Profile ID: %r', profile_id)
 
+    def render_active_endpoints_request(self, addr_short):
+        """
+        Generate Active Endpoints Request
+        The active endpoint request needs the short address of the device
+        in the payload. Remember, it needs to be little endian (backwards)
+        The first byte in the payload is simply a number to identify the message
+        the response will have the same number in it.
+        See: http://ftp1.digi.com/support/images/APP_NOTE_XBee_ZigBee_Device_Profile.pdf
+
+        Field Name       Size (bytes)   Description
+        Network Address  2              16-bit address of a device in the network whose active
+                                        endpoint list being requested.
+
+        :param node_id:
+        :param source_addr:
+        """
+        self.logger.debug('Sending Active Endpoints Request')
+        data = b'\xaa' + addr_short[1] + addr_short[0]
+        message = {
+            'description': 'Active Endpoint Request',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'profile': self.ZDP_PROFILE_ID,
+            'cluster': b'\x00\x05',
+            'data': data
+        }
+        return message
+
+    def render_match_descriptor_response(self, received_message):
+        """
+        Generate Match Descriptor Response
+        If a descriptor match is found on the device, this response contains a list of endpoints that
+        support the request criteria.
+
+        Field Name       Size (bytes)   Description
+        Status           1
+        Network Address  2              Indicates the 16-bit address of the responding device.
+        Length           1              The number of endpoints on the remote device that match
+                                        the request criteria.
+        Match List       Variable       List of endpoints on the remote that match the request criteria.
+
+        :param node_id:
+        :param received_message:
+        """
+        self.logger.debug('Sending Match Descriptor Response')
+        rf_data = received_message['rf_data']
+        data = rf_data[0:1] + b'\x00\x00\x00\x01\x02'
+        message = {
+            'description': 'Match Descriptor Response',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'profile': self.ZDP_PROFILE_ID,
+            'cluster': b'\x80\x06',
+            'data': data
+        }
+        return message
+
     def render_state_change_message(self, state):
         """
         Generate Node State Change. States:
@@ -547,25 +606,6 @@ class Hub(Base):
         }
         return message
 
-    def send_active_endpoint_request(self, node_id, source_addr):
-        """
-        Send Active Endpoint Request
-
-        :param node_id:
-        :param source_addr:
-        """
-        self.logger.debug('Sending Active Endpoint Request')
-        data = b'\xaa' + source_addr[1] + source_addr[0]
-        message = {
-            'description': 'Active Endpoint Request',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x00',
-            'profile': self.ZDP_PROFILE_ID,
-            'cluster': b'\x00\x05',
-            'data': data
-        }
-        self.send_message(message, *self.node_id_to_addrs(node_id))
-
     def send_hardware_join(self, node_id):
         """
         Send Hardware Join
@@ -608,26 +648,6 @@ class Hub(Base):
            'cluster'        : b'\x05\x00',
            'profile'        : self.ALERTME_PROFILE_ID,
            'data'           : b'\x11\x80\x00\x00\x05'
-        }
-        self.send_message(message, *self.node_id_to_addrs(node_id))
-
-    def send_match_descriptor_response(self, node_id, received_message):
-        """
-        Send Match Descriptor Response
-
-        :param node_id:
-        :param received_message:
-        """
-        self.logger.debug('Sending Match Descriptor Response')
-        rf_data = received_message['rf_data']
-        data = rf_data[0:1] + b'\x00\x00\x00\x01\x02'
-        message = {
-            'description': 'Match Descriptor Response',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x00',
-            'profile': self.ZDP_PROFILE_ID,
-            'cluster': b'\x80\x06',
-            'data': data
         }
         self.send_message(message, *self.node_id_to_addrs(node_id))
 
