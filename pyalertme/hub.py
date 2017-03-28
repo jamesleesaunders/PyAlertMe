@@ -327,8 +327,8 @@ class Hub(Base):
                     self.logger.debug('Received Device Announce Message')
                     # This will tell me the address of the new thing
                     # so we're going to send an active endpoint request
-                    message = self.render_active_endpoints_request(source_addr_short)
-                    self.send_message(message, source_addr_long, source_addr_short)
+                    reply = self.render_active_endpoints_request(source_addr_short)
+                    self.send_message(reply, source_addr_long, source_addr_short)
 
                 elif (cluster_id == b'\x00\x00'):
                     # Network (16-bit) Address Request.
@@ -354,10 +354,10 @@ class Hub(Base):
 
                 elif (cluster_id == b'\x00\x04'):
                     # Route Record Broadcast Response.
-                    self.logger.debug('Simple Descriptor Request')
+                    self.logger.debug('Received Simple Descriptor Request')
 
                 elif (cluster_id == b'\x80\x38'):
-                    self.logger.debug('Management Network Update Request')
+                    self.logger.debug('Received Management Network Update Request')
 
                 elif (cluster_id == b'\x802'):
                     # Route Record Broadcast Response.
@@ -371,16 +371,19 @@ class Hub(Base):
                     # regard this controller as valid.
 
                     # First send the Match Descriptor Response
-                    message = self.render_match_descriptor_response(message)
-                    self.send_message(message, source_addr_long, source_addr_short)
-                    time.sleep(2)
+                    reply = self.render_match_descriptor_response(message)
+                    self.send_message(reply, source_addr_long, source_addr_short)
 
                     # The next message is directed at the hardware code (rather than the network code).
+                    time.sleep(2)
                     # The device has to receive this message to stay joined.
-                    self.send_hardware_join(node_id)
+                    reply = self.render_hardware_join_1()
+                    self.send_message(reply, source_addr_long, source_addr_short)
+                    reply = self.render_hardware_join_2()
+                    self.send_message(reply, source_addr_long, source_addr_short)
 
                     # We are fully associated!
-                    self.logger.debug('Device should now be Associated')
+                    self.logger.debug('Device should now be associated')
 
                 else:
                     self.logger.error('Unrecognised Cluster ID: %e', cluster_id)
@@ -425,7 +428,8 @@ class Hub(Base):
 
                         # This may be the missing link to this thing?
                         self.logger.debug('Sending Missing Link')
-                        self.send_missing_link(node_id, message)
+                        reply = self.render_missing_link(message)
+                        self.send_message(reply, source_addr_long, source_addr_short)
 
                     else:
                         self.logger.error('Unrecognised Cluster Cmd: %r', cluster_cmd)
@@ -460,7 +464,8 @@ class Hub(Base):
                     # When the device first connects, it comes up in a state that needs initialization, this command
                     # seems to take care of that. So, look at the value of the data and send the command.
                     if (message['rf_data'][3:7] == b'\x15\x00\x39\x10'):
-                        self.send_security_init(node_id)
+                        reply = self.render_security_init()
+                        self.send_message(reply, source_addr_long, source_addr_short)
 
                     properties = self.parse_security_state(message['rf_data'])
                     self.save_node_attributes(node_id, properties)
@@ -488,7 +493,6 @@ class Hub(Base):
         :param node_id:
         :param source_addr:
         """
-        self.logger.debug('Sending Active Endpoints Request')
         data = b'\xaa' + addr_short[1] + addr_short[0]
         message = {
             'description': 'Active Endpoint Request',
@@ -516,7 +520,6 @@ class Hub(Base):
         :param node_id:
         :param received_message:
         """
-        self.logger.debug('Sending Match Descriptor Response')
         rf_data = received_message['rf_data']
         data = rf_data[0:1] + b'\x00\x00\x00\x01\x02'
         message = {
@@ -531,7 +534,8 @@ class Hub(Base):
 
     def render_state_change_message(self, state):
         """
-        Generate Node State Change. States:
+        Generate Node State Change.
+        States:
             ON, OFF, CHECK
 
         :param state: Switch State
@@ -560,7 +564,8 @@ class Hub(Base):
 
     def render_mode_change_message(self, mode):
         """
-        Generate Mode Change Request. Modes:
+        Generate Mode Change Request
+        Modes:
             NORMAL, RANGE, LOCKED, SILENT
 
         :param mode: Switch Mode
@@ -592,7 +597,8 @@ class Hub(Base):
 
     def render_type_request_message(self):
         """
-        Request Node Type (Version, Manufacturer etc).
+        Generate Node Type Request
+            Version, Manufacturer, etc
 
         :return: Message
         """
@@ -606,13 +612,11 @@ class Hub(Base):
         }
         return message
 
-    def send_hardware_join(self, node_id):
+    def render_hardware_join_1(self):
         """
-        Send Hardware Join
+        Generate Hardware Join 1
 
-        :param node_id:
         """
-        self.logger.debug('Sending Hardware Join 1')
         message = {
             'description'   : 'Hardware Join Messages 1',
             'src_endpoint'  : b'\x02',
@@ -621,9 +625,13 @@ class Hub(Base):
             'profile'       : self.ALERTME_PROFILE_ID,
             'data'          : b'\x11\x01\xfc'
         }
-        self.send_message(message, *self.node_id_to_addrs(node_id))
+        return message
 
-        self.logger.debug('Sending Hardware Join 2')
+    def render_hardware_join_2(self):
+        """
+        Generate Hardware Join 2
+
+        """
         message = {
             'description': 'Hardware Join Messages 2',
             'src_endpoint': b'\x00',
@@ -632,15 +640,13 @@ class Hub(Base):
             'profile': self.ALERTME_PROFILE_ID,
             'data': b'\x19\x01\xfa\x00\x01'
         }
-        self.send_message(message, *self.node_id_to_addrs(node_id))
+        return message
 
-    def send_security_init(self, node_id):
+    def render_security_init(self):
         """
-        Send Security Initialization
+        Generate Security Initialization
 
-        :param node_id:
         """
-        self.logger.debug('Sending Security Initialization')
         message = {
            'description'    : 'Security Initialization',
            'src_endpoint'   : b'\x00',
@@ -649,16 +655,14 @@ class Hub(Base):
            'profile'        : self.ALERTME_PROFILE_ID,
            'data'           : b'\x11\x80\x00\x00\x05'
         }
-        self.send_message(message, *self.node_id_to_addrs(node_id))
+        return message
 
-    def send_missing_link(self, node_id, received_message):
+    def render_missing_link(self, received_message):
         """
-        Send 'Missing Link'
+        Generate 'Missing Link'
 
-        :param node_id:
         :param received_message:
         """
-        self.logger.debug('Sending Missing Link')
         message = {
            'description'    : 'Missing Link',
            'src_endpoint'   : received_message['dest_endpoint'],
@@ -667,7 +671,7 @@ class Hub(Base):
            'profile'        : self.ALERTME_PROFILE_ID,
            'data'           : b'\x11\x39\xfd'
         }
-        self.send_message(message, *self.node_id_to_addrs(node_id))
+        return message
 
     @staticmethod
     def parse_version_info(rf_data):
