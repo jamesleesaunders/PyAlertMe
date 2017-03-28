@@ -15,9 +15,9 @@ class TestSmartPlug(unittest.TestCase):
     def tearDown(self):
         self.deviceObj.halt()
 
-    def test_render_type_message(self):
+    def test_generate_type_message(self):
 
-        result = self.deviceObj.render_type_message()
+        result = self.deviceObj.generate_type_message()
         expected = {
             'description': 'Type Info',
             'src_endpoint': b'\x00',
@@ -76,9 +76,9 @@ class TestSmartPlug(unittest.TestCase):
         expected = b'~\x00\x19\x11\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x00\x02\x00\xee\xc2\x16\x00\x00\th\x80\x07\x01\x1b'
         self.assertEqual(result, expected)
 
-    def test_render_state_message(self):
+    def test_generate_state_message(self):
         self.deviceObj.state = 0
-        result = self.deviceObj.render_state_message()
+        result = self.deviceObj.generate_state_message()
         expected = {
             'profile': '\xc2\x16',
             'description': 'Switch State',
@@ -89,7 +89,7 @@ class TestSmartPlug(unittest.TestCase):
         }
         self.assertEqual(result, expected)
         self.deviceObj.state = 1
-        result = self.deviceObj.render_state_message()
+        result = self.deviceObj.generate_state_message()
         expected = {
             'profile': '\xc2\x16',
             'description': 'Switch State',

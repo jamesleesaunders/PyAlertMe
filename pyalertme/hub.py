@@ -65,7 +65,7 @@ class Hub(Base):
         # Next, sent out a version request to each node we have discovered above
         nodes = self.get_nodes()
         for node_id in nodes.keys():
-            message = self.render_type_request_message()
+            message = self.generate_type_request_message()
             self.send_message(message, *self.node_id_to_addrs(node_id))
             time.sleep(1.00)
 
@@ -208,10 +208,10 @@ class Hub(Base):
         :param value: Value, state, mode
         """
         if command == 'State':
-            message = self.render_state_change_message(value)
+            message = self.generate_state_change_message(value)
             self.send_message(message, *self.node_id_to_addrs(node_id))
         elif command == 'Mode':
-            message = self.render_mode_change_message(value)
+            message = self.generate_mode_change_message(value)
             self.send_message(message, *self.node_id_to_addrs(node_id))
         else:
             self.logger.error('Invalid Attribute Request')
@@ -327,7 +327,7 @@ class Hub(Base):
                     self.logger.debug('Received Device Announce Message')
                     # This will tell me the address of the new thing
                     # so we're going to send an active endpoint request
-                    reply = self.render_active_endpoints_request(source_addr_short)
+                    reply = self.generate_active_endpoints_request(source_addr_short)
                     self.send_message(reply, source_addr_long, source_addr_short)
 
                 elif (cluster_id == b'\x00\x00'):
@@ -371,15 +371,15 @@ class Hub(Base):
                     # regard this controller as valid.
 
                     # First send the Match Descriptor Response
-                    reply = self.render_match_descriptor_response(message)
+                    reply = self.generate_match_descriptor_response(message)
                     self.send_message(reply, source_addr_long, source_addr_short)
 
                     # The next message is directed at the hardware code (rather than the network code).
                     time.sleep(2)
                     # The device has to receive this message to stay joined.
-                    reply = self.render_hardware_join_1()
+                    reply = self.generate_hardware_join_1()
                     self.send_message(reply, source_addr_long, source_addr_short)
-                    reply = self.render_hardware_join_2()
+                    reply = self.generate_hardware_join_2()
                     self.send_message(reply, source_addr_long, source_addr_short)
 
                     # We are fully associated!
@@ -428,7 +428,7 @@ class Hub(Base):
 
                         # This may be the missing link to this thing?
                         self.logger.debug('Sending Missing Link')
-                        reply = self.render_missing_link(message)
+                        reply = self.generate_missing_link(message)
                         self.send_message(reply, source_addr_long, source_addr_short)
 
                     else:
@@ -464,7 +464,7 @@ class Hub(Base):
                     # When the device first connects, it comes up in a state that needs initialization, this command
                     # seems to take care of that. So, look at the value of the data and send the command.
                     if (message['rf_data'][3:7] == b'\x15\x00\x39\x10'):
-                        reply = self.render_security_init()
+                        reply = self.generate_security_init()
                         self.send_message(reply, source_addr_long, source_addr_short)
 
                     properties = self.parse_security_state(message['rf_data'])
@@ -477,7 +477,7 @@ class Hub(Base):
             else:
                 self.logger.error('Unrecognised Profile ID: %r', profile_id)
 
-    def render_active_endpoints_request(self, addr_short):
+    def generate_active_endpoints_request(self, addr_short):
         """
         Generate Active Endpoints Request
         The active endpoint request needs the short address of the device
@@ -504,7 +504,7 @@ class Hub(Base):
         }
         return message
 
-    def render_match_descriptor_response(self, received_message):
+    def generate_match_descriptor_response(self, received_message):
         """
         Generate Match Descriptor Response
         If a descriptor match is found on the device, this response contains a list of endpoints that
@@ -532,7 +532,7 @@ class Hub(Base):
         }
         return message
 
-    def render_state_change_message(self, state):
+    def generate_state_change_message(self, state):
         """
         Generate Node State Change.
         States:
@@ -562,7 +562,7 @@ class Hub(Base):
 
         return message
 
-    def render_mode_change_message(self, mode):
+    def generate_mode_change_message(self, mode):
         """
         Generate Mode Change Request
         Modes:
@@ -595,7 +595,7 @@ class Hub(Base):
 
         return message
 
-    def render_type_request_message(self):
+    def generate_type_request_message(self):
         """
         Generate Node Type Request
             Version, Manufacturer, etc
@@ -612,7 +612,7 @@ class Hub(Base):
         }
         return message
 
-    def render_hardware_join_1(self):
+    def generate_hardware_join_1(self):
         """
         Generate Hardware Join 1
 
@@ -627,7 +627,7 @@ class Hub(Base):
         }
         return message
 
-    def render_hardware_join_2(self):
+    def generate_hardware_join_2(self):
         """
         Generate Hardware Join 2
 
@@ -642,7 +642,7 @@ class Hub(Base):
         }
         return message
 
-    def render_security_init(self):
+    def generate_security_init(self):
         """
         Generate Security Initialization
 
@@ -657,7 +657,7 @@ class Hub(Base):
         }
         return message
 
-    def render_missing_link(self, received_message):
+    def generate_missing_link(self, received_message):
         """
         Generate 'Missing Link'
 
