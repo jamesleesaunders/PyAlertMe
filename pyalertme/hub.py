@@ -65,8 +65,7 @@ class Hub(Base):
         # Next, sent out a version request to each node we have discovered above
         nodes = self.get_nodes()
         for node_id in nodes.keys():
-            message = self.generate_type_request_message()
-            self.send_message(message, *self.node_id_to_addrs(node_id))
+            self.send_type_request(node_id)
             time.sleep(1.00)
 
     def get_node(self, node_id):
@@ -215,6 +214,16 @@ class Hub(Base):
             self.send_message(message, *self.node_id_to_addrs(node_id))
         else:
             self.logger.error('Invalid Attribute Request')
+
+    def send_type_request(self, node_id):
+        """
+        Send Type Request
+
+        :param node_id: Integer Short Node ID
+        """
+        message = self.generate_type_request_message()
+        addresses = self.node_id_to_addrs(node_id)
+        self.send_message(message, *addresses)
 
     def save_node_type(self, node_id, details):
         """

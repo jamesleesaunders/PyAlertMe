@@ -95,4 +95,4 @@ ENV/
 .idea/
 
 # SQLite DB 
-.db
+*.db
