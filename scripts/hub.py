@@ -6,7 +6,6 @@
 # Author:      James Saunders [james@saunders-family.net]
 # Copyright:   Copyright (C) 2017 James Saunders
 # License:     MIT
-# Version:     0.1.4
 
 import serial
 import logging
@@ -39,13 +38,13 @@ logger.addHandler(fh)
 # Serial Configuration
 XBEE_PORT = '/dev/tty.usbserial-A1014P7W' # MacBook Serial Port
 XBEE_BAUD = 9600
-serialObj = serial.Serial(XBEE_PORT, XBEE_BAUD)
+ser = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
 def callback(attrib_name, value):
     print("Attribute: " + str(attrib_name) + "  Value: " + str(value))
 
-hubObj = Hub(callback)
-hubObj.start(serialObj)
+hub_obj = Hub(callback)
+hub_obj.start(ser)
 
 # Kick off discovery thread
 # hubObj.discovery()
@@ -55,22 +54,22 @@ while True:
     try:
         time.sleep(0.001)
 
-        nodes = hubObj.get_nodes()
+        nodes = hub_obj.get_nodes()
         pp.pprint(nodes)
         print("Select device:\n")
         node_id = raw_input("")
 
         while True:
-            pp.pprint(hubObj.list_actions())
+            pp.pprint(hub_obj.list_actions())
             print("Select command:\n")
             action = raw_input("")
-            message = hubObj.get_action(action)
+            message = hub_obj.get_action(action)
 
             dest_addr_long = nodes[int(node_id)]['AddressLong']
             dest_addr_short = b's\xba'
             pp.pprint(dest_addr_long)
             pp.pprint(dest_addr_short)
-            hubObj.send_message(message, dest_addr_long, dest_addr_short)
+            hub_obj.send_message(message, dest_addr_long, dest_addr_short)
 
     except IndexError:
         print("No Command")
@@ -89,4 +88,4 @@ while True:
 
 # Close up shop
 print("Closing Serial Port")
-hubObj.halt()
+hub_obj.halt()

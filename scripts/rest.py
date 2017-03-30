@@ -6,14 +6,13 @@
 # Author:      James Saunders [james@saunders-family.net]
 # Copyright:   Copyright (C) 2017 James Saunders
 # License:     MIT
-# Version:     0.1.4
 
-from flask import Flask, jsonify, abort, make_response, request
-import serial
-import logging
 import sys
 sys.path.insert(0, '../')
+from flask import Flask, jsonify, abort, make_response, request
+import serial
 from pyalertme import *
+import logging
 import pprint
 
 pp = pprint.PrettyPrinter(indent=4)
@@ -38,10 +37,10 @@ logger.addHandler(fh)
 # Serial Configuration
 XBEE_PORT = '/dev/tty.usbserial-A1014P7W' # MacBook Serial Port
 XBEE_BAUD = 9600
-serialObj = serial.Serial(XBEE_PORT, XBEE_BAUD)
+ser = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
-hubObj = Hub()
-hubObj.start(serialObj)
+hub_obj = Hub()
+hub_obj.start(ser)
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = True
@@ -54,23 +53,21 @@ API_BASE    = '/' + API_NAME + '/api/v' + API_VERSION
 def not_found(error):
     return make_response(jsonify({'error': 'Bad Request'}), 400)
 
-
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not Found'}), 404)
 
-
 @app.route(API_BASE + '/nodes', methods=['GET'])
 def get_nodes():
-    nodes = hubObj.get_nodes()
+    nodes = hub_obj.get_nodes()
     for id, node in nodes.iteritems():
         nodes[id]['AddressLong'] = ''
         nodes[id]['AddressShort'] = ''
-    return jsonify({'nodes': nodes})
+    return jsonify({'Nodes': nodes})
 
 @app.route(API_BASE + '/nodes/<int:node_id>', methods=['GET'])
 def get_node(node_id):
-    node = hubObj.get_node(node_id)
+    node = hub_obj.get_node(node_id)
 
     if node:
         # Blank out the addresses for now
@@ -83,38 +80,33 @@ def get_node(node_id):
 @app.route(API_BASE + '/history/<int:node_id>', methods=['GET'])
 def attribute_history(node_id):
     attrib_name = 'PowerFactor'
-    history = hubObj.get_node_attribute_history(node_id, attrib_name, 338083200, 1537228800)
+    history = hub_obj.get_node_attribute_history(node_id, attrib_name, 338083200, 1537228800)
     return jsonify(history)
 
-@app.route(API_BASE + '/nodes/<string:node_id>', methods=['PUT'])
+@app.route(API_BASE + '/nodes/<int:node_id>', methods=['PUT'])
 def update_node(node_id):
     # If the request is not JSON error 400 Bad Request
-    if not request.json or not request.json['nodes'][0].has_key('attributes'):
+    if not request.json or not request.json['Nodes'][0].has_key('Attributes'):
         abort(400)
 
-    nodes = hubObj.get_nodes()
+    node = hub_obj.get_node(node_id)
 
-    # Check requested node exists
-    for node_index, node in enumerate(nodes):
-        if node['id'] == node_id:
-            # Loop round attribute update request updating values
-            for attribute in request.json['nodes'][0]['attributes']:
-                if nodes[node_index]['attributes'].has_key(attribute):
-                    for key in request.json['nodes'][0]['attributes'][attribute]:
-                        nodes[node_index]['attributes'][attribute][key] = request.json['nodes'][0]['attributes'][attribute][key]
-                        hubObj.send_state_request(node_index, '')
+    # Loop round attribute update request updating values
+    for attribute in request.json['Nodes'][0]['Attributes']:
+        if node['Attributes'].has_key(attribute):
+            for key in request.json['Nodes'][0]['Attributes'][attribute]:
+                value = request.json['Nodes'][0]['Attributes'][attribute][key]
+                hub_obj.call_node_command(node_id, attribute, value)
+        else:
+            abort(404)
 
-                else:
-                    abort(404)
-
-            return jsonify(node), 200
-
-    # Node not found error 404 Not Found
-    abort(404)
+    node['AddressLong'] = ''
+    node['AddressShort'] = ''
+    return jsonify(node), 200
 
 @app.route(API_BASE + '/discovery', methods=['POST'])
 def discovery():
-    hubObj._discovery()
+    hub_obj.discovery()
     return jsonify({'discovery': 1})
 
 if __name__ == '__main__':
