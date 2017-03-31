@@ -8,12 +8,12 @@ from mock_serial import Serial
 class TestHub(unittest.TestCase):
 
     def setUp(self):
-        self.serialObj = Serial()
-        self.hubObj = Hub()
-        self.hubObj.start(self.serialObj)
+        self.ser = Serial()
+        self.hub_obj = Hub()
+        self.hub_obj.start(self.ser)
 
     def tearDown(self):
-        self.hubObj.halt()
+        self.hub_obj.halt()
 
     def test_receive_message(self):
         self.maxDiff = None
@@ -29,14 +29,14 @@ class TestHub(unittest.TestCase):
             'source_addr_long': b'\x00\ro\x00\x03\xbb\xb9\xf8',
             'src_endpoint':     b'\x02'
         }
-        self.hubObj.receive_message(message)
-        result = self.hubObj.get_nodes()
+        self.hub_obj.receive_message(message)
+        result = self.hub_obj.get_nodes()
         expected = {
             1: {
                 'Id': 1,
                 'Name': 'Unspecified',
-                'AddressLong': '\x00\ro\x00\x03\xbb\xb9\xf8',
-                'AddressShort': None,
+                'AddressLong': b'\x00\ro\x00\x03\xbb\xb9\xf8',
+                'AddressShort': b'\x88\x9f',
                 'Type': 'SmartPlug',
                 'Manufacturer': 'AlertMe.com',
                 'Version': 20045,
@@ -64,8 +64,8 @@ class TestHub(unittest.TestCase):
             'id': 'rx_explicit',
             'options': b'\x01',
         }
-        self.hubObj.receive_message(message)
-        result = self.serialObj.get_data_written()
+        self.hub_obj.receive_message(message)
+        result = self.ser.get_data_written()
         expected = b'~\x00\x19\x11\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x00\x02\x00\xf0\xc2\x16\x00\x00\x19\x01\xfa\x00\x01\xfd'
         self.assertEqual(result, expected)
 
@@ -101,11 +101,11 @@ class TestHub(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_parse_version_info(self):
-        serialObj2 = Serial()
-        deviceObj = SmartPlug()
-        deviceObj.start(serialObj2)
+        ser2 = Serial()
+        device_obj = SmartPlug()
+        device_obj.start(ser2)
 
-        message = deviceObj.generate_type_message()
+        message = device_obj.generate_type_message()
         result = Hub.parse_version_info(message['data'])
         expected = {
             'Version': 20045,
@@ -114,7 +114,7 @@ class TestHub(unittest.TestCase):
             'ManufactureDate': '2013-09-26'
         }
         self.assertEqual(result, expected)
-        deviceObj.halt()
+        device_obj.halt()
 
         result = Hub.parse_version_info(b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\tSmartPlug\n2013-09-26')
         expected = {
