@@ -8,15 +8,15 @@ from mock_serial import Serial
 class TestSensor(unittest.TestCase):
 
     def setUp(self):
-        self.serialObj = Serial()
-        self.deviceObj = Sensor()
-        self.deviceObj.start(self.serialObj)
+        self.ser = Serial()
+        self.device_obj = Sensor()
+        self.device_obj.start(self.ser)
 
     def tearDown(self):
-        self.deviceObj.halt()
+        self.device_obj.halt()
 
     def test_generate_type_message(self):
-        result = self.deviceObj.generate_type_message()
+        result = self.device_obj.generate_type_message()
         expected = {
             'description': 'Type Info',
             'src_endpoint': b'\x00',
