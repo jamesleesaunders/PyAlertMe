@@ -52,15 +52,15 @@ class SmartPlug(Device):
                         # State Request
                         # b'\x11\x00\x01\x01'
                         self.logger.debug('Switch State is: %s', self.state)
-                        self.send_message(self.generate_state_message(), self.hub_addr_long, self.hub_addr_short)
+                        self.send_message(self.generate_switch_state_update(), self.hub_addr_long, self.hub_addr_short)
 
                     elif (cluster_cmd == b'\02'):
                         # Change State
                         # b'\x11\x00\x02\x01\x01' On
                         # b'\x11\x00\x02\x00\x01' Off
-                        self.state = self.parse_switch_state_change(message['rf_data'])
+                        self.state = self.parse_switch_state_request(message['rf_data'])
                         self.logger.debug('Switch State Changed to: %s', self.state)
-                        self.send_message(self.generate_state_message(), self.hub_addr_long, self.hub_addr_short)
+                        self.send_message(self.generate_switch_state_update(), self.hub_addr_long, self.hub_addr_short)
 
                     elif (cluster_cmd == b'\xfa'):
                         # Set Mode
@@ -97,22 +97,21 @@ class SmartPlug(Device):
         """
         self.state = state
         self.logger.debug('Switch State Changed to: %s', self.state)
-        self.send_message(self.generate_state_message(), self.hub_addr_long, self.hub_addr_short)
+        self.send_message(self.generate_switch_state_update(), self.hub_addr_long, self.hub_addr_short)
 
-
-    def generate_state_message(self):
+    def generate_switch_state_update(self):
         """
         Generate State Message
 
         :return: Message of switch state
         """
-        # cluster_cmd == b'\x80'
-        if(self.state):
-            data = b'\th\x80\x06\x00'
-        else:
-            data = b'\th\x80\x07\x01'
+        checksum = b'\th'
+        cluster_cmd = b'\x80'
+        payload = b'\x06\x00' if self.state else b'\x07\x01'
+        data = checksum + cluster_cmd + payload
+
         message = {
-            'description':   'Switch State',
+            'description':   'Switch State Update',
             'src_endpoint':  b'\x00',
             'dest_endpoint': b'\x02',
             'cluster':       b'\x00\xee',
@@ -122,7 +121,7 @@ class SmartPlug(Device):
         return(message)
 
     @staticmethod
-    def parse_switch_state_change(rf_data):
+    def parse_switch_state_request(rf_data):
         """
         Process message, parse for state change request
 

@@ -102,16 +102,16 @@ class TestHub(unittest.TestCase):
 
     def test_parse_version_info(self):
         ser2 = Serial()
-        device_obj = SmartPlug()
+        device_obj = Device()
         device_obj.start(ser2)
 
-        message = device_obj.generate_type_message()
+        message = device_obj.generate_type_update()
         result = Hub.parse_version_info(message['data'])
         expected = {
-            'Version': 20045,
-            'Manufacturer': 'AlertMe.com',
-            'Type': 'SmartPlug',
-            'ManufactureDate': '2013-09-26'
+            'Version': 1,
+            'Manufacturer': 'Acme.co.uk',
+            'Type': 'Generic Device',
+            'ManufactureDate': '2016-09-18'
         }
         self.assertEqual(result, expected)
         device_obj.halt()

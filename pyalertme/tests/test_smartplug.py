@@ -15,9 +15,8 @@ class TestSmartPlug(unittest.TestCase):
     def tearDown(self):
         self.device_obj.halt()
 
-    def test_generate_type_message(self):
-
-        result = self.device_obj.generate_type_message()
+    def test_generate_type_update(self):
+        result = self.device_obj.generate_type_update()
         expected = {
             'description': 'Type Info',
             'src_endpoint': b'\x00',
@@ -29,7 +28,6 @@ class TestSmartPlug(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_state_change(self):
-
         message_on = {
             'cluster':          b'\x00\xee',
             'dest_endpoint':    b'\x02',
@@ -58,6 +56,35 @@ class TestSmartPlug(unittest.TestCase):
         self.device_obj.receive_message(message_off)
         self.assertEqual(self.device_obj.state, 0)
 
+    def test_generate_state_update(self):
+        self.device_obj.state = 0
+        result = self.device_obj.generate_switch_state_update()
+        expected = {
+            'profile': '\xc2\x16',
+            'description': 'Switch State Update',
+            'src_endpoint': '\x00',
+            'cluster': '\x00\xee',
+            'data': '\th\x80\x07\x01',
+            'dest_endpoint': '\x02'
+        }
+        self.assertEqual(result, expected)
+        self.device_obj.state = 1
+        result = self.device_obj.generate_switch_state_update()
+        expected = {
+            'profile': '\xc2\x16',
+            'description': 'Switch State Update',
+            'src_endpoint': '\x00',
+            'cluster': '\x00\xee',
+            'data': '\th\x80\x06\x00',
+            'dest_endpoint': '\x02'
+        }
+        self.assertEqual(result, expected)
+
+    def test_parse_switch_state_change(self):
+        result = SmartPlug.parse_switch_state_request(b'\x11\x00\x02\x01\x01')
+        self.assertEqual(result, 1)
+        result = SmartPlug.parse_switch_state_request(b'\x11\x00\x02\x00\x01')
+        self.assertEqual(result, 0)
 
     def test_send_message(self):
         message = {
@@ -75,36 +102,6 @@ class TestSmartPlug(unittest.TestCase):
         result = self.ser.get_data_written()
         expected = b'~\x00\x19\x11\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x00\x02\x00\xee\xc2\x16\x00\x00\th\x80\x07\x01\x1b'
         self.assertEqual(result, expected)
-
-    def test_generate_state_message(self):
-        self.device_obj.state = 0
-        result = self.device_obj.generate_state_message()
-        expected = {
-            'profile': '\xc2\x16',
-            'description': 'Switch State',
-            'src_endpoint': '\x00',
-            'cluster': '\x00\xee',
-            'data': '\th\x80\x07\x01',
-            'dest_endpoint': '\x02'
-        }
-        self.assertEqual(result, expected)
-        self.device_obj.state = 1
-        result = self.device_obj.generate_state_message()
-        expected = {
-            'profile': '\xc2\x16',
-            'description': 'Switch State',
-            'src_endpoint': '\x00',
-            'cluster': '\x00\xee',
-            'data': '\th\x80\x06\x00',
-            'dest_endpoint': '\x02'
-        }
-        self.assertEqual(result, expected)
-
-    def test_parse_switch_state_change(self):
-        result = SmartPlug.parse_switch_state_change(b'\x11\x00\x02\x01\x01')
-        self.assertEqual(result, 1)
-        result = SmartPlug.parse_switch_state_change(b'\x11\x00\x02\x00\x01')
-        self.assertEqual(result, 0)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

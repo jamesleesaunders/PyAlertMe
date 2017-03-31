@@ -15,8 +15,8 @@ class TestSensor(unittest.TestCase):
     def tearDown(self):
         self.device_obj.halt()
 
-    def test_generate_type_message(self):
-        result = self.device_obj.generate_type_message()
+    def test_generate_type_update(self):
+        result = self.device_obj.generate_type_update()
         expected = {
             'description': 'Type Info',
             'src_endpoint': b'\x00',

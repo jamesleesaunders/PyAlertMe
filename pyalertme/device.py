@@ -16,9 +16,9 @@ class Device(Base):
         Base.__init__(self)
 
         # Type Info
-        self.manu = 'AlertMe.com'
+        self.manu = 'Acme.co.uk'
         self.type = 'Generic Device'
-        self.date = '2017-01-02'
+        self.date = '2016-09-18'
         self.version = 1
 
         # Start off not associated
@@ -70,7 +70,7 @@ class Device(Base):
                 elif (cluster_id == b'\x00\xf6'):
                     # b'\x11\x00\xfc\x00\x01'
                     self.logger.debug('Version Request')
-                    self.send_message(self.generate_type_message(), self.hub_addr_long, self.hub_addr_short)
+                    self.send_message(self.generate_type_update(), self.hub_addr_long, self.hub_addr_short)
 
                 elif (cluster_id == b'\x00\xf0'):
                     self.logger.debug('Hardware Join Messages 2')
@@ -80,12 +80,12 @@ class Device(Base):
                 elif (cluster_id == b'\x00\xee'):
                     if (cluster_cmd == b'\xfa'):
                         self.logger.debug('Range Test')
-                        self.send_message(self.generate_range_message(), self.hub_addr_long, self.hub_addr_short)
+                        self.send_message(self.generate_range_update(), self.hub_addr_long, self.hub_addr_short)
 
             else:
                 self.logger.error('Unrecognised Profile ID: %e', profile_id)
 
-    def generate_type_message(self):
+    def generate_type_update(self):
         """
         Generate type message
 
@@ -93,14 +93,13 @@ class Device(Base):
         """
         checksum = b'\tq'
         cluster_cmd = b'\xfe'
-        data = \
-            checksum \
-            + cluster_cmd \
-            + struct.pack('H', self.version) \
+        payload = struct.pack('H', self.version) \
             +  b'\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0b' \
             + self.manu \
             + '\n' + self.type \
             + '\n' + self.date
+        data = checksum + cluster_cmd + payload
+
         message = {
             'description':   'Type Info',
             'src_endpoint':  b'\x00',
@@ -111,16 +110,17 @@ class Device(Base):
         }
         return(message)
 
-    def generate_range_message(self):
+    def generate_range_update(self):
         """
         Generate range message
 
         :return: Message of range value
         """
-        # 197
-        # cluster_cmd == b'\xfd'
-        # data = b'\t+\xfd\xc5w'
-        data = b'\t+' + b'\xfd' + struct.pack('B', self.rssi)
+        checksum = b'\t+'
+        cluster_cmd = b'\xfd'
+        payload = struct.pack('B', self.rssi)
+        data = checksum + cluster_cmd + payload
+
         message = {
             'description':   'Range Info',
             'src_endpoint':  b'\x00',

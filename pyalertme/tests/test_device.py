@@ -15,9 +15,9 @@ class TestDevice(unittest.TestCase):
     def tearDown(self):
         self.device_obj.halt()
 
-    def test_generate_range_message(self):
+    def test_generate_range_update(self):
         self.device_obj.rssi = 0
-        result = self.device_obj.generate_range_message()
+        result = self.device_obj.generate_range_update()
         expected = {
             'cluster': '\x00\xf6',
             'data': '\t+\xfd\x00',
@@ -29,7 +29,7 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(result, expected)
 
         self.device_obj.rssi = 197
-        result = self.device_obj.generate_range_message()
+        result = self.device_obj.generate_range_update()
         expected = {
             'cluster': '\x00\xf6',
             'data': '\t+\xfd\xc5',
@@ -40,11 +40,11 @@ class TestDevice(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-    def test_generate_type_message(self):
-        result = self.device_obj.generate_type_message()
+    def test_generate_type_update(self):
+        result = self.device_obj.generate_type_update()
         expected = {
             'cluster': '\x00\xf6',
-            'data': '\tq\xfe\x01\x00\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\nGeneric Device\n2017-01-02',
+            'data': '\tq\xfe\x01\x00\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAcme.co.uk\nGeneric Device\n2016-09-18',
             'description': 'Type Info',
             'dest_endpoint': '\x02',
             'profile': '\xc2\x16',
