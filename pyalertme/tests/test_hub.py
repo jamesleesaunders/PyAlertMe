@@ -221,5 +221,74 @@ class TestHub(unittest.TestCase):
         expected = {'ReedSwitch': 'OPEN', 'TamperSwitch': 'CLOSED'}
         self.assertEqual(result, expected)
 
+    def test_generate_state_change_message(self):
+        result = self.hub_obj.generate_state_change_message('ON')
+        expected = {
+            'description': 'Switch Plug On',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xee',
+            'profile': b'\xc2\x16',
+            'data': b'\x11\x00\x02\x01\x01'
+        }
+        self.assertEqual(result, expected)
+
+        result = self.hub_obj.generate_state_change_message('OFF')
+        expected = {
+            'description': 'Switch Plug Off',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xee',
+            'profile': b'\xc2\x16',
+            'data': b'\x11\x00\x02\x00\x01'
+        }
+        self.assertEqual(result, expected)
+
+        result = self.hub_obj.generate_state_change_message('CHECK')
+        expected = {
+            'description': 'Switch State Request',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xee',
+            'profile': b'\xc2\x16',
+            'data': b'\x11\x00\x01\x01'
+        }
+        self.assertEqual(result, expected)
+
+    def test_generate_mode_change_message(self):
+        result = self.hub_obj.generate_mode_change_message('NORMAL')
+        expected = {
+            'description': 'Normal Mode',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf0',
+            'profile': b'\xc2\x16',
+            'data': b'\x11\x00\xfa\x00\x01'
+        }
+        self.assertEqual(result, expected)
+
+        result = self.hub_obj.generate_mode_change_message('RANGE')
+        expected = {
+            'description': 'Range Test',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf0',
+            'profile': b'\xc2\x16',
+            'data': b'\x11\x00\xfa\x01\x01'
+        }
+        self.assertEqual(result, expected)
+
+    def test_generate_type_request_message(self):
+        result = self.hub_obj.generate_type_request_message()
+        expected = {
+            'description': 'Version Request',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf6',
+            'profile': b'\xc2\x16',
+            'data': b'\x11\x00\xfc\x00\x01'
+        }
+        self.assertEqual(result, expected)
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

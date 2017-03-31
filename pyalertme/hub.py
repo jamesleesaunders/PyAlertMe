@@ -564,7 +564,7 @@ class Hub(Base):
             message['description'] = 'Switch Plug Off'
             message['data'] = b'\x11\x00\x02\x00\x01'
         elif state == 'CHECK':
-            message['description'] = 'Switch Status'
+            message['description'] = 'Switch State Request'
             message['data'] = b'\x11\x00\x01\x01'
         else:
             self.logger.error('Invalid state request %s', state)
