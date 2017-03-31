@@ -8,16 +8,16 @@ from mock_serial import Serial
 class TestSmartPlug(unittest.TestCase):
 
     def setUp(self):
-        self.serialObj = Serial()
-        self.deviceObj = SmartPlug()
-        self.deviceObj.start(self.serialObj)
+        self.ser = Serial()
+        self.device_obj = SmartPlug()
+        self.device_obj.start(self.ser)
 
     def tearDown(self):
-        self.deviceObj.halt()
+        self.device_obj.halt()
 
     def test_generate_type_message(self):
 
-        result = self.deviceObj.generate_type_message()
+        result = self.device_obj.generate_type_message()
         expected = {
             'description': 'Type Info',
             'src_endpoint': b'\x00',
@@ -41,8 +41,8 @@ class TestSmartPlug(unittest.TestCase):
             'source_addr_long': b'\x00\ro\x00\x03\xbb\xb9\xf8',
             'src_endpoint':     b'\x02'
         }
-        self.deviceObj.receive_message(message_on)
-        self.assertEqual(self.deviceObj.state, 1)
+        self.device_obj.receive_message(message_on)
+        self.assertEqual(self.device_obj.state, 1)
 
         message_off = {
             'cluster':          b'\x00\xee',
@@ -55,8 +55,8 @@ class TestSmartPlug(unittest.TestCase):
             'source_addr_long': b'\x00\ro\x00\x03\xbb\xb9\xf8',
             'src_endpoint':     b'\x02'
         }
-        self.deviceObj.receive_message(message_off)
-        self.assertEqual(self.deviceObj.state, 0)
+        self.device_obj.receive_message(message_off)
+        self.assertEqual(self.device_obj.state, 0)
 
 
     def test_send_message(self):
@@ -71,14 +71,14 @@ class TestSmartPlug(unittest.TestCase):
             'profile':          b'\xc2\x16',
             'src_endpoint':     b'\x02'
         }
-        self.deviceObj.receive_message(message)
-        result = self.serialObj.get_data_written()
+        self.device_obj.receive_message(message)
+        result = self.ser.get_data_written()
         expected = b'~\x00\x19\x11\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x00\x02\x00\xee\xc2\x16\x00\x00\th\x80\x07\x01\x1b'
         self.assertEqual(result, expected)
 
     def test_generate_state_message(self):
-        self.deviceObj.state = 0
-        result = self.deviceObj.generate_state_message()
+        self.device_obj.state = 0
+        result = self.device_obj.generate_state_message()
         expected = {
             'profile': '\xc2\x16',
             'description': 'Switch State',
@@ -88,8 +88,8 @@ class TestSmartPlug(unittest.TestCase):
             'dest_endpoint': '\x02'
         }
         self.assertEqual(result, expected)
-        self.deviceObj.state = 1
-        result = self.deviceObj.generate_state_message()
+        self.device_obj.state = 1
+        result = self.device_obj.generate_state_message()
         expected = {
             'profile': '\xc2\x16',
             'description': 'Switch State',
