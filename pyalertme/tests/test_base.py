@@ -8,12 +8,12 @@ from mock_serial import Serial
 class TestBase(unittest.TestCase):
 
     def setUp(self):
-        self.serialObj = Serial()
-        self.deviceObj = Base()
-        self.deviceObj.start(self.serialObj)
+        self.ser = Serial()
+        self.device_obj = Base()
+        self.device_obj.start(self.ser)
 
     def tearDown(self):
-        self.deviceObj.halt()
+        self.device_obj.halt()
 
     def test_pretty_mac(self):
         result = Base.pretty_mac(b'\x00\ro\x00\x03\xbb\xb9\xf8')
