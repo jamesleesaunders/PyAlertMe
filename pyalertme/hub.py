@@ -197,34 +197,6 @@ class Hub(Base):
 
         return addr_long, addr_short
 
-    def call_node_command(self, node_id, command, value):
-        """
-        Shortcut function to set node state, mode etc.
-        Calls send_state_request, send_mode_request etc.
-
-        :param node_id: Integer Short Node ID
-        :param command: Parameter or command to be sent
-        :param value: Value, state, mode
-        """
-        if command == 'State':
-            message = self.generate_state_change_message(value)
-            self.send_message(message, *self.node_id_to_addrs(node_id))
-        elif command == 'Mode':
-            message = self.generate_mode_change_message(value)
-            self.send_message(message, *self.node_id_to_addrs(node_id))
-        else:
-            self.logger.error('Invalid Attribute Request')
-
-    def send_type_request(self, node_id):
-        """
-        Send Type Request
-
-        :param node_id: Integer Short Node ID
-        """
-        message = self.generate_type_request_message()
-        addresses = self.node_id_to_addrs(node_id)
-        self.send_message(message, *addresses)
-
     def save_node_type(self, node_id, details):
         """
         Set Node Type
@@ -301,6 +273,9 @@ class Hub(Base):
         """
         Update Packet Counter
 
+        Not sure if this is a good idea or not? It may be useful for debugging,
+        but danger that the DB will be hammered if lots of packets are received.
+
         :param node_id:
         :return:
         """
@@ -327,6 +302,7 @@ class Hub(Base):
             source_addr_long = message['source_addr_long']
             source_addr_short = message['source_addr']
             node_id = self.lookup_node_id(source_addr_long, source_addr_short)
+            # TODO: Do we need this packet counter? It could hammer the DB?
             self.update_packet_counter(node_id)
 
             if (profile_id == self.ZDP_PROFILE_ID):
@@ -380,7 +356,7 @@ class Hub(Base):
                     # regard this controller as valid.
 
                     # First send the Match Descriptor Response
-                    reply = self.generate_match_descriptor_response(message)
+                    reply = self.generate_match_descriptor_response(message['rf_data'])
                     self.send_message(reply, source_addr_long, source_addr_short)
 
                     # The next message is directed at the hardware code (rather than the network code).
@@ -437,7 +413,7 @@ class Hub(Base):
 
                         # This may be the missing link to this thing?
                         self.logger.debug('Sending Missing Link')
-                        reply = self.generate_missing_link(message)
+                        reply = self.generate_missing_link(message['dest_endpoint'], message['source_endpoint'])
                         self.send_message(reply, source_addr_long, source_addr_short)
 
                     else:
@@ -486,6 +462,54 @@ class Hub(Base):
             else:
                 self.logger.error('Unrecognised Profile ID: %r', profile_id)
 
+    def call_node_command(self, node_id, command, value):
+        """
+        Shortcut function to set node state, mode etc.
+        Calls send_state_request, send_mode_request etc.
+
+        :param node_id: Integer Short Node ID
+        :param command: Parameter or command to be sent
+        :param value: Value, State, Mode
+        """
+        if command == 'State':
+            self.send_state_request(node_id, value)
+        elif command == 'Mode':
+            self.send_mode_request(node_id, value)
+        else:
+            self.logger.error('Invalid Attribute Request')
+
+    def send_type_request(self, node_id):
+        """
+        Send Type Request
+
+        :param node_id: Integer Short Node ID
+        """
+        message = self.generate_type_request()
+        addresses = self.node_id_to_addrs(node_id)
+        self.send_message(message, *addresses)
+
+    def send_state_request(self, node_id, state):
+        """
+        Send State Request
+
+        :param node_id: Integer Short Node ID
+        :param state:
+        """
+        message = self.generate_state_change_request(state)
+        addresses = self.node_id_to_addrs(node_id)
+        self.send_message(message, *addresses)
+
+    def send_mode_request(self, node_id, mode):
+        """
+        Send Mode Request
+
+        :param node_id: Integer Short Node ID
+        :param mode:
+        """
+        message = self.generate_mode_change_request(mode)
+        addresses = self.node_id_to_addrs(node_id)
+        self.send_message(message, *addresses)
+
     def generate_active_endpoints_request(self, addr_short):
         """
         Generate Active Endpoints Request
@@ -504,7 +528,7 @@ class Hub(Base):
         """
         data = b'\xaa' + addr_short[1] + addr_short[0]
         message = {
-            'description': 'Active Endpoint Request',
+            'description': 'Active Endpoints Request',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x00',
             'profile': self.ZDP_PROFILE_ID,
@@ -513,7 +537,7 @@ class Hub(Base):
         }
         return message
 
-    def generate_match_descriptor_response(self, received_message):
+    def generate_match_descriptor_response(self, rf_data):
         """
         Generate Match Descriptor Response
         If a descriptor match is found on the device, this response contains a list of endpoints that
@@ -529,7 +553,6 @@ class Hub(Base):
         :param node_id:
         :param received_message:
         """
-        rf_data = received_message['rf_data']
         data = rf_data[0:1] + b'\x00\x00\x00\x01\x02'
         message = {
             'description': 'Match Descriptor Response',
@@ -541,9 +564,9 @@ class Hub(Base):
         }
         return message
 
-    def generate_state_change_message(self, state):
+    def generate_state_change_request(self, state):
         """
-        Generate Node State Change.
+        Generate Node State Change Request
         States:
             ON, OFF, CHECK
 
@@ -571,7 +594,7 @@ class Hub(Base):
 
         return message
 
-    def generate_mode_change_message(self, mode):
+    def generate_mode_change_request(self, mode):
         """
         Generate Mode Change Request
         Modes:
@@ -604,7 +627,7 @@ class Hub(Base):
 
         return message
 
-    def generate_type_request_message(self):
+    def generate_type_request(self):
         """
         Generate Node Type Request
             Version, Manufacturer, etc
@@ -627,12 +650,12 @@ class Hub(Base):
 
         """
         message = {
-            'description'   : 'Hardware Join Messages 1',
-            'src_endpoint'  : b'\x02',
-            'dest_endpoint' : b'\x02',
-            'cluster'       : b'\x00\xf6',
-            'profile'       : self.ALERTME_PROFILE_ID,
-            'data'          : b'\x11\x01\xfc'
+            'description': 'Hardware Join Messages 1',
+            'src_endpoint': b'\x02',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf6',
+            'profile': self.ALERTME_PROFILE_ID,
+            'data': b'\x11\x01\xfc'
         }
         return message
 
@@ -657,28 +680,29 @@ class Hub(Base):
 
         """
         message = {
-           'description'    : 'Security Initialization',
-           'src_endpoint'   : b'\x00',
-           'dest_endpoint'  : b'\x02',
-           'cluster'        : b'\x05\x00',
-           'profile'        : self.ALERTME_PROFILE_ID,
-           'data'           : b'\x11\x80\x00\x00\x05'
+           'description': 'Security Initialization',
+           'src_endpoint': b'\x00',
+           'dest_endpoint': b'\x02',
+           'cluster': b'\x05\x00',
+           'profile': self.ALERTME_PROFILE_ID,
+           'data': b'\x11\x80\x00\x00\x05'
         }
         return message
 
-    def generate_missing_link(self, received_message):
+    def generate_missing_link(self, src_endpoint, dest_endpoint):
         """
         Generate 'Missing Link'
 
-        :param received_message:
+        :param src_endpoint:
+        :param dest_endpoint:
         """
         message = {
-           'description'    : 'Missing Link',
-           'src_endpoint'   : received_message['dest_endpoint'],
-           'dest_endpoint'  : received_message['source_endpoint'],
-           'cluster'        : b'\x00\xf0',
-           'profile'        : self.ALERTME_PROFILE_ID,
-           'data'           : b'\x11\x39\xfd'
+           'description': 'Missing Link',
+           'src_endpoint': src_endpoint, # received_message['dest_endpoint'],
+           'dest_endpoint': dest_endpoint, # received_message['source_endpoint'],
+           'cluster': b'\x00\xf0',
+           'profile': self.ALERTME_PROFILE_ID,
+           'data': b'\x11\x39\xfd'
         }
         return message
 

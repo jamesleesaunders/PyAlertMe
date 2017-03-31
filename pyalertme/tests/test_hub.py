@@ -221,72 +221,148 @@ class TestHub(unittest.TestCase):
         expected = {'ReedSwitch': 'OPEN', 'TamperSwitch': 'CLOSED'}
         self.assertEqual(result, expected)
 
-    def test_generate_state_change_message(self):
-        result = self.hub_obj.generate_state_change_message('ON')
+    def test_generate_state_change_request(self):
+        result = self.hub_obj.generate_state_change_request('ON')
         expected = {
             'description': 'Switch Plug On',
+            'profile': b'\xc2\x16',
+            'cluster': b'\x00\xee',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xee',
-            'profile': b'\xc2\x16',
             'data': b'\x11\x00\x02\x01\x01'
         }
         self.assertEqual(result, expected)
 
-        result = self.hub_obj.generate_state_change_message('OFF')
+        result = self.hub_obj.generate_state_change_request('OFF')
         expected = {
             'description': 'Switch Plug Off',
+            'profile': b'\xc2\x16',
+            'cluster': b'\x00\xee',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xee',
-            'profile': b'\xc2\x16',
             'data': b'\x11\x00\x02\x00\x01'
         }
         self.assertEqual(result, expected)
 
-        result = self.hub_obj.generate_state_change_message('CHECK')
+        result = self.hub_obj.generate_state_change_request('CHECK')
         expected = {
             'description': 'Switch State Request',
+            'profile': b'\xc2\x16',
+            'cluster': b'\x00\xee',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xee',
-            'profile': b'\xc2\x16',
             'data': b'\x11\x00\x01\x01'
         }
         self.assertEqual(result, expected)
 
-    def test_generate_mode_change_message(self):
-        result = self.hub_obj.generate_mode_change_message('NORMAL')
+    def test_generate_mode_change_request(self):
+        result = self.hub_obj.generate_mode_change_request('NORMAL')
         expected = {
             'description': 'Normal Mode',
+            'profile': b'\xc2\x16',
+            'cluster': b'\x00\xf0',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf0',
-            'profile': b'\xc2\x16',
             'data': b'\x11\x00\xfa\x00\x01'
         }
         self.assertEqual(result, expected)
 
-        result = self.hub_obj.generate_mode_change_message('RANGE')
+        result = self.hub_obj.generate_mode_change_request('RANGE')
         expected = {
             'description': 'Range Test',
+            'profile': b'\xc2\x16',
+            'cluster': b'\x00\xf0',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf0',
-            'profile': b'\xc2\x16',
             'data': b'\x11\x00\xfa\x01\x01'
         }
         self.assertEqual(result, expected)
 
-    def test_generate_type_request_message(self):
-        result = self.hub_obj.generate_type_request_message()
+    def test_generate_type_request(self):
+        result = self.hub_obj.generate_type_request()
         expected = {
             'description': 'Version Request',
+            'profile': b'\xc2\x16',
+            'cluster': b'\x00\xf6',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf6',
-            'profile': b'\xc2\x16',
             'data': b'\x11\x00\xfc\x00\x01'
+        }
+        self.assertEqual(result, expected)
+
+    def test_generate_active_endpoints_request(self):
+        source_addr_short = b'\x88\x9f'
+        result = self.hub_obj.generate_active_endpoints_request(source_addr_short)
+        expected = {
+            'description': 'Active Endpoints Request',
+            'profile': '\x00\x00',
+            'cluster': '\x00\x05',
+            'src_endpoint': '\x00',
+            'dest_endpoint': '\x00',
+            'data': '\xaa\x9f\x88'
+        }
+        self.assertEqual(result, expected)
+
+    def test_generate_match_descriptor_response(self):
+        rf_data = b'\x00\x00\x00'
+        result = self.hub_obj.generate_match_descriptor_response(rf_data)
+        expected = {
+            'description': 'Match Descriptor Response',
+            'profile': '\x00\x00',
+            'cluster': '\x80\x06',
+            'src_endpoint': '\x00',
+            'dest_endpoint': '\x00',
+            'data': '\x00\x00\x00\x00\x01\x02'
+        }
+        self.assertEqual(result, expected)
+
+    def test_generate_hardware_join_1(self):
+        result = self.hub_obj.generate_hardware_join_1()
+        expected = {
+            'description': 'Hardware Join Messages 1',
+            'profile': b'\xc2\x16',
+            'cluster': b'\x00\xf6',
+            'src_endpoint': b'\x02',
+            'dest_endpoint': b'\x02',
+            'data': b'\x11\x01\xfc'
+        }
+        self.assertEqual(result, expected)
+
+    def test_generate_hardware_join_2(self):
+        result = self.hub_obj.generate_hardware_join_2()
+        expected = {
+            'description': 'Hardware Join Messages 2',
+            'profile': b'\xc2\x16',
+            'cluster': b'\x00\xf0',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'data': b'\x19\x01\xfa\x00\x01'
+        }
+        self.assertEqual(result, expected)
+
+    def test_generate_security_init(self):
+        result = self.hub_obj.generate_security_init()
+        expected = {
+            'description': 'Security Initialization',
+            'profile': b'\xc2\x16',
+            'cluster': b'\x05\x00',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'data': b'\x11\x80\x00\x00\x05'
+        }
+        self.assertEqual(result, expected)
+
+    def test_generate_missing_link(self):
+        src_endpoint =  b'\x02'
+        dest_endpoint = b'\x02'
+        result = self.hub_obj.generate_missing_link(src_endpoint, dest_endpoint)
+        expected = {
+            'description': 'Missing Link',
+            'profile': '\xc2\x16',
+            'cluster': '\x00\xf0',
+            'src_endpoint': '\x02',
+            'dest_endpoint': '\x02',
+            'data': '\x119\xfd'
         }
         self.assertEqual(result, expected)
 
