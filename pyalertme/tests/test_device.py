@@ -43,12 +43,24 @@ class TestDevice(unittest.TestCase):
     def test_generate_type_update(self):
         result = self.device_obj.generate_type_update()
         expected = {
-            'cluster': '\x00\xf6',
-            'data': '\tq\xfe\x01\x00\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAcme.co.uk\nGeneric Device\n2016-09-18',
             'description': 'Type Info',
-            'dest_endpoint': '\x02',
             'profile': '\xc2\x16',
-            'src_endpoint': '\x00'
+            'cluster': '\x00\xf6',
+            'src_endpoint': '\x00',
+            'dest_endpoint': '\x02',
+            'data': '\tq\xfe\x01\x00\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAcme.co.uk\nGeneric Device\n2016-09-18'
+        }
+        self.assertEqual(result, expected)
+
+    def test_generate_match_descriptor_request(self):
+        result = self.device_obj.generate_match_descriptor_request()
+        expected = {
+            'description': 'Match Descriptor Request',
+            'profile': b'\x00\x00',
+            'cluster': b'\x00\x06',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'data': b'\x03\xfd\xff\x16\xc2\x00\x01\xf0\x00'
         }
         self.assertEqual(result, expected)
 

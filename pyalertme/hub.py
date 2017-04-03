@@ -520,8 +520,8 @@ class Hub(Base):
         See: http://ftp1.digi.com/support/images/APP_NOTE_XBee_ZigBee_Device_Profile.pdf
 
         Field Name       Size (bytes)   Description
-        Network Address  2              16-bit address of a device in the network whose active
-                                        endpoint list being requested.
+        Network Address  2              16-bit address of a device in the network whose
+                                        active endpoint list being requested.
 
         :param node_id:
         :param source_addr:
@@ -529,10 +529,10 @@ class Hub(Base):
         data = b'\xaa' + addr_short[1] + addr_short[0]
         message = {
             'description': 'Active Endpoints Request',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x00',
             'profile': self.ZDP_PROFILE_ID,
             'cluster': b'\x00\x05',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
             'data': data
         }
         return message
@@ -556,10 +556,10 @@ class Hub(Base):
         data = rf_data[0:1] + b'\x00\x00\x00\x01\x02'
         message = {
             'description': 'Match Descriptor Response',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x00',
             'profile': self.ZDP_PROFILE_ID,
             'cluster': b'\x80\x06',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
             'data': data
         }
         return message
@@ -574,10 +574,10 @@ class Hub(Base):
         :return: message
         """
         message = {
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
             'profile': self.ALERTME_PROFILE_ID,
-            'cluster': b'\x00\xee'
+            'cluster': b'\x00\xee',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02'
         }
 
         if state == 'ON':
@@ -604,10 +604,10 @@ class Hub(Base):
         :return: message
         """
         message = {
+            'profile': self.ALERTME_PROFILE_ID,
+            'cluster': b'\x00\xf0',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'profile': self.ALERTME_PROFILE_ID,
-            'cluster': b'\x00\xf0'
         }
 
         if mode == 'NORMAL':
@@ -636,10 +636,10 @@ class Hub(Base):
         """
         message = {
             'description': 'Version Request',
+            'profile': self.ALERTME_PROFILE_ID,
+            'cluster': b'\x00\xf6',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf6',
-            'profile': self.ALERTME_PROFILE_ID,
             'data': b'\x11\x00\xfc\x00\x01'
         }
         return message
@@ -651,10 +651,10 @@ class Hub(Base):
         """
         message = {
             'description': 'Hardware Join Messages 1',
+            'profile': self.ALERTME_PROFILE_ID,
+            'cluster': b'\x00\xf6',
             'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf6',
-            'profile': self.ALERTME_PROFILE_ID,
             'data': b'\x11\x01\xfc'
         }
         return message
@@ -666,10 +666,10 @@ class Hub(Base):
         """
         message = {
             'description': 'Hardware Join Messages 2',
+            'profile': self.ALERTME_PROFILE_ID,
+            'cluster': b'\x00\xf0',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf0',
-            'profile': self.ALERTME_PROFILE_ID,
             'data': b'\x19\x01\xfa\x00\x01'
         }
         return message
@@ -680,12 +680,12 @@ class Hub(Base):
 
         """
         message = {
-           'description': 'Security Initialization',
-           'src_endpoint': b'\x00',
-           'dest_endpoint': b'\x02',
-           'cluster': b'\x05\x00',
-           'profile': self.ALERTME_PROFILE_ID,
-           'data': b'\x11\x80\x00\x00\x05'
+            'description': 'Security Initialization',
+            'profile': self.ALERTME_PROFILE_ID,
+            'cluster': b'\x05\x00',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'data': b'\x11\x80\x00\x00\x05'
         }
         return message
 
@@ -693,16 +693,16 @@ class Hub(Base):
         """
         Generate 'Missing Link'
 
-        :param src_endpoint:
-        :param dest_endpoint:
+        :param src_endpoint: Note: This is the dest endpoint of the received message
+        :param dest_endpoint: Note: This is the dest endpoint of the received message
         """
         message = {
-           'description': 'Missing Link',
-           'src_endpoint': src_endpoint, # received_message['dest_endpoint'],
-           'dest_endpoint': dest_endpoint, # received_message['source_endpoint'],
-           'cluster': b'\x00\xf0',
-           'profile': self.ALERTME_PROFILE_ID,
-           'data': b'\x11\x39\xfd'
+            'description': 'Missing Link',
+            'profile': self.ALERTME_PROFILE_ID,
+            'cluster': b'\x00\xf0',
+            'src_endpoint': src_endpoint,
+            'dest_endpoint': dest_endpoint,
+            'data': b'\x11\x39\xfd'
         }
         return message
 

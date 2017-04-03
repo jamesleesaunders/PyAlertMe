@@ -33,9 +33,9 @@ class Base(object):
         self.date = None
         self.version = None
 
-        # Received and Sent Messages
-        self.outgoing_messages = []
-        self.incoming_messages = []
+        # My addresses
+        self.addr_short = None
+        self.addr_long = None
 
         self.associated = False
 
