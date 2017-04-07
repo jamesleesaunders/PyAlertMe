@@ -14,28 +14,31 @@ import time
 
 pp = pprint.PrettyPrinter(indent=4)
 
-XBEE_PORT = '/dev/tty.usbserial-A1014P7W' # MacBook Serial Port
-XBEE_BAUD = 9600
-serialObj = serial.Serial(XBEE_PORT, XBEE_BAUD)
-xbee = ZigBee(serialObj)
+def receive_message(message):
+    if message and 'command' in message:
+        pp.pprint(message['parameter'])
 
-def wait():
-    message = xbee.wait_read_frame()
-    pp.pprint(message)
-    while True:
-        if message and 'command' in message:
-            print(message['parameter'])
-            break
+def xbee_error(error):
+    print('XBee Error: %s', error)
+
+
+XBEE_PORT = '/dev/tty.usbserial-DN018OI6'
+XBEE_BAUD = 9600
+ser = serial.Serial(XBEE_PORT, XBEE_BAUD)
+zb = ZigBee(ser=ser, callback=receive_message, error_callback=xbee_error, escaped=True)
 
 # Get Addresses
-xbee.at(frame='A', command='MY')
-wait()
-time.sleep(2)
+print ("Sending MY")
+zb.at( command='MY', frame=0x01) # Short Address
+time.sleep(3)
 
-xbee.at(frame='A', command='SH')
-wait()
-time.sleep(2)
+print ("Sending SH")
+zb.at(command='SH', frame=0x02) # Long Address High
+time.sleep(3)
 
-xbee.at(frame='A', command='SL')
-wait()
-time.sleep(2)
+print ("Sending SL")
+zb.at(command='SL', frame=0x03) # Long Address Low
+time.sleep(3)
+
+zb.halt()
+ser.close()
