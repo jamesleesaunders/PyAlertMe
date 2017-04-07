@@ -100,7 +100,7 @@ class TestSmartPlug(unittest.TestCase):
         }
         self.device_obj.receive_message(message)
         result = self.ser.get_data_written()
-        expected = b'~\x00\x19\x11\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x00\x02\x00\xee\xc2\x16\x00\x00\th\x80\x07\x01\x1b'
+        expected = b'~\x00\x19}1\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x00\x02\x00\xee\xc2\x16\x00\x00\th\x80\x07\x01\x1b'
         self.assertEqual(result, expected)
 
 if __name__ == '__main__':
