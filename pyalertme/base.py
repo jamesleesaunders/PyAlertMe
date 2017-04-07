@@ -49,7 +49,7 @@ class Base(object):
         """
         if(serial != None):
             self.serial = serial
-            self.zb = ZigBee(ser=serial, callback=self.receive_message, error_callback=self.xbee_error)
+            self.zb = ZigBee(ser=serial, callback=self.receive_message, error_callback=self.xbee_error, escaped=True)
 
     def halt(self):
         """

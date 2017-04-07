@@ -36,7 +36,7 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 # Serial Configuration
-XBEE_PORT = '/dev/tty.usbserial-A1014P7W' # MacBook Serial Port
+XBEE_PORT = '/dev/tty.usbserial-DN018OI6' # MacBook Serial Port
 XBEE_BAUD = 9600
 ser = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
