@@ -45,6 +45,8 @@ def callback(attrib_name, value):
 
 hub_obj = Hub(callback)
 hub_obj.start(ser)
+pp.pprint(hub_obj.get_addr_short())
+pp.pprint(hub_obj.get_addr_long())
 
 # Kick off discovery thread
 # hubObj.discovery()

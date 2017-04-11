@@ -24,5 +24,12 @@ class TestBase(unittest.TestCase):
         expected = '00:0d:6f:00:02:bb:b7:e8'
         self.assertEqual(result, expected, 'Test MAC 2')
 
+    def test_get_addresses(self):
+        self.device_obj.addr_short = b'\x00\x01'
+        self.assertEqual(self.device_obj.get_addr_short(), b'\x00\x01')
+
+        self.device_obj.addr_long = [b'\x00\x13\xa2\x00', b'@\xe9\xa4\xc0']
+        self.assertEqual(self.device_obj.get_addr_long(), b'\x00\x13\xa2\x00@\xe9\xa4\xc0')
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
