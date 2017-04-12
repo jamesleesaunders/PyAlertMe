@@ -36,7 +36,7 @@ class Base(object):
         # My addresses
         self.addr_short = None
         self.addr_long = None
-        self.addr_long_list = [None, None]
+        self.__addr_long_list = [None, None]
 
         self.associated = False
 
@@ -72,13 +72,6 @@ class Base(object):
         """
         self.logger.critical('XBee Error: %s', error)
 
-    def get_addr_short(self):
-        return self.addr_short
-
-    def get_addr_long(self):
-        self.addr_long = b''.join(self.addr_long_list)
-        return self.addr_long
-
     def read_addresses(self):
         """
         Work out own address
@@ -91,11 +84,12 @@ class Base(object):
         time.sleep(0.05)
         self.zb.send('at', command='SL')
         time.sleep(0.05)
+        self.zb.send('at', command='HV')
+        time.sleep(0.05)
 
     def send_message(self, message, dest_addr_long, dest_addr_short):
         """
         Send message to XBee
-
 
         :param message: Dict message
         :param dest_addr_long: 48-bits Long Address
@@ -132,9 +126,14 @@ class Base(object):
             if message['command'] == 'MY':
                 self.addr_short = message['parameter']
             if message['command'] == 'SH':
-                self.addr_long_list[0] = message['parameter']
+                self.__addr_long_list[0] = message['parameter']
             if message['command'] == 'SL':
-                self.addr_long_list[1] = message['parameter']
+                self.__addr_long_list[1] = message['parameter']
+            if message['command'] == 'HV':
+                self.version = message['parameter']
+            # If we have worked out both the High and Low addresses then calculate the full addr_long
+            if self.__addr_long_list[0] and self.__addr_long_list[1]:
+                self.addr_long = b''.join(self.__addr_long_list)
 
         # Zigbee Explicit Packets
         if message['id'] == 'rx_explicit':
