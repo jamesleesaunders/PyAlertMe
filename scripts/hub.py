@@ -65,8 +65,9 @@ while True:
             action = raw_input("")
             message = hub_obj.get_action(action)
 
-            dest_addr_long = nodes[int(node_id)]['AddressLong']
-            dest_addr_short = b's\xba'
+            dest_addr_long = nodes[node_id]['addr_long']
+            dest_addr_short = nodes[node_id]['addr_short']
+
             pp.pprint(dest_addr_long)
             pp.pprint(dest_addr_short)
             hub_obj.send_message(message, dest_addr_long, dest_addr_short)

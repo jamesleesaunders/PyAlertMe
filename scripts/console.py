@@ -34,8 +34,7 @@ class TestCmd(Command):
 
             nodes = hub_obj.get_nodes()
             for id, node in nodes.iteritems():
-                output += str(id) + ". " + node['Type'] + " [" + node['Name'] + "] (" + Base.pretty_mac(
-                    node['AddressLong']) + ")\n"
+                output += str(id) + " " + str(node) + "\n"
 
             return output
 
