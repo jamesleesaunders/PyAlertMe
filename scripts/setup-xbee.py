@@ -46,7 +46,7 @@ ser = serial.Serial(XBEE_PORT, XBEE_BAUD)
 zb = ZigBee(ser=ser, callback=receive_message, error_callback=xbee_error, escaped=True)
 
 
-commandset = 'Setup'
+commandset = 'Addresses'
 print "Running", commandset, "...."
 for name, command in commands[commandset].iteritems():
     print "Sending", name

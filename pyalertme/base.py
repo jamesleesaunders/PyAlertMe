@@ -36,6 +36,7 @@ class Base(object):
         # My addresses
         self.addr_short = None
         self.addr_long = None
+        self.__addr_long_list = [None, None]
 
         self.associated = False
 
@@ -50,6 +51,7 @@ class Base(object):
         if(serial != None):
             self.serial = serial
             self.zb = ZigBee(ser=serial, callback=self.receive_message, error_callback=self.xbee_error, escaped=True)
+            self.read_addresses()
 
     def halt(self):
         """
@@ -70,10 +72,24 @@ class Base(object):
         """
         self.logger.critical('XBee Error: %s', error)
 
+    def read_addresses(self):
+        """
+        Work out own address
+
+        """
+        self.logger.debug('Requesting out own addresses')
+        self.zb.send('at', command='MY')
+        time.sleep(0.05)
+        self.zb.send('at', command='SH')
+        time.sleep(0.05)
+        self.zb.send('at', command='SL')
+        time.sleep(0.05)
+        self.zb.send('at', command='HV')
+        time.sleep(0.05)
+
     def send_message(self, message, dest_addr_long, dest_addr_short):
         """
         Send message to XBee
-
 
         :param message: Dict message
         :param dest_addr_long: 48-bits Long Address
@@ -83,9 +99,8 @@ class Base(object):
         # Tack on destination addresses
         message['dest_addr_long']  = dest_addr_long
         message['dest_addr'] = dest_addr_short
-        device_id = Base.pretty_mac(dest_addr_long)
 
-        self.logger.debug('Device: %s Sending: %s', device_id, message)
+        self.logger.debug('Sending Message: %s', message)
         self.zb.send('tx_explicit', **message)
 
     def receive_message(self, message):
@@ -96,13 +111,9 @@ class Base(object):
         :param message: Dict of message
         :return:
         """
-        # Grab source address, work out device ID
-        source_addr_long = message['source_addr_long']
-        pretty_addr = Base.pretty_mac(source_addr_long)
-
-        self.logger.debug('Device: %s Received: %s', pretty_addr, message)
+        self.logger.debug('Received Message: %s', message)
         self.process_message(message)
-       
+
     def process_message(self, message):
         """
         Process incoming message
@@ -110,20 +121,34 @@ class Base(object):
         :param message: Dict of message
         :return:
         """
-        # We are only interested in Zigbee Explicit packets.
-        if (message['id'] == 'rx_explicit'):
+        # AT Packets
+        if message['id'] == 'at_response':
+            if message['command'] == 'MY':
+                self.addr_short = message['parameter']
+            if message['command'] == 'SH':
+                self.__addr_long_list[0] = message['parameter']
+            if message['command'] == 'SL':
+                self.__addr_long_list[1] = message['parameter']
+            if message['command'] == 'HV':
+                self.version = message['parameter']
+            # If we have worked out both the High and Low addresses then calculate the full addr_long
+            if self.__addr_long_list[0] and self.__addr_long_list[1]:
+                self.addr_long = b''.join(self.__addr_long_list)
+
+        # Zigbee Explicit Packets
+        if message['id'] == 'rx_explicit':
             profile_id = message['profile']
             cluster_id = message['cluster']
 
-            if (profile_id == self.ZDP_PROFILE_ID):
+            if profile_id == self.ZDP_PROFILE_ID:
                 # Zigbee Device Profile ID
                 self.logger.debug('Zigbee Device Profile Packet Receieved')
 
-            elif (profile_id == self.ALERTME_PROFILE_ID):
+            elif profile_id == self.ALERTME_PROFILE_ID:
                 # AlertMe Profile ID
                 self.logger.debug('AlertMe Specific Profile Packet Received')
 
-            elif (profile_id == self.HA_PROFILE_ID):
+            elif profile_id == self.HA_PROFILE_ID:
                 # HA Profile ID
                 self.logger.debug('HA Profile Packet Received')
 
