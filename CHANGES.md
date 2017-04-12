@@ -33,3 +33,9 @@ v0.1.5 - 28 Mar 2017
 * Added Python Docs comment blocks to all class functions.
 * Added new attribute history function.
 * Fixed Version request.
+
+v0.2.0 - 12 Apr 2017
+* Added AT commands to work out own addresses.
+* Mode escaped=True.
+* Adding Generate Match Descriptor Request.
+* New setup-xbee.py script to auto configure module.
