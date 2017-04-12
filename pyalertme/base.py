@@ -35,7 +35,8 @@ class Base(object):
 
         # My addresses
         self.addr_short = None
-        self.addr_long = [None, None]
+        self.addr_long = None
+        self.addr_long_list = [None, None]
 
         self.associated = False
 
@@ -75,8 +76,8 @@ class Base(object):
         return self.addr_short
 
     def get_addr_long(self):
-        ret = b''.join(self.addr_long)
-        return ret
+        self.addr_long = b''.join(self.addr_long_list)
+        return self.addr_long
 
     def read_addresses(self):
         """
@@ -131,9 +132,9 @@ class Base(object):
             if message['command'] == 'MY':
                 self.addr_short = message['parameter']
             if message['command'] == 'SH':
-                self.addr_long[0] = message['parameter']
+                self.addr_long_list[0] = message['parameter']
             if message['command'] == 'SL':
-                self.addr_long[1] = message['parameter']
+                self.addr_long_list[1] = message['parameter']
 
         # Zigbee Explicit Packets
         if message['id'] == 'rx_explicit':

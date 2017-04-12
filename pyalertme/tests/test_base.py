@@ -25,10 +25,11 @@ class TestBase(unittest.TestCase):
         self.assertEqual(result, expected, 'Test MAC 2')
 
     def test_get_addresses(self):
-        self.device_obj.addr_short = b'\x00\x01'
-        self.assertEqual(self.device_obj.get_addr_short(), b'\x00\x01')
+        self.device_obj.receive_message({'status': '\x00', 'frame_id': '\x01', 'parameter': '\x88\x9f', 'command': 'MY', 'id': 'at_response'})
+        self.assertEqual(self.device_obj.get_addr_short(), b'\x88\x9f')
 
-        self.device_obj.addr_long = [b'\x00\x13\xa2\x00', b'@\xe9\xa4\xc0']
+        self.device_obj.receive_message({'status': '\x00', 'frame_id': '\x01', 'parameter': '\x00\x13\xa2\x00', 'command': 'SH', 'id': 'at_response'})
+        self.device_obj.receive_message({'status': '\x00', 'frame_id': '\x01', 'parameter': '@\xe9\xa4\xc0', 'command': 'SL', 'id': 'at_response'})
         self.assertEqual(self.device_obj.get_addr_long(), b'\x00\x13\xa2\x00@\xe9\xa4\xc0')
 
 if __name__ == '__main__':
