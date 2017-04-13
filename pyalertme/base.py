@@ -23,9 +23,10 @@ class Base(object):
         Base Constructor
 
         """
-        self.logger = logging.getLogger('pyalertme')
+        self._logger = logging.getLogger('pyalertme')
 
-        self.zb = None
+        self._xbee = None
+        self._serial = None
 
         # Type Info
         self.manu = None
@@ -49,8 +50,8 @@ class Base(object):
         :return:
         """
         if(serial != None):
-            self.serial = serial
-            self.zb = ZigBee(ser=serial, callback=self.receive_message, error_callback=self.xbee_error, escaped=True)
+            self._serial = serial
+            self._xbee = ZigBee(ser=self._serial, callback=self.receive_message, error_callback=self.xbee_error, escaped=True)
             self.read_addresses()
 
     def halt(self):
@@ -60,8 +61,8 @@ class Base(object):
 
         :return:
         """
-        self.zb.halt()
-        self.serial.close()
+        self._xbee.halt()
+        self._serial.close()
 
     def xbee_error(self, error):
         """
@@ -78,13 +79,13 @@ class Base(object):
 
         """
         self.logger.debug('Requesting out own addresses')
-        self.zb.send('at', command='MY')
+        self._xbee.send('at', command='MY')
         time.sleep(0.05)
-        self.zb.send('at', command='SH')
+        self._xbee.send('at', command='SH')
         time.sleep(0.05)
-        self.zb.send('at', command='SL')
+        self._xbee.send('at', command='SL')
         time.sleep(0.05)
-        self.zb.send('at', command='HV')
+        self._xbee.send('at', command='HV')
         time.sleep(0.05)
 
     def send_message(self, message, dest_addr_long, dest_addr_short):
@@ -100,8 +101,8 @@ class Base(object):
         message['dest_addr_long']  = dest_addr_long
         message['dest_addr'] = dest_addr_short
 
-        self.logger.debug('Sending Message: %s', message)
-        self.zb.send('tx_explicit', **message)
+        self._logger.debug('Sending Message: %s', message)
+        self._xbee.send('tx_explicit', **message)
 
     def receive_message(self, message):
         """
