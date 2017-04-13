@@ -78,7 +78,7 @@ class Base(object):
         Work out own address
 
         """
-        self.logger.debug('Requesting out own addresses')
+        self._logger.debug('Requesting own addresses')
         self._xbee.send('at', command='MY')
         time.sleep(0.05)
         self._xbee.send('at', command='SH')
@@ -143,18 +143,18 @@ class Base(object):
 
             if profile_id == self.ZDP_PROFILE_ID:
                 # Zigbee Device Profile ID
-                self.logger.debug('Zigbee Device Profile Packet Receieved')
+                self._logger.debug('Zigbee Device Profile Packet Receieved')
 
             elif profile_id == self.ALERTME_PROFILE_ID:
                 # AlertMe Profile ID
-                self.logger.debug('AlertMe Specific Profile Packet Received')
+                self._logger.debug('AlertMe Specific Profile Packet Received')
 
             elif profile_id == self.HA_PROFILE_ID:
                 # HA Profile ID
-                self.logger.debug('HA Profile Packet Received')
+                self._logger.debug('HA Profile Packet Received')
 
             else:
-                self.logger.error('Unrecognised Profile ID: %e', profile_id)
+                self._logger.error('Unrecognised Profile ID: %e', profile_id)
 
     def __str__(self):
         """
