@@ -51,7 +51,7 @@ class SmartPlug(Device):
                     if (cluster_cmd == b'\01'):
                         # State Request
                         # b'\x11\x00\x01\x01'
-                        self.logger.debug('Switch State is: %s', self.state)
+                        self._logger.debug('Switch State is: %s', self.state)
                         self.send_message(self.generate_switch_state_update(), self.hub_addr_long, self.hub_addr_short)
 
                     elif (cluster_cmd == b'\02'):
@@ -59,7 +59,7 @@ class SmartPlug(Device):
                         # b'\x11\x00\x02\x01\x01' On
                         # b'\x11\x00\x02\x00\x01' Off
                         self.state = self.parse_switch_state_request(message['rf_data'])
-                        self.logger.debug('Switch State Changed to: %s', self.state)
+                        self._logger.debug('Switch State Changed to: %s', self.state)
                         self.send_message(self.generate_switch_state_update(), self.hub_addr_long, self.hub_addr_short)
 
                     elif (cluster_cmd == b'\xfa'):
@@ -67,26 +67,26 @@ class SmartPlug(Device):
                         if(message['rf_data'][4] == b'\x00\x01'):
                             # Normal
                             # b'\x11\x00\xfa\x00\x01'
-                            self.logger.debug('Normal Mode')
+                            self._logger.debug('Normal Mode')
 
                         elif(message['rf_data'][4] == b'\x00\x01'):
                             # Locked
                             # b'\x11\x00\xfa\x02\x01'
-                            self.logger.debug('Locked Mode')
+                            self._logger.debug('Locked Mode')
 
                         elif(message['rf_data'][4] == b'\x03\x01'):
                             # Silent
                             # b'\x11\x00\xfa\x03\x01'
-                            self.logger.debug('Silent Mode')
+                            self._logger.debug('Silent Mode')
 
                     else:
-                        self.logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
+                        self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
                 else:
-                    self.logger.error('Unrecognised Cluster ID: %r', cluster_id)
+                    self._logger.error('Unrecognised Cluster ID: %r', cluster_id)
 
             else:
-                self.logger.error('Unrecognised Profile ID: %r', profile_id)
+                self._logger.error('Unrecognised Profile ID: %r', profile_id)
 
     def set_state(self, state):
         """
@@ -96,7 +96,7 @@ class SmartPlug(Device):
         :return:
         """
         self.state = state
-        self.logger.debug('Switch State Changed to: %s', self.state)
+        self._logger.debug('Switch State Changed to: %s', self.state)
         self.send_message(self.generate_switch_state_update(), self.hub_addr_long, self.hub_addr_short)
 
     def generate_switch_state_update(self):
