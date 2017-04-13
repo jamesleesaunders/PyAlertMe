@@ -12,9 +12,10 @@ class Hub(Base):
         """
         Hub Constructor
 
-        :param callback: Optional
         """
-        Base.__init__(self)
+        Base.__init__(self, callback)
+
+        self._discovery_thread = threading.Thread(target=self._discovery)
 
         # Type Info
         self.manu = 'AlertMe.com'
@@ -24,10 +25,6 @@ class Hub(Base):
 
         # List of Associated Nodes
         self.nodes = {}
-
-        # Threadding and Callback
-        self._discovery_thread = threading.Thread(target=self._discovery)
-        self._callback = callback if callback else lambda node_id, attrib_name, value: None
 
     def discovery(self):
         """

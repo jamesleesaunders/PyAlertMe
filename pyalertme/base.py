@@ -18,15 +18,17 @@ class Base(object):
     BROADCAST_LONG  = b'\x00\x00\x00\x00\x00\x00\xff\xff'
     BROADCAST_SHORT = b'\xff\xfe'
 
-    def __init__(self):
+    def __init__(self, callback=None):
         """
         Base Constructor
 
+        :param callback: Optional
         """
         self._logger = logging.getLogger('pyalertme')
 
         self._xbee = None
         self._serial = None
+        self._callback = callback if callback else lambda node_id, attrib_name, value: None
 
         # Type Info
         self.manu = None
@@ -53,6 +55,9 @@ class Base(object):
             self._serial = serial
             self._xbee = ZigBee(ser=self._serial, callback=self.receive_message, error_callback=self.xbee_error, escaped=True)
             self.read_addresses()
+
+    def get_node_id(self):
+        return self.pretty_mac(self.addr_long)
 
     def halt(self):
         """

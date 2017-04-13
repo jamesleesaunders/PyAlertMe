@@ -8,12 +8,12 @@ import threading
 
 class Sensor(Device):
 
-    def __init__(self):
+    def __init__(self, callback=None):
         """
         Sensor Constructor
 
         """
-        Device.__init__(self)
+        Device.__init__(self, callback)
 
         # Type Info
         self.manu = 'AlertMe.com'

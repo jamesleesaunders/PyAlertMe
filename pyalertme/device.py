@@ -8,12 +8,12 @@ import threading
 
 class Device(Base):
 
-    def __init__(self):
+    def __init__(self, callback=None):
         """
         Device Constructor
 
         """
-        Base.__init__(self)
+        Base.__init__(self, callback)
 
         # Type Info
         self.manu = 'AlertMe.com'
