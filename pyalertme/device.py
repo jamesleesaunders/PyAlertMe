@@ -16,7 +16,7 @@ class Device(Base):
         Base.__init__(self)
 
         # Type Info
-        self.manu = 'Acme.co.uk'
+        self.manu = 'AlertMe.com'
         self.type = 'Generic Device'
         self.date = '2016-09-18'
         self.version = 1

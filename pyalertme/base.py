@@ -37,7 +37,7 @@ class Base(object):
         # My addresses
         self.addr_short = None
         self.addr_long = None
-        self.__addr_long_list = [None, None]
+        self._addr_long_list = [None, None]
 
         self.associated = False
 
@@ -127,14 +127,14 @@ class Base(object):
             if message['command'] == 'MY':
                 self.addr_short = message['parameter']
             if message['command'] == 'SH':
-                self.__addr_long_list[0] = message['parameter']
+                self._addr_long_list[0] = message['parameter']
             if message['command'] == 'SL':
-                self.__addr_long_list[1] = message['parameter']
+                self._addr_long_list[1] = message['parameter']
             if message['command'] == 'HV':
                 self.version = message['parameter']
             # If we have worked out both the High and Low addresses then calculate the full addr_long
-            if self.__addr_long_list[0] and self.__addr_long_list[1]:
-                self.addr_long = b''.join(self.__addr_long_list)
+            if self._addr_long_list[0] and self._addr_long_list[1]:
+                self.addr_long = b''.join(self._addr_long_list)
 
         # Zigbee Explicit Packets
         if message['id'] == 'rx_explicit':

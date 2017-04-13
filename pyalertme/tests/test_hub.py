@@ -16,8 +16,6 @@ class TestHub(unittest.TestCase):
         self.hub_obj.halt()
 
     def test_receive_message(self):
-        self.maxDiff = None
-
         message = {
             'cluster':          b'\x00\xf6',
             'dest_endpoint':    b'\x02',
@@ -102,7 +100,7 @@ class TestHub(unittest.TestCase):
         result = Hub.parse_version_info(message['data'])
         expected = {
             'Version': 1,
-            'Manufacturer': 'Acme.co.uk',
+            'Manufacturer': 'AlertMe.com',
             'Type': 'Generic Device',
             'ManufactureDate': '2016-09-18'
         }

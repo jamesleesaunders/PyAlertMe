@@ -20,12 +20,14 @@ class Hub(Base):
         self.manu = 'AlertMe.com'
         self.type = 'Nano Hub'
         self.date = '2017-01-01'
-        self.version = 00001
-        self.discovery_thread = threading.Thread(target=self._discovery)
-        self.callback = callback
+        self.version = 1
 
-        # List of associated nodes
+        # List of Associated Nodes
         self.nodes = {}
+
+        # Threadding and Callback
+        self._discovery_thread = threading.Thread(target=self._discovery)
+        self._callback = callback
 
     def discovery(self):
         """
@@ -33,7 +35,7 @@ class Hub(Base):
 
         """
         self._logger.debug('Discovery Mode Started')
-        self.discovery_thread.start()
+        self._discovery_thread.start()
 
     def _discovery(self):
         """
@@ -76,6 +78,7 @@ class Hub(Base):
     def save_node_attribute(self, node_id, attrib_name, value):
         """
         Save Single Node Attribute
+
         :param node_id:
         :param attrib_name:
         :param value:
@@ -83,8 +86,8 @@ class Hub(Base):
         """
         self.nodes[node_id]['attributes'][attrib_name] = value
 
-        if self.callback:
-            self.callback(attrib_name, value)
+        if self._callback:
+            self._callback(attrib_name, value)
 
     def get_node(self, node_id):
         """
@@ -98,6 +101,7 @@ class Hub(Base):
     def get_nodes(self):
         """
         Get Nodes
+
         :return: Dictionary of Nodes
         """
         return self.nodes
@@ -105,6 +109,7 @@ class Hub(Base):
     def save_node_type(self, node_id, details):
         """
         Set Node Type
+
         :param node_id:
         :param details:
         """
@@ -112,18 +117,15 @@ class Hub(Base):
         for field, value in details.iteritems():
             self.nodes[node_id][field] = value
 
-    def lookup_node_id(self, addr_long, addr_short):
+    def addrs_to_node_id(self, addr_long, addr_short):
         """
-        Given a long address lookup or generate new short integer Node ID.
-        First see if we can ascertain the Node ID from 'local cache' (from self.nodes),
-        failing that see if it can be found in SQLite DB. Otherwise generate new ID.
+        Given a 48-bit Long Address and 16-bit Short Address lookup or generate new short integer Node ID.
+
         :param addr_long: 48-bits Long Address
         :param addr_short: 16-bit Short Address
         :return: Integer Short Node ID
         """
         node_id = Base.pretty_mac(addr_long)
-
-        # Lookup in local cache
         if node_id not in self.nodes:
             # Add to nodes list
             self.nodes[node_id] = {'addr_long': addr_long, 'addr_short': addr_short, 'attributes': {}}
@@ -132,8 +134,9 @@ class Hub(Base):
 
     def node_id_to_addrs(self, node_id):
         """
-        Given a Node ID return a tuple of 48-bits Long Address and 16-bit Short Address.
+        Given a Node ID return a tuple of 48-bit Long Address and 16-bit Short Address.
         This is typically used to pass addresses to send_message().
+
         :param node_id:  Integer Short Node ID
         :return: Tuple of long and short addresses
         """
@@ -158,7 +161,7 @@ class Hub(Base):
 
             source_addr_long = message['source_addr_long']
             source_addr_short = message['source_addr']
-            node_id = self.lookup_node_id(source_addr_long, source_addr_short)
+            node_id = self.addrs_to_node_id(source_addr_long, source_addr_short)
 
             if (profile_id == self.ZDP_PROFILE_ID):
                 # Zigbee Device Profile ID
