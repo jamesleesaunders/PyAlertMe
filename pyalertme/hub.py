@@ -32,7 +32,7 @@ class Hub(Base):
         Start Discovery Mode - Start discovery thread.
 
         """
-        self.logger.debug('Discovery Mode Started')
+        self._logger.debug('Discovery Mode Started')
         self.discovery_thread.start()
 
     def _discovery(self):
@@ -44,7 +44,7 @@ class Hub(Base):
         timeout = time.time() + 30
         i = 1
         while time.time() < timeout:
-            self.logger.debug('Sending Discovery Request #%s', i)
+            self._logger.debug('Sending Discovery Request #%s', i)
             message = {
                 'description': 'Management Routing Table Request',
                 'src_endpoint': b'\x00',
@@ -69,7 +69,7 @@ class Hub(Base):
         :param attributes:
         :return:
         """
-        self.logger.debug('Updating Attributes: %s', attributes)
+        self._logger.debug('Updating Attributes: %s', attributes)
         for attrib_name, value in attributes.iteritems():
             self.save_node_attribute(node_id, attrib_name, value)
 
