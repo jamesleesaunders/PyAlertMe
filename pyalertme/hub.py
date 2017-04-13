@@ -108,7 +108,7 @@ class Hub(Base):
         :param node_id:
         :param details:
         """
-        self.logger.debug('Setting Device Type to %s', details)
+        self._logger.debug('Setting Device Type to %s', details)
         for field, value in details.iteritems():
             self.nodes[node_id][field] = value
 
@@ -164,7 +164,7 @@ class Hub(Base):
                 # Zigbee Device Profile ID
                 if (cluster_id == b'\x13'):
                     # Device Announce Message.
-                    self.logger.debug('Received Device Announce Message')
+                    self._logger.debug('Received Device Announce Message')
                     # This will tell me the address of the new thing
                     # so we're going to send an active endpoint request
                     reply = self.generate_active_endpoints_request(source_addr_short)
@@ -172,40 +172,40 @@ class Hub(Base):
 
                 elif (cluster_id == b'\x00\x00'):
                     # Network (16-bit) Address Request.
-                    self.logger.debug('Received Network (16-bit) Address Request')
+                    self._logger.debug('Received Network (16-bit) Address Request')
 
                 elif (cluster_id == b'\x80\x00'):
                     # Network (16-bit) Address Response.
                     # Not sure what this is? Only seen on the Hive ActivePlug?
                     # See: http://www.desert-home.com/2015/06/hacking-into-iris-door-sensor-part-4.html
                     # http://ftp1.digi.com/support/images/APP_NOTE_XBee_ZigBee_Device_Profile.pdf
-                    self.logger.debug('Received Network (16-bit) Address Response')
+                    self._logger.debug('Received Network (16-bit) Address Response')
 
                 elif (cluster_id == b'\x00\x05'):
                     # Active Endpoint Request.
-                    self.logger.debug('Received Active Endpoint Request')
+                    self._logger.debug('Received Active Endpoint Request')
 
                 elif (cluster_id == b'\x80\x05'):
                     # Active Endpoint Response.
                     # This message tells us what the device can do, but it isn't constructed correctly to match what
                     # the switch can do according to the spec. This is another message that gets it's response after
                     # we receive the Match Descriptor below.
-                    self.logger.debug('Received Active Endpoint Response')
+                    self._logger.debug('Received Active Endpoint Response')
 
                 elif (cluster_id == b'\x00\x04'):
                     # Route Record Broadcast Response.
-                    self.logger.debug('Received Simple Descriptor Request')
+                    self._logger.debug('Received Simple Descriptor Request')
 
                 elif (cluster_id == b'\x80\x38'):
-                    self.logger.debug('Received Management Network Update Request')
+                    self._logger.debug('Received Management Network Update Request')
 
                 elif (cluster_id == b'\x802'):
                     # Route Record Broadcast Response.
-                    self.logger.debug('Received Route Record Broadcast Response')
+                    self._logger.debug('Received Route Record Broadcast Response')
 
                 elif (cluster_id == b'\x00\x06'):
                     # Match Descriptor Request.
-                    self.logger.debug('Received Match Descriptor Request')
+                    self._logger.debug('Received Match Descriptor Request')
                     # This is the point where we finally respond to the switch. A couple of messages are sent
                     # to cause the switch to join with the controller at a network level and to cause it to
                     # regard this controller as valid.
@@ -223,10 +223,10 @@ class Hub(Base):
                     self.send_message(reply, source_addr_long, source_addr_short)
 
                     # We are fully associated!
-                    self.logger.debug('Device should now be associated')
+                    self._logger.debug('Device should now be associated')
 
                 else:
-                    self.logger.error('Unrecognised Cluster ID: %e', cluster_id)
+                    self._logger.error('Unrecognised Cluster ID: %e', cluster_id)
 
             elif (profile_id == self.ALERTME_PROFILE_ID):
                 # AlertMe Profile ID
@@ -241,65 +241,65 @@ class Hub(Base):
                     if (cluster_cmd == b'\x80'):
                         properties = self.parse_switch_state(message['rf_data'])
                         self.save_node_attributes(node_id, properties)
-                        self.logger.debug('Switch Status: %s', properties)
+                        self._logger.debug('Switch Status: %s', properties)
 
                     else:
-                        self.logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
+                        self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
                 elif (cluster_id == b'\x00\xef'):
                     if (cluster_cmd == b'\x81'):
                         properties = self.parse_power_factor(message['rf_data'])
                         self.save_node_attributes(node_id, properties)
-                        self.logger.debug('Current Instantaneous Power: %s', properties)
+                        self._logger.debug('Current Instantaneous Power: %s', properties)
 
                     elif (cluster_cmd == b'\x82'):
                         properties = self.parse_power_consumption(message['rf_data'])
                         self.save_node_attributes(node_id, properties)
-                        self.logger.debug('Uptime: %s Usage: %s', properties['UpTime'], properties['PowerConsumption'])
+                        self._logger.debug('Uptime: %s Usage: %s', properties['UpTime'], properties['PowerConsumption'])
 
                     else:
-                        self.logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
+                        self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
                 elif (cluster_id == b'\x00\xf0'):
                     if (cluster_cmd == b'\xfb'):
                         properties = self.parse_status_update(message['rf_data'])
                         self.save_node_attributes(node_id, properties)
-                        self.logger.debug('Status Update: %s', properties)
+                        self._logger.debug('Status Update: %s', properties)
 
                         # This may be the missing link to this thing?
-                        self.logger.debug('Sending Missing Link')
+                        self._logger.debug('Sending Missing Link')
                         reply = self.generate_missing_link(message['dest_endpoint'], message['source_endpoint'])
                         self.send_message(reply, source_addr_long, source_addr_short)
 
                     else:
-                        self.logger.error('Unrecognised Cluster Cmd: %r', cluster_cmd)
+                        self._logger.error('Unrecognised Cluster Cmd: %r', cluster_cmd)
 
                 elif (cluster_id == b'\x00\xf2'):
                     properties = self.parse_tamper_state(message['rf_data'])
                     self.save_node_attributes(node_id, properties)
-                    self.logger.debug('Tamper Switch Changed State: %s', properties)
+                    self._logger.debug('Tamper Switch Changed State: %s', properties)
 
                 elif (cluster_id == b'\x00\xf3'):
                     properties = self.parse_button_press(message['rf_data'])
                     self.save_node_attributes(node_id, properties)
-                    self.logger.debug('Button Press: %s', properties)
+                    self._logger.debug('Button Press: %s', properties)
 
                 elif (cluster_id == b'\x00\xf6'):
                     if (cluster_cmd == b'\xfd'):
                         properties = self.parse_range_info(message['rf_data'])
                         self.save_node_attributes(node_id, properties)
-                        self.logger.debug('Range Test RSSI Value: %s', properties)
+                        self._logger.debug('Range Test RSSI Value: %s', properties)
 
                     elif (cluster_cmd == b'\xfe'):
                         properties = self.parse_version_info(message['rf_data'])
                         self.save_node_type(node_id, properties)
-                        self.logger.debug('Version Information: %s', properties)
+                        self._logger.debug('Version Information: %s', properties)
 
                     else:
-                        self.logger.error('Unrecognised Cluster Command: %e', cluster_cmd)
+                        self._logger.error('Unrecognised Cluster Command: %e', cluster_cmd)
 
                 elif (cluster_id == b'\x05\x00'):
-                    self.logger.debug('Security Event')
+                    self._logger.debug('Security Event')
                     # Security Cluster.
                     # When the device first connects, it comes up in a state that needs initialization, this command
                     # seems to take care of that. So, look at the value of the data and send the command.
@@ -309,13 +309,13 @@ class Hub(Base):
 
                     properties = self.parse_security_state(message['rf_data'])
                     self.save_node_attributes(node_id, properties)
-                    self.logger.debug('Security Device Values: %s', properties)
+                    self._logger.debug('Security Device Values: %s', properties)
 
                 else:
-                    self.logger.error('Unrecognised Cluster ID: %r', cluster_id)
+                    self._logger.error('Unrecognised Cluster ID: %r', cluster_id)
 
             else:
-                self.logger.error('Unrecognised Profile ID: %r', profile_id)
+                self._logger.error('Unrecognised Profile ID: %r', profile_id)
 
     def call_node_command(self, node_id, command, value):
         """
@@ -331,7 +331,7 @@ class Hub(Base):
         elif command == 'Mode':
             self.send_mode_request(node_id, value)
         else:
-            self.logger.error('Invalid Attribute Request')
+            self._logger.error('Invalid Attribute Request')
 
     def send_type_request(self, node_id):
         """
@@ -445,7 +445,7 @@ class Hub(Base):
             message['description'] = 'Switch State Request'
             message['data'] = b'\x11\x00\x01\x01'
         else:
-            self.logger.error('Invalid state request %s', state)
+            self._logger.error('Invalid state request %s', state)
 
         return message
 
@@ -478,7 +478,7 @@ class Hub(Base):
             message['description'] = 'Silent Mode'
             message['data'] = b'\x11\x00\xfa\x03\x01'
         else:
-            self.logger.error('Invalid mode request %s', mode)
+            self._logger.error('Invalid mode request %s', mode)
 
         return message
 
