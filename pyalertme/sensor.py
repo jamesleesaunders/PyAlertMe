@@ -53,10 +53,10 @@ class Sensor(Device):
 
                 if (cluster_id == b'\x05\x00'):
                     # Security Initialization
-                    self.logger.info('Security Initialization')
+                    self._logger.info('Security Initialization')
 
                 else:
-                    self.logger.error('Unrecognised Cluster ID: %r', cluster_id)
+                    self._logger.error('Unrecognised Cluster ID: %r', cluster_id)
 
             else:
-                self.logger.error('Unrecognised Profile ID: %r', profile_id)
+                self._logger.error('Unrecognised Profile ID: %r', profile_id)
