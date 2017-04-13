@@ -8,7 +8,7 @@ import sqlite3
 
 class Hub(Base):
 
-    def __init__(self, callback = lambda attrib_name, value: None):
+    def __init__(self, callback=None):
         """
         Hub Constructor
 
@@ -27,7 +27,7 @@ class Hub(Base):
 
         # Threadding and Callback
         self._discovery_thread = threading.Thread(target=self._discovery)
-        self._callback = callback
+        self._callback = callback if callback else lambda node_id, attrib_name, value: None
 
     def discovery(self):
         """
@@ -87,7 +87,7 @@ class Hub(Base):
         self.nodes[node_id]['attributes'][attrib_name] = value
 
         if self._callback:
-            self._callback(attrib_name, value)
+            self._callback(node_id, attrib_name, value)
 
     def get_node(self, node_id):
         """

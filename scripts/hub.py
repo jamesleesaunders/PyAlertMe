@@ -40,8 +40,8 @@ XBEE_PORT = '/dev/tty.usbserial-DN018OI6' # MacBook Serial Port
 XBEE_BAUD = 9600
 ser = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
-def callback(attrib_name, value):
-    print("Attribute: " + str(attrib_name) + "  Value: " + str(value))
+def callback(node_id, attrib_name, value):
+    print("Node ID: " + node_id + "  Attribute: " + attrib_name + "  Value: " + str(value))
 
 hub_obj = Hub(callback)
 hub_obj.start(ser)

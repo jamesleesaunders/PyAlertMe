@@ -84,11 +84,11 @@ class TestHub(unittest.TestCase):
 
     def test_parse_switch_state(self):
         result = Hub.parse_switch_state(b'\th\x80\x07\x01')
-        expected = {'State' : 'ON'}
+        expected = {'State': 'ON'}
         self.assertEqual(result, expected)
 
         result = Hub.parse_switch_state(b'\th\x80\x06\x00')
-        expected = {'State' : 'OFF'}
+        expected = {'State': 'OFF'}
         self.assertEqual(result, expected)
 
     def test_parse_version_info(self):
