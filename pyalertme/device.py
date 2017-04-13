@@ -46,13 +46,13 @@ class Device(Base):
             if (profile_id == self.ZDP_PROFILE_ID):
                 # Zigbee Device Profile ID
                 if (cluster_id == b'\x00\x32'):
-                    self.logger.debug('Broacast Discover TBC')
+                    self._logger.debug('Broacast Discover TBC')
 
                 elif (cluster_id == b'\x00\x05'):
-                    self.logger.debug('Active Endpoint Request')
+                    self._logger.debug('Active Endpoint Request')
 
                 elif (cluster_id == b'\x80\x06'):
-                    self.logger.debug('Match Descriptor')
+                    self._logger.debug('Match Descriptor')
 
             elif (profile_id == self.ALERTME_PROFILE_ID):
                 # AlertMe Profile ID
@@ -65,25 +65,25 @@ class Device(Base):
 
                 if (cluster_id == b'\x00\xf6'):
                     #'data': b'\x11\x01\xfc' same as type?
-                    self.logger.debug('Hardware Join Messages 1')
+                    self._logger.debug('Hardware Join Messages 1')
 
                 elif (cluster_id == b'\x00\xf6'):
                     # b'\x11\x00\xfc\x00\x01'
-                    self.logger.debug('Version Request')
+                    self._logger.debug('Version Request')
                     self.send_message(self.generate_type_update(), self.hub_addr_long, self.hub_addr_short)
 
                 elif (cluster_id == b'\x00\xf0'):
-                    self.logger.debug('Hardware Join Messages 2')
+                    self._logger.debug('Hardware Join Messages 2')
                     # We are now fully associated
                     self.associated = True
 
                 elif (cluster_id == b'\x00\xee'):
                     if (cluster_cmd == b'\xfa'):
-                        self.logger.debug('Range Test')
+                        self._logger.debug('Range Test')
                         self.send_message(self.generate_range_update(), self.hub_addr_long, self.hub_addr_short)
 
             else:
-                self.logger.error('Unrecognised Profile ID: %e', profile_id)
+                self._logger.error('Unrecognised Profile ID: %e', profile_id)
 
     def generate_type_update(self):
         """
