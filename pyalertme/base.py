@@ -71,7 +71,7 @@ class Base(object):
         :param error:
         :return:
         """
-        self.logger.critical('XBee Error: %s', error)
+        self._logger.critical('XBee Error: %s', error)
 
     def read_addresses(self):
         """
@@ -112,7 +112,7 @@ class Base(object):
         :param message: Dict of message
         :return:
         """
-        self.logger.debug('Received Message: %s', message)
+        self._logger.debug('Received Message: %s', message)
         self.process_message(message)
 
     def process_message(self, message):
