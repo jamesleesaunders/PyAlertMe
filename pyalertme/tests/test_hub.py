@@ -107,7 +107,7 @@ class TestHub(unittest.TestCase):
         self.assertEqual(result, expected)
         device_obj.halt()
 
-        result = Hub.parse_version_info(b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bPyAlertMe\tSmartPlug\n2013-09-26')
+        result = Hub.parse_version_info(b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\tSmartPlug\n2013-09-26')
         expected = {
             'Version': 20045,
             'Manufacturer': 'AlertMe.com',
