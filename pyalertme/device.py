@@ -16,7 +16,7 @@ class Device(Base):
         Base.__init__(self, callback)
 
         # Type Info
-        self.manu = 'AlertMe.com'
+        self.manu = 'PyAlertMe'
         self.type = 'Generic Device'
         self.date = '2016-09-18'
         self.version = 1
