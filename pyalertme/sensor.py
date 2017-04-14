@@ -16,7 +16,7 @@ class Sensor(Device):
         Device.__init__(self, callback)
 
         # Type Info
-        self.manu = 'AlertMe.com'
+        self.manu = 'PyAlertMe'
         self.type = 'Button Device'
         self.date = '2010-11-15'
         self.version = 59435
