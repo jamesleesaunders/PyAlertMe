@@ -100,7 +100,7 @@ class TestHub(unittest.TestCase):
         result = Hub.parse_version_info(message['data'])
         expected = {
             'Version': 1,
-            'Manufacturer': 'AlertMe.com',
+            'Manufacturer': 'PyAlertMe',
             'Type': 'Generic Device',
             'ManufactureDate': '2016-09-18'
         }
