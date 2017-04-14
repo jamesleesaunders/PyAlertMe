@@ -16,7 +16,7 @@ class SmartPlug(Device):
         Device.__init__(self, callback)
 
         # Type Info
-        self.manu = 'AlertMe.com'
+        self.manu = 'PyAlertMe'
         self.type = 'SmartPlug'
         self.date = '2013-09-26'
         self.version = 20045
