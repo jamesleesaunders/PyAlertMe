@@ -28,7 +28,7 @@ class Base(object):
 
         self._xbee = None
         self._serial = None
-        self._callback = callback if callback else lambda node_id, attrib_name, value: None
+        self._callback = callback if callback else self._callback
 
         # Type Info
         self.manu = None
@@ -42,6 +42,12 @@ class Base(object):
         self._addr_long_list = [None, None]
 
         self.associated = False
+
+    def _callback(self, type, node_id, field, value):
+        if type == 'Attribute':
+            print("Attribute Update [Node ID: " + node_id + "\tField: " + field + "\tValue: " + str(value) + "]")
+        elif type == 'Property':
+            print("Property Update [Node ID: " + node_id + "\tField: " + field + "\tValue: " + str(value) + "]")
 
     def start(self, serial):
         """
@@ -159,7 +165,7 @@ class Base(object):
                 self._logger.debug('HA Profile Packet Received')
 
             else:
-                self._logger.error('Unrecognised Profile ID: %e', profile_id)
+                self._logger.error('Unrecognised Profile ID: %r', profile_id)
 
     def __str__(self):
         """

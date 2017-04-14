@@ -25,7 +25,7 @@ formatter = logging.Formatter('%(asctime)s %(levelname)-3s %(module)-5s %(messag
 
 # Create console handler and set level to info
 sh = logging.StreamHandler()
-sh.setLevel(logging.DEBUG)
+sh.setLevel(logging.ERROR)
 sh.setFormatter(formatter)
 logger.addHandler(sh)
 
@@ -40,14 +40,18 @@ XBEE_PORT = '/dev/tty.usbserial-DN018OI6' # MacBook Serial Port
 XBEE_BAUD = 9600
 ser = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
-def callback(node_id, attrib_name, value):
-    print("Node ID: " + node_id + "  Attribute: " + attrib_name + "  Value: " + str(value))
+def callback(type, node_id, field, value):
+    if type == 'Attribute':
+        print("Attribute Update\n\tNode ID: " + node_id + "  Field: " + field + "  Value: " + str(value))
+    elif type == 'Node':
+        print("Node Update\n\tNode ID: " + node_id + "  Field: " + field + "  Value: " + str(value))
 
-hub_obj = Hub(callback)
+# Create Hub Object
+hub_obj = Hub()
 hub_obj.start(ser)
 
-# Kick off discovery thread
-# hubObj.discovery()
+# Kick Off Discovery
+hub_obj.discovery()
 
 # Actions Phase
 while True:
@@ -64,13 +68,8 @@ while True:
             print("Select command:\n")
             action = raw_input("")
             message = hub_obj.get_action(action)
-
-            dest_addr_long = nodes[node_id]['addr_long']
-            dest_addr_short = nodes[node_id]['addr_short']
-
-            pp.pprint(dest_addr_long)
-            pp.pprint(dest_addr_short)
-            hub_obj.send_message(message, dest_addr_long, dest_addr_short)
+            addresses = hub_obj.node_id_to_addrs(node_id)
+            hub_obj.send_message(message, *addresses)
 
     except IndexError:
         print("No Command")

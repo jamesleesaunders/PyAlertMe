@@ -17,15 +17,15 @@ class TestHub(unittest.TestCase):
 
     def test_receive_message(self):
         message = {
-            'cluster':          b'\x00\xf6',
-            'dest_endpoint':    b'\x02',
-            'id':               'rx_explicit',
-            'options':          b'\x01',
-            'profile':          b'\xc2\x16',
-            'rf_data':          b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\tSmartPlug\n2013-09-26',
-            'source_addr':      b'\x88\x9f',
+            'cluster': b'\x00\xf6',
+            'dest_endpoint': b'\x02',
+            'id': 'rx_explicit',
+            'options': b'\x01',
+            'profile': b'\xc2\x16',
+            'rf_data': b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\tSmartPlug\n2013-09-26',
+            'source_addr': b'\x88\x9f',
             'source_addr_long': b'\x00\ro\x00\x03\xbb\xb9\xf8',
-            'src_endpoint':     b'\x02'
+            'src_endpoint': b'\x02'
         }
         self.hub_obj.receive_message(message)
         result = self.hub_obj.get_nodes()
@@ -35,9 +35,9 @@ class TestHub(unittest.TestCase):
                 'Manufacturer': 'AlertMe.com',
                 'Type': 'SmartPlug',
                 'Version': 20045,
-                'addr_long': '\x00\ro\x00\x03\xbb\xb9\xf8',
-                'addr_short': '\x88\x9f',
-                'attributes': {}
+                'AddressLong': '\x00\ro\x00\x03\xbb\xb9\xf8',
+                'AddressShort': '\x88\x9f',
+                'Attributes': {}
             }
         }
 
@@ -356,6 +356,22 @@ class TestHub(unittest.TestCase):
             'data': '\x119\xfd'
         }
         self.assertEqual(result, expected)
+
+    def test_unknown_message(self):
+        # Temporary Test while investigating...
+        # 2017-04-14 21:59:57,078 ERROR hub   Unrecognised Cluster Command: '\xfc'
+        message = {
+            'profile': b'\xc2\x16',
+            'source_addr': b'\x00\x00',
+            'dest_endpoint': b'\x02',
+            'rf_data': b'\x11\x00\xfc\x00\x01',
+            'source_endpoint': b'\x00',
+            'options': b'\x01',
+            'source_addr_long': b'\x00\x13\xa2\x00@\xe9\xa4\xc0',
+            'cluster': b'\x00\xf6',
+            'id': 'rx_explicit'
+        }
+        self.hub_obj.receive_message(message)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

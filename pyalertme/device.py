@@ -19,7 +19,7 @@ class Device(Base):
         self.manu = 'PyAlertMe'
         self.type = 'Generic Device'
         self.date = '2016-09-18'
-        self.version = 1
+        self.version = 00001
 
         # Start off not associated
         self.associated = False
@@ -64,7 +64,7 @@ class Device(Base):
                     cluster_cmd = bytes([message['rf_data'][2]])
 
                 if (cluster_id == b'\x00\xf6'):
-                    #'data': b'\x11\x01\xfc' same as type?
+                    # b'\x11\x01\xfc' almost the same as type below?
                     self._logger.debug('Hardware Join Messages 1')
 
                 elif (cluster_id == b'\x00\xf6'):
@@ -83,7 +83,7 @@ class Device(Base):
                         self.send_message(self.generate_range_update(), self.hub_addr_long, self.hub_addr_short)
 
             else:
-                self._logger.error('Unrecognised Profile ID: %e', profile_id)
+                self._logger.error('Unrecognised Profile ID: %r', profile_id)
 
     def generate_type_update(self):
         """

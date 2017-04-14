@@ -21,7 +21,7 @@ class Hub(Base):
         self.manu = 'PyAlertMe'
         self.type = 'Nano Hub'
         self.date = '2017-01-01'
-        self.version = 1
+        self.version = None
 
         # List of Associated Nodes
         self.nodes = {}
@@ -68,7 +68,6 @@ class Hub(Base):
         :param attributes:
         :return:
         """
-        self._logger.debug('Updating Attributes: %s', attributes)
         for attrib_name, value in attributes.iteritems():
             self.save_node_attribute(node_id, attrib_name, value)
 
@@ -81,27 +80,33 @@ class Hub(Base):
         :param value:
         :return:
         """
-        self.nodes[node_id]['attributes'][attrib_name] = value
+        self._logger.debug('Updating Node Attribute: %s Value: %s', attrib_name, value)
+        self.nodes[node_id]['Attributes'][attrib_name] = value
+        self._callback('Attribute', node_id, attrib_name, value)
 
-        if self._callback:
-            self._callback(node_id, attrib_name, value)
-
-    def get_node(self, node_id):
+    def save_node_properties(self, node_id, properties):
         """
-        Given a Node ID return node.
+        Save Multiple Node Properties
 
-        :param node_id: Integer Short Node ID
-        :return: Node record
+        :param node_id:
+        :param properties:
+        :return:
         """
-        return self.nodes[node_id]
+        for property_name, value in properties.iteritems():
+            self.save_node_property(node_id, property_name, value)
 
-    def get_nodes(self):
+    def save_node_property(self, node_id, property_name, value):
         """
-        Get Nodes
+        Save Single Node Property
 
-        :return: Dictionary of Nodes
+        :param node_id:
+        :param property_name:
+        :param value:
+        :return:
         """
-        return self.nodes
+        self._logger.debug('Updating Node Property: %s Value: %s', property_name, value)
+        self.nodes[node_id][property_name] = value
+        self._callback('Property', node_id, property_name, value)
 
     def save_node_type(self, node_id, details):
         """
@@ -112,7 +117,25 @@ class Hub(Base):
         """
         self._logger.debug('Setting Device Type to %s', details)
         for field, value in details.iteritems():
-            self.nodes[node_id][field] = value
+            # self.nodes[node_id][field] = value
+            self.save_node_property(node_id, field, value)
+
+    def get_nodes(self):
+        """
+        Get Nodes
+
+        :return: Dictionary of Nodes
+        """
+        return self.nodes
+
+    def get_node(self, node_id):
+        """
+        Given a Node ID return node.
+
+        :param node_id: Integer Short Node ID
+        :return: Node record
+        """
+        return self.nodes[node_id]
 
     def addrs_to_node_id(self, addr_long, addr_short):
         """
@@ -123,10 +146,16 @@ class Hub(Base):
         :return: Integer Short Node ID
         """
         node_id = Base.pretty_mac(addr_long)
+
+        if addr_long == self.addr_long:
+            # If this is me, dont add to nodes list
+            return node_id
+
         if node_id not in self.nodes:
             # Add to nodes list
-            self.nodes[node_id] = {'addr_long': addr_long, 'addr_short': addr_short, 'attributes': {}}
+           self.nodes[node_id] = {'AddressLong': addr_long, 'Attributes': {}}
 
+        self.save_node_properties(node_id, {'AddressLong': addr_long, 'AddressShort': addr_short})
         return node_id
 
     def node_id_to_addrs(self, node_id):
@@ -137,8 +166,8 @@ class Hub(Base):
         :param node_id:  Integer Short Node ID
         :return: Tuple of long and short addresses
         """
-        addr_long = self.nodes[node_id]['addr_long']
-        addr_short = self.nodes[node_id]['addr_short']
+        addr_long = self.nodes[node_id]['AddressLong']
+        addr_short = self.nodes[node_id]['AddressShort']
 
         return addr_long, addr_short
 
@@ -226,7 +255,7 @@ class Hub(Base):
                     self._logger.debug('Device should now be associated')
 
                 else:
-                    self._logger.error('Unrecognised Cluster ID: %e', cluster_id)
+                    self._logger.error('Unrecognised Cluster ID: %r', cluster_id)
 
             elif (profile_id == self.ALERTME_PROFILE_ID):
                 # AlertMe Profile ID
@@ -272,7 +301,7 @@ class Hub(Base):
                         self.send_message(reply, source_addr_long, source_addr_short)
 
                     else:
-                        self._logger.error('Unrecognised Cluster Cmd: %r', cluster_cmd)
+                        self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
                 elif (cluster_id == b'\x00\xf2'):
                     properties = self.parse_tamper_state(message['rf_data'])
@@ -296,7 +325,7 @@ class Hub(Base):
                         self._logger.debug('Version Information: %s', properties)
 
                     else:
-                        self._logger.error('Unrecognised Cluster Command: %e', cluster_cmd)
+                        self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
                 elif (cluster_id == b'\x05\x00'):
                     self._logger.debug('Security Event')
@@ -754,7 +783,7 @@ class Hub(Base):
             ret['TempFahrenheit'] = float(struct.unpack("<h", rf_data[8:10])[0]) / 100.0 * 1.8 + 32
 
         else:
-            logging.error('Unrecognised Device Status %s', rf_data)
+            logging.error('Unrecognised Device Status %r', rf_data)
 
         return ret
 

@@ -61,7 +61,7 @@ class SmartPlug(Device):
                         self.state = self.parse_switch_state_request(message['rf_data'])
                         self._logger.debug('Switch State Changed to: %s', self.state)
                         self.send_message(self.generate_switch_state_update(), self.hub_addr_long, self.hub_addr_short)
-                        self._callback(self.get_node_id(), 'State', 'ON')
+                        self._callback('Attribute', self.get_node_id(), 'State', 'ON')
 
                     elif (cluster_cmd == b'\xfa'):
                         # Set Mode
