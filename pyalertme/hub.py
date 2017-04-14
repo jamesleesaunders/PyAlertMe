@@ -18,7 +18,7 @@ class Hub(Base):
         self._discovery_thread = threading.Thread(target=self._discovery)
 
         # Type Info
-        self.manu = 'AlertMe.com'
+        self.manu = 'PyAlertMe'
         self.type = 'Nano Hub'
         self.date = '2017-01-01'
         self.version = 1
