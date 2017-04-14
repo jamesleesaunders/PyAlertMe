@@ -19,7 +19,7 @@ class Hub(Base):
 
         # Type Info
         self.manu = 'PyAlertMe'
-        self.type = 'Hub'
+        self.type = 'Nano Hub'
         self.date = '2017-01-01'
         self.version = 1
 
