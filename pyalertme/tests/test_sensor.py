@@ -23,7 +23,7 @@ class TestSensor(unittest.TestCase):
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xf6',
             'profile': b'\xc2\x16',
-            'data': '\tq\xfe+\xe8\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\nButton Device\n2010-11-15'
+            'data': '\tq\xfe+\xe8\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bPyAlertMe\nButton Device\n2010-11-15'
         }
         self.assertEqual(result, expected)
 
