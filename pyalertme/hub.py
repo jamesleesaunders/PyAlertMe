@@ -125,7 +125,7 @@ class Hub(Base):
         """
         return self.nodes[node_id]
 
-    def addr_to_node_id(self, addr_long):
+    def addr_long_to_node_id(self, addr_long):
         """
         Given a 48-bit Long Address lookup or generate new Node ID.
 
@@ -172,7 +172,7 @@ class Hub(Base):
         if message['id'] == 'rx_explicit':
             source_addr_long = message['source_addr_long']
             source_addr_short = message['source_addr']
-            node_id = self.addr_to_node_id(source_addr_long)
+            node_id = self.addr_long_to_node_id(source_addr_long)
 
             if node_id:
                 self.save_node_properties(node_id, {'AddressLong': source_addr_long, 'AddressShort': source_addr_short})
