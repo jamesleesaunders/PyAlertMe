@@ -35,25 +35,25 @@ class Sensor(Device):
         super(Sensor, self).process_message(message)
 
         # Zigbee Explicit Packets
-        if (message['id'] == 'rx_explicit'):
+        if message['id'] == 'rx_explicit':
             profile_id = message['profile']
             cluster_id = message['cluster']
 
             source_addr_long = message['source_addr_long']
             source_addr_short = message['source_addr']
 
-            if (profile_id == self.ALERTME_PROFILE_ID):
+            if profile_id == self.ALERTME_PROFILE_ID:
                 # AlertMe Profile ID
 
                 # Python 2 / 3 hack
-                if (hasattr(bytes(), 'encode')):
+                if hasattr(bytes(), 'encode'):
                     cluster_cmd = message['rf_data'][2]
                 else:
                     cluster_cmd = bytes([message['rf_data'][2]])
 
-                if (cluster_id == b'\x05\x00'):
+                if cluster_id == b'\x05\x00':
                     # Security Initialization
-                    self._logger.info('Security Initialization')
+                    self._logger.info('Received Security Initialization')
 
                 else:
                     self._logger.error('Unrecognised Cluster ID: %r', cluster_id)

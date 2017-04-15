@@ -35,7 +35,7 @@ class Device(Base):
         """
         super(Device, self).process_message(message)
         # Zigbee Explicit Packets
-        if (message['id'] == 'rx_explicit'):
+        if message['id'] == 'rx_explicit':
             profile_id = message['profile']
             cluster_id = message['cluster']
 
@@ -43,43 +43,43 @@ class Device(Base):
             self.hub_addr_long = message['source_addr_long']
             self.hub_addr_short = message['source_addr']
 
-            if (profile_id == self.ZDP_PROFILE_ID):
+            if profile_id == self.ZDP_PROFILE_ID:
                 # Zigbee Device Profile ID
-                if (cluster_id == b'\x00\x32'):
-                    self._logger.debug('Broacast Discover TBC')
+                if cluster_id == b'\x00\x32':
+                    self._logger.debug('Received Broacast Discover TBC')
 
-                elif (cluster_id == b'\x00\x05'):
-                    self._logger.debug('Active Endpoint Request')
+                elif cluster_id == b'\x00\x05':
+                    self._logger.debug('Received Active Endpoint Request')
 
-                elif (cluster_id == b'\x80\x06'):
-                    self._logger.debug('Match Descriptor')
+                elif cluster_id == b'\x80\x06':
+                    self._logger.debug('Received Match Descriptor')
 
             elif (profile_id == self.ALERTME_PROFILE_ID):
                 # AlertMe Profile ID
 
                 # Python 2 / 3 hack
-                if (hasattr(bytes(), 'encode')):
+                if hasattr(bytes(), 'encode'):
                     cluster_cmd = message['rf_data'][2]
                 else:
                     cluster_cmd = bytes([message['rf_data'][2]])
 
-                if (cluster_id == b'\x00\xf6'):
+                if cluster_id == b'\x00\xf6':
                     # b'\x11\x01\xfc' almost the same as type below?
-                    self._logger.debug('Hardware Join Messages 1')
+                    self._logger.debug('Received Hardware Join Message 1')
 
-                elif (cluster_id == b'\x00\xf6'):
+                elif cluster_id == b'\x00\xf6':
                     # b'\x11\x00\xfc\x00\x01'
-                    self._logger.debug('Version Request')
+                    self._logger.debug('Received Version Request')
                     self.send_message(self.generate_type_update(), self.hub_addr_long, self.hub_addr_short)
 
-                elif (cluster_id == b'\x00\xf0'):
-                    self._logger.debug('Hardware Join Messages 2')
+                elif cluster_id == b'\x00\xf0':
+                    self._logger.debug('Received Hardware Join Message 2')
                     # We are now fully associated
                     self.associated = True
 
-                elif (cluster_id == b'\x00\xee'):
-                    if (cluster_cmd == b'\xfa'):
-                        self._logger.debug('Range Test')
+                elif cluster_id == b'\x00\xee':
+                    if cluster_cmd == b'\xfa':
+                        self._logger.debug('Received Range Test Request')
                         self.send_message(self.generate_range_update(), self.hub_addr_long, self.hub_addr_short)
 
             else:

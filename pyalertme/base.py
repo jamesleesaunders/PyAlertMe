@@ -154,15 +154,15 @@ class Base(object):
 
             if profile_id == self.ZDP_PROFILE_ID:
                 # Zigbee Device Profile ID
-                self._logger.debug('Zigbee Device Profile Packet Receieved')
+                self._logger.debug('Received Zigbee Device Profile Packet')
 
             elif profile_id == self.ALERTME_PROFILE_ID:
                 # AlertMe Profile ID
-                self._logger.debug('AlertMe Specific Profile Packet Received')
+                self._logger.debug('Received AlertMe Specific Profile Packet')
 
             elif profile_id == self.HA_PROFILE_ID:
                 # HA Profile ID
-                self._logger.debug('HA Profile Packet Received')
+                self._logger.debug('Received HA Profile Packet')
 
             else:
                 self._logger.error('Unrecognised Profile ID: %r', profile_id)
@@ -209,7 +209,7 @@ class Base(object):
             'data': '\xff\x00'
         },
         'hardware_join_1': {
-            'description': 'Hardware Join Messages 1',  # Device
+            'description': 'Hardware Join Message 1',  # Device
             'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xf6',
@@ -217,7 +217,7 @@ class Base(object):
             'data': b'\x11\x01\xfc'
         },
         'hardware_join_2': {
-            'description': 'Hardware Join Messages 2',  # Device (also note Version req)
+            'description': 'Hardware Join Message 2',  # Device (also note Version req)
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xf0',

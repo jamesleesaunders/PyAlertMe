@@ -34,27 +34,27 @@ class SmartPlug(Device):
         super(SmartPlug, self).process_message(message)
 
         # Zigbee Explicit Packets
-        if (message['id'] == 'rx_explicit'):
+        if message['id'] == 'rx_explicit':
             profile_id = message['profile']
             cluster_id = message['cluster']
 
-            if (profile_id == self.ALERTME_PROFILE_ID):
+            if profile_id == self.ALERTME_PROFILE_ID:
                 # AlertMe Profile ID
 
                 # Python 2 / 3 hack
-                if (hasattr(bytes(), 'encode')):
+                if hasattr(bytes(), 'encode'):
                     cluster_cmd = message['rf_data'][2]
                 else:
                     cluster_cmd = bytes([message['rf_data'][2]])
 
-                if (cluster_id == b'\x00\xee'):
-                    if (cluster_cmd == b'\01'):
+                if cluster_id == b'\x00\xee':
+                    if cluster_cmd == b'\01':
                         # State Request
                         # b'\x11\x00\x01\x01'
                         self._logger.debug('Switch State is: %s', self.state)
                         self.send_message(self.generate_switch_state_update(), self.hub_addr_long, self.hub_addr_short)
 
-                    elif (cluster_cmd == b'\02'):
+                    elif cluster_cmd == b'\02':
                         # Change State
                         # b'\x11\x00\x02\x01\x01' On
                         # b'\x11\x00\x02\x00\x01' Off
@@ -63,19 +63,19 @@ class SmartPlug(Device):
                         self.send_message(self.generate_switch_state_update(), self.hub_addr_long, self.hub_addr_short)
                         self._callback('Attribute', self.get_node_id(), 'State', 'ON')
 
-                    elif (cluster_cmd == b'\xfa'):
+                    elif cluster_cmd == b'\xfa':
                         # Set Mode
-                        if(message['rf_data'][4] == b'\x00\x01'):
+                        if message['rf_data'][4] == b'\x00\x01':
                             # Normal
                             # b'\x11\x00\xfa\x00\x01'
                             self._logger.debug('Normal Mode')
 
-                        elif(message['rf_data'][4] == b'\x00\x01'):
+                        elif message['rf_data'][4] == b'\x00\x01':
                             # Locked
                             # b'\x11\x00\xfa\x02\x01'
                             self._logger.debug('Locked Mode')
 
-                        elif(message['rf_data'][4] == b'\x03\x01'):
+                        elif message['rf_data'][4] == b'\x03\x01':
                             # Silent
                             # b'\x11\x00\xfa\x03\x01'
                             self._logger.debug('Silent Mode')
