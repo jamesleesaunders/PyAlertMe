@@ -96,8 +96,6 @@ class Base(object):
         time.sleep(0.05)
         self._xbee.send('at', command='SL')
         time.sleep(0.05)
-        self._xbee.send('at', command='HV')
-        time.sleep(0.05)
 
     def send_message(self, message, dest_addr_long, dest_addr_short):
         """
@@ -141,8 +139,6 @@ class Base(object):
                 self._addr_long_list[0] = message['parameter']
             if message['command'] == 'SL':
                 self._addr_long_list[1] = message['parameter']
-            if message['command'] == 'HV':
-                self.version = message['parameter']
             # If we have worked out both the High and Low addresses then calculate the full addr_long
             if self._addr_long_list[0] and self._addr_long_list[1]:
                 self.addr_long = b''.join(self._addr_long_list)

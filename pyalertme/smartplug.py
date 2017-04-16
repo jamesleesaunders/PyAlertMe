@@ -108,7 +108,7 @@ class SmartPlug(Device):
         """
         checksum = b'\th'
         cluster_cmd = b'\x80'
-        payload = b'\x06\x00' if self.state else b'\x07\x01'
+        payload = b'\x07\x06' if self.state else b'\x06\x01'
         data = checksum + cluster_cmd + payload
 
         message = {

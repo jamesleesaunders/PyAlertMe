@@ -64,13 +64,14 @@ class Device(Base):
                     cluster_cmd = bytes([message['rf_data'][2]])
 
                 if cluster_id == b'\x00\xf6':
-                    # b'\x11\x01\xfc' almost the same as type below?
-                    self._logger.debug('Received Hardware Join Message 1')
-
-                elif cluster_id == b'\x00\xf6':
                     # b'\x11\x00\xfc\x00\x01'
                     self._logger.debug('Received Version Request')
                     self.send_message(self.generate_type_update(), self.hub_addr_long, self.hub_addr_short)
+
+                # elif cluster_id == b'\x00\xf6':
+                    # b'\x11\x01\xfc'
+                    # Almost the same as type above? Not sure on link yet?
+                    # self._logger.debug('Received Hardware Join Message 1')
 
                 elif cluster_id == b'\x00\xf0':
                     self._logger.debug('Received Hardware Join Message 2')
