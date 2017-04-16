@@ -212,14 +212,6 @@ class Base(object):
             'profile': ALERTME_PROFILE_ID,
             'data': b'\x11\x01\xfc'
         },
-        'hardware_join_2': {
-            'description': 'Hardware Join Message 2',  # Device (also note Version req)
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf0',
-            'profile': ALERTME_PROFILE_ID,
-            'data': b'\x19\x01\xfa\x00\x01'
-        },
         'active_endpoint_request': {
             'description': 'Active Endpoint Request',  # Device
             'src_endpoint': b'\x00',
@@ -267,6 +259,14 @@ class Base(object):
             'cluster'       : b'\x00\xee',
             'profile'       : ALERTME_PROFILE_ID,
             'data'          : b'\x11\x00\x01\x01'
+        },
+        'hardware_join_2': {
+            'description'   : 'Hardware Join Message 2',  # Device (also note Version req)
+            'src_endpoint'  : b'\x00',
+            'dest_endpoint' : b'\x02',
+            'cluster'       : b'\x00\xf0',
+            'profile'       : ALERTME_PROFILE_ID,
+            'data'          : b'\x19\x01\xfa\x00\x01'
         },
         'normal_mode': {
             'description'   : 'Normal Mode',  #SmartPlug

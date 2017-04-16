@@ -29,6 +29,8 @@ ZigBee Stack Profile (ZS): 2
 ## Packets
 
 #### Range Test
+
+Response:
 ```python
 {
 'profile': '\xc2\x16', 
@@ -44,9 +46,6 @@ ZigBee Stack Profile (ZS): 2
 ```
 2017-04-16 23:14:20,046 DEBUG hub   Received RSSI Range Test Update
 2017-04-16 23:14:20,046 DEBUG hub   Updating Node Attribute: RSSI Value: 208
-
-
-
 ```python
 {
 'profile': '\xc2\x16', 
@@ -62,3 +61,20 @@ ZigBee Stack Profile (ZS): 2
 ```
 2017-04-16 23:14:22,017 DEBUG hub   Received RSSI Range Test Update
 2017-04-16 23:14:22,017 DEBUG hub   Updating Node Attribute: RSSI Value: 207
+
+Request:
+```python
+{
+'profile': '\xc2\x16', 
+'source_addr': '\x00\x00', 
+'dest_endpoint': '\x02', 
+'rf_data': '\x11\x00\xfa\x01\x01', 
+'source_endpoint': '\x00', 
+'options': '\x01', 
+'source_addr_long': '\x00\x13\xa2\x00@\xe9\xa4\xc0', 
+'cluster': '\x00\xf0', 
+'id': 'rx_explicit'
+}
+```
+2017-04-16 23:29:52,004 DEBUG base  Received AlertMe Specific Profile Packet
+2017-04-16 23:29:52,004 DEBUG device Received Hardware Join Message 2
