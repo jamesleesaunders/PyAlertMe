@@ -74,4 +74,4 @@ while True:
 
 # Close up shop
 print("Closing Serial Port")
-hub_obj.halt()
+device_obj.halt()

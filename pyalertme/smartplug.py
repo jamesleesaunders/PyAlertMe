@@ -83,8 +83,8 @@ class SmartPlug(Device):
                     else:
                         self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
-                else:
-                    self._logger.error('Unrecognised Cluster ID: %r', cluster_id)
+                # else:
+                    # self._logger.error('Unrecognised Cluster ID: %r', cluster_id)
 
             else:
                 self._logger.error('Unrecognised Profile ID: %r', profile_id)
@@ -108,7 +108,7 @@ class SmartPlug(Device):
         """
         checksum = b'\th'
         cluster_cmd = b'\x80'
-        payload = b'\x07\x06' if self.state else b'\x06\x01'
+        payload = b'\x07\x01' if self.state else b'\x06\x00'
         data = checksum + cluster_cmd + payload
 
         message = {
