@@ -43,7 +43,7 @@ class Device(Base):
 
         """
         while True:
-            if self.associated == True
+            if self.associated == True:
                 self.updates()
             time.sleep(2.00)
 
