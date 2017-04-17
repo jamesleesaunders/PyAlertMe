@@ -220,8 +220,8 @@ class Base(object):
             'profile': ZDP_PROFILE_ID,
             'data': b'\x00\x00'
         },
-        'match_descriptor_response': {  # Hub
-            'description': 'Match Descriptor Response',
+        'match_descriptor_response': {
+            'description': 'Match Descriptor Response', # Hub
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x00',
             'cluster': b'\x80\x06',
