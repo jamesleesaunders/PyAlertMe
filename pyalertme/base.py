@@ -205,7 +205,7 @@ class Base(object):
             'data': '\xff\x00'
         },
         'hardware_join_1': {
-            'description': 'Hardware Join Message 1',  # Device
+            'description': 'Hardware Join Message 1',  # Device (also note similarity to Version req)
             'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xf6',
@@ -237,68 +237,68 @@ class Base(object):
             'data': b'\x11\x00\xfc\x00\x01'
         },
         'plug_off': {
-            'description'   : 'Switch Plug Off',  #SmartPlug
-            'src_endpoint'  : b'\x00',
-            'dest_endpoint' : b'\x02',
-            'cluster'       : b'\x00\xee',
-            'profile'       : ALERTME_PROFILE_ID,
-            'data'          : b'\x11\x00\x02\x00\x01'
+            'description': 'Switch Plug Off',  # SmartPlug
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xee',
+            'profile': ALERTME_PROFILE_ID,
+            'data': b'\x11\x00\x02\x00\x01'
         },
         'plug_on': {
-            'description'   : 'Switch Plug On',  #SmartPlug
-            'src_endpoint'  : b'\x00',
-            'dest_endpoint' : b'\x02',
-            'cluster'       : b'\x00\xee',
-            'profile'       : ALERTME_PROFILE_ID,
-            'data'          : b'\x11\x00\x02\x01\x01'
+            'description': 'Switch Plug On',  # SmartPlug
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xee',
+            'profile': ALERTME_PROFILE_ID,
+            'data': b'\x11\x00\x02\x01\x01'
         },
         'switch_status': {
-            'description'   : 'Switch Status',  #SmartPlug
-            'src_endpoint'  : b'\x00',
-            'dest_endpoint' : b'\x02',
-            'cluster'       : b'\x00\xee',
-            'profile'       : ALERTME_PROFILE_ID,
-            'data'          : b'\x11\x00\x01\x01'
+            'description': 'Switch Status',  # SmartPlug
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xee',
+            'profile': ALERTME_PROFILE_ID,
+            'data': b'\x11\x00\x01\x01'
         },
         'hardware_join_2': {
-            'description'   : 'Hardware Join Message 2',  # Device (also note Version req)
-            'src_endpoint'  : b'\x00',
-            'dest_endpoint' : b'\x02',
-            'cluster'       : b'\x00\xf0',
-            'profile'       : ALERTME_PROFILE_ID,
-            'data'          : b'\x19\x01\xfa\x00\x01'
+            'description': 'Hardware Join Message 2',  # Device (also note similarity to Range RSSI req)
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf0',
+            'profile': ALERTME_PROFILE_ID,
+            'data': b'\x19\x01\xfa\x00\x01'
         },
         'normal_mode': {
-            'description'   : 'Normal Mode',  #SmartPlug
-            'src_endpoint'  : b'\x00',
-            'dest_endpoint' : b'\x02',
-            'cluster'       : b'\x00\xf0',
-            'profile'       : ALERTME_PROFILE_ID,
-            'data'          : b'\x11\x00\xfa\x00\x01'
+            'description': 'Normal Mode',  # SmartPlug
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf0',
+            'profile': ALERTME_PROFILE_ID,
+            'data': b'\x11\x00\xfa\x00\x01'
         },
         'range_test': {
-            'description'   : 'Range Test',  # Device
-            'src_endpoint'  : b'\x00',
-            'dest_endpoint' : b'\x02',
-            'cluster'       : b'\x00\xf0',
-            'profile'       : ALERTME_PROFILE_ID,
-            'data'          : b'\x11\x00\xfa\x01\x01'
+            'description': 'Range Test',  # Device
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf0',
+            'profile': ALERTME_PROFILE_ID,
+            'data': b'\x11\x00\xfa\x01\x01'
         },
         'locked_mode': {
-            'description'   : 'Locked Mode',   #SmartPlug
-            'src_endpoint'  : b'\x00',
-            'dest_endpoint' : b'\x02',
-            'cluster'       : b'\x00\xf0',
-            'profile'       : ALERTME_PROFILE_ID,
-            'data'          : b'\x11\x00\xfa\x02\x01'
+            'description': 'Locked Mode',   # SmartPlug
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf0',
+            'profile': ALERTME_PROFILE_ID,
+            'data': b'\x11\x00\xfa\x02\x01'
         },
         'silent_mode': {
-            'description'   : 'Silent Mode',   #SmartPlug
-            'src_endpoint'  : b'\x00',
-            'dest_endpoint' : b'\x02',
-            'cluster'       : b'\x00\xf0',
-            'profile'       : ALERTME_PROFILE_ID,
-            'data'          : b'\x11\x00\xfa\x03\x01'
+            'description': 'Silent Mode',   # SmartPlug
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf0',
+            'profile': ALERTME_PROFILE_ID,
+            'data': b'\x11\x00\xfa\x03\x01'
         },
         'security_initialization': {
             'description': 'Security Initialization',  # Sensor
