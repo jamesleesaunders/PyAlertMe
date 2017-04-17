@@ -29,29 +29,29 @@ class TestSmartPlug(unittest.TestCase):
 
     def test_state_change(self):
         message_on = {
-            'cluster':          b'\x00\xee',
-            'dest_endpoint':    b'\x02',
-            'id':               'rx_explicit',
-            'options':          b'\x01',
-            'profile':          b'\xc2\x16',
-            'rf_data':          b'\x11\x00\x02\x01\x01',
-            'source_addr':      b'\x88\x9f',
+            'cluster': b'\x00\xee',
+            'dest_endpoint': b'\x02',
+            'id': 'rx_explicit',
+            'options': b'\x01',
+            'profile': b'\xc2\x16',
+            'rf_data': b'\x11\x00\x02\x01\x01',
+            'source_addr': b'\x88\x9f',
             'source_addr_long': b'\x00\ro\x00\x03\xbb\xb9\xf8',
-            'src_endpoint':     b'\x02'
+            'src_endpoint': b'\x02'
         }
         self.device_obj.receive_message(message_on)
         self.assertEqual(self.device_obj.state, 1)
 
         message_off = {
-            'cluster':          b'\x00\xee',
-            'dest_endpoint':    b'\x02',
-            'id':               'rx_explicit',
-            'options':          b'\x01',
-            'profile':          b'\xc2\x16',
-            'rf_data':          b'\x11\x00\x02\x00\x01',
-            'source_addr':      b'\x88\x9f',
+            'cluster': b'\x00\xee',
+            'dest_endpoint': b'\x02',
+            'id': 'rx_explicit',
+            'options': b'\x01',
+            'profile': b'\xc2\x16',
+            'rf_data': b'\x11\x00\x02\x00\x01',
+            'source_addr': b'\x88\x9f',
             'source_addr_long': b'\x00\ro\x00\x03\xbb\xb9\xf8',
-            'src_endpoint':     b'\x02'
+            'src_endpoint': b'\x02'
         }
         self.device_obj.receive_message(message_off)
         self.assertEqual(self.device_obj.state, 0)
@@ -60,23 +60,23 @@ class TestSmartPlug(unittest.TestCase):
         self.device_obj.state = 1
         result = self.device_obj.generate_switch_state_update()
         expected = {
-            'profile': '\xc2\x16',
+            'profile': b'\xc2\x16',
             'description': 'Switch State Update',
-            'src_endpoint': '\x00',
-            'cluster': '\x00\xee',
-            'data': '\th\x80\x07\x01',
+            'src_endpoint': b'\x00',
+            'cluster': b'\x00\xee',
+            'data': b'\th\x80\x07\x01',
             'dest_endpoint': '\x02'
         }
         self.assertEqual(result, expected)
         self.device_obj.state = 0
         result = self.device_obj.generate_switch_state_update()
         expected = {
-            'profile': '\xc2\x16',
+            'profile': b'\xc2\x16',
             'description': 'Switch State Update',
-            'src_endpoint': '\x00',
-            'cluster': '\x00\xee',
-            'data': '\th\x80\x06\x00',
-            'dest_endpoint': '\x02'
+            'src_endpoint': b'\x00',
+            'cluster': b'\x00\xee',
+            'data': b'\th\x80\x06\x00',
+            'dest_endpoint': b'\x02'
         }
         self.assertEqual(result, expected)
 
@@ -89,14 +89,14 @@ class TestSmartPlug(unittest.TestCase):
     def test_send_message(self):
         message = {
             'source_addr_long': b'\x00\ro\x00\x03\xbb\xb9\xf8',
-            'source_addr':      b'\x88\x9f',
-            'cluster':          b'\x00\xee',
-            'rf_data':          b'\x11\x00\x01\x01',
-            'dest_endpoint':    b'\x02',
-            'id':               'rx_explicit',
-            'options':          b'\x01',
-            'profile':          b'\xc2\x16',
-            'src_endpoint':     b'\x02'
+            'source_addr': b'\x88\x9f',
+            'cluster': b'\x00\xee',
+            'rf_data': b'\x11\x00\x01\x01',
+            'dest_endpoint': b'\x02',
+            'id': 'rx_explicit',
+            'options': b'\x01',
+            'profile': b'\xc2\x16',
+            'src_endpoint': b'\x02'
         }
         self.device_obj.receive_message(message)
         result = self.ser.get_data_written()
@@ -108,11 +108,11 @@ class TestSmartPlug(unittest.TestCase):
         result = self.device_obj.generate_power_factor()
         expected = {
             'description': 'Current Instantaneous Power',
-            'profile': '\xc2\x16',
-            'cluster': '\x00\xef',
-            'source_endpoint': '\x02',
-            'dest_endpoint': '\x02',
-            'data': '\tj\x81\x00\x00'
+            'profile': b'\xc2\x16',
+            'cluster': b'\x00\xef',
+            'source_endpoint': b'\x02',
+            'dest_endpoint': b'\x02',
+            'data': b'\tj\x81\x00\x00'
         }
         self.assertEqual(result, expected)
 
@@ -120,11 +120,11 @@ class TestSmartPlug(unittest.TestCase):
         result = self.device_obj.generate_power_factor()
         expected = {
             'description': 'Current Instantaneous Power',
-            'profile': '\xc2\x16',
-            'cluster': '\x00\xef',
-            'source_endpoint': '\x02',
-            'dest_endpoint': '\x02',
-            'data': '\tj\x81\n\x00'
+            'profile': b'\xc2\x16',
+            'cluster': b'\x00\xef',
+            'source_endpoint': b'\x02',
+            'dest_endpoint': b'\x02',
+            'data': b'\tj\x81\n\x00'
         }
         self.assertEqual(result, expected)
 

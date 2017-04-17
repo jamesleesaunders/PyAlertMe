@@ -286,11 +286,11 @@ class TestHub(unittest.TestCase):
         result = self.hub_obj.generate_active_endpoints_request(source_addr_short)
         expected = {
             'description': 'Active Endpoints Request',
-            'profile': '\x00\x00',
-            'cluster': '\x00\x05',
-            'src_endpoint': '\x00',
-            'dest_endpoint': '\x00',
-            'data': '\xaa\x9f\x88'
+            'profile': b'\x00\x00',
+            'cluster': b'\x00\x05',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'data': b'\xaa\x9f\x88'
         }
         self.assertEqual(result, expected)
 
@@ -299,11 +299,11 @@ class TestHub(unittest.TestCase):
         result = self.hub_obj.generate_match_descriptor_response(rf_data)
         expected = {
             'description': 'Match Descriptor Response',
-            'profile': '\x00\x00',
-            'cluster': '\x80\x06',
-            'src_endpoint': '\x00',
-            'dest_endpoint': '\x00',
-            'data': '\x03\x00\x00\x00\x01\x02'
+            'profile': b'\x00\x00',
+            'cluster': b'\x80\x06',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'data': b'\x03\x00\x00\x00\x01\x02'
         }
         self.assertEqual(result, expected)
 
@@ -349,11 +349,11 @@ class TestHub(unittest.TestCase):
         result = self.hub_obj.generate_missing_link(src_endpoint, dest_endpoint)
         expected = {
             'description': 'Missing Link',
-            'profile': '\xc2\x16',
-            'cluster': '\x00\xf0',
-            'src_endpoint': '\x02',
-            'dest_endpoint': '\x02',
-            'data': '\x119\xfd'
+            'profile': b'\xc2\x16',
+            'cluster': b'\x00\xf0',
+            'src_endpoint': b'\x02',
+            'dest_endpoint': b'\x02',
+            'data': b'\x119\xfd'
         }
         self.assertEqual(result, expected)
 
