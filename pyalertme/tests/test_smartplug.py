@@ -110,7 +110,7 @@ class TestSmartPlug(unittest.TestCase):
             'description': 'Current Instantaneous Power',
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xef',
-            'source_endpoint': b'\x02',
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': b'\tj\x81\x00\x00'
         }
@@ -122,7 +122,7 @@ class TestSmartPlug(unittest.TestCase):
             'description': 'Current Instantaneous Power',
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xef',
-            'source_endpoint': b'\x02',
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': b'\tj\x81\n\x00'
         }

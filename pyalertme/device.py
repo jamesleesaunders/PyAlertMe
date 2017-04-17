@@ -23,8 +23,27 @@ class Device(Base):
 
         # Start off not associated
         self.associated = False
+        self.hub_addr_long = None
+        self.hub_addr_short = None
+        self._updates_thread = threading.Thread(target=self._updates)
 
         self.rssi = 197
+
+    def updates(self):
+        """
+        Continual Updates
+        Overwrite this function with things you want running every 2 seconds.
+        """
+        return None
+
+    def _updates(self):
+        """
+        Continual Updates Thread
+
+        """
+        while True:
+            self.updates()
+            time.sleep(2.00)
 
     def process_message(self, message):
         """
@@ -38,10 +57,11 @@ class Device(Base):
         if message['id'] == 'rx_explicit':
             profile_id = message['profile']
             cluster_id = message['cluster']
+            source_addr_long = message['source_addr_long']
+            source_addr_short = message['source_addr']
 
-            # Take note of hub address
-            self.hub_addr_long = message['source_addr_long']
-            self.hub_addr_short = message['source_addr']
+            if self.associated == False:
+                self.send_message(self.generate_match_descriptor_request(), source_addr_long, source_addr_short)
 
             if profile_id == self.ZDP_PROFILE_ID:
                 # Zigbee Device Profile ID
@@ -52,7 +72,7 @@ class Device(Base):
                     self._logger.debug('Received Active Endpoint Request')
 
                 elif cluster_id == b'\x80\x06':
-                    self._logger.debug('Received Match Descriptor')
+                    self._logger.debug('Received Match Descriptor Response')
 
             elif (profile_id == self.ALERTME_PROFILE_ID):
                 # AlertMe Profile ID
@@ -75,8 +95,14 @@ class Device(Base):
 
                 elif cluster_id == b'\x00\xf0':
                     self._logger.debug('Received Hardware Join Message 2')
-                    # We are now fully associated
-                    self.associated = True
+                    if self.associated == False:
+                        # Take note of hub address
+                        self.hub_addr_long = message['source_addr_long']
+                        self.hub_addr_short = message['source_addr']
+                        # We are now fully associated
+                        self.associated = True
+                        # Start continual update thread
+                        self._updates_thread.start()
 
                 elif cluster_id == b'\x00\xee':
                     if cluster_cmd == b'\xfa':

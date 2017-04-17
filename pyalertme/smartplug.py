@@ -21,9 +21,16 @@ class SmartPlug(Device):
         self.date = '2013-09-26'
         self.version = 20045
 
-        # Relay State
+        # Relay State and Power
         self.state = 0
-        self.power = 0
+        self.power = 60
+
+    def updates(self):
+        """
+        Continual Updates
+
+        """
+        self.send_message(self.generate_power_factor(), self.hub_addr_long, self.hub_addr_short)
 
     def process_message(self, message):
         """
@@ -87,8 +94,8 @@ class SmartPlug(Device):
                 # else:
                     # self._logger.error('Unrecognised Cluster ID: %r', cluster_id)
 
-            else:
-                self._logger.error('Unrecognised Profile ID: %r', profile_id)
+            # else:
+                # self._logger.error('Unrecognised Profile ID: %r', profile_id)
 
     def set_state(self, state):
         """
@@ -100,6 +107,8 @@ class SmartPlug(Device):
         self.state = state
         self._logger.debug('Switch State Changed to: %s', self.state)
         self.send_message(self.generate_switch_state_update(), self.hub_addr_long, self.hub_addr_short)
+        from random import randint
+        self.power = randint(0, 100)
 
     def generate_switch_state_update(self):
         """
@@ -153,7 +162,7 @@ class SmartPlug(Device):
             'description': 'Current Instantaneous Power',
             'profile': self.ALERTME_PROFILE_ID,
             'cluster': b'\x00\xef',
-            'source_endpoint': b'\x02',
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': data
         }
