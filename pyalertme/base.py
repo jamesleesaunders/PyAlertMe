@@ -261,7 +261,7 @@ class Base(object):
             'data': b'\x11\x00\x01\x01'
         },
         'hardware_join_2': {
-            'description': 'Hardware Join Message 2',  # Device (also note similarity to Range RSSI req)
+            'description': 'Hardware Join Message 2',  # Device (also note similarity to Normal Mode)
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xf0',
