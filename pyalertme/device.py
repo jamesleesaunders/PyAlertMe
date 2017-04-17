@@ -26,6 +26,7 @@ class Device(Base):
         self.hub_addr_long = None
         self.hub_addr_short = None
         self._updates_thread = threading.Thread(target=self._updates)
+        self._updates_thread.start()
 
         self.rssi = 197
 
@@ -42,7 +43,8 @@ class Device(Base):
 
         """
         while True:
-            self.updates()
+            if self.associated == True
+                self.updates()
             time.sleep(2.00)
 
     def process_message(self, message):
@@ -95,14 +97,11 @@ class Device(Base):
 
                 elif cluster_id == b'\x00\xf0':
                     self._logger.debug('Received Hardware Join Message 2')
-                    if self.associated == False:
-                        # Take note of hub address
-                        self.hub_addr_long = message['source_addr_long']
-                        self.hub_addr_short = message['source_addr']
-                        # We are now fully associated
-                        self.associated = True
-                        # Start continual update thread
-                        self._updates_thread.start()
+                    # Take note of hub address
+                    self.hub_addr_long = message['source_addr_long']
+                    self.hub_addr_short = message['source_addr']
+                    # We are now fully associated
+                    self.associated = True
 
                 elif cluster_id == b'\x00\xee':
                     if cluster_cmd == b'\xfa':
