@@ -78,3 +78,19 @@ Request:
 ```
 2017-04-16 23:29:52,004 DEBUG base  Received AlertMe Specific Profile Packet
 2017-04-16 23:29:52,004 DEBUG device Received Hardware Join Message 2
+
+#### Power
+```python
+{
+'profile': '\xc2\x16', 
+'source_addr': '3\x1d', 
+'dest_endpoint': '\x02', 
+'rf_data': '\tj\x81\x00\x00', 
+'source_endpoint': '\x02', 'options': '\x01', 
+'source_addr_long': '\x00\ro\x00\x03\xbb\xb9\xf8', 
+'cluster': '\x00\xef', 
+'id': 'rx_explicit'
+}
+```
+2017-04-17 21:28:52,751 DEBUG hub   Received Current Instantaneous Power Update
+2017-04-17 21:28:52,752 DEBUG hub   Updating Node Attribute: PowerFactor Value: 0

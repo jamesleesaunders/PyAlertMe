@@ -103,5 +103,30 @@ class TestSmartPlug(unittest.TestCase):
         expected = b'~\x00\x19}1\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x00\x02\x00\xee\xc2\x16\x00\x00\th\x80\x06\x00\x1d'
         self.assertEqual(result, expected)
 
+    def test_generate_power_factor(self):
+        self.device_obj.power = 0
+        result = self.device_obj.generate_power_factor()
+        expected = {
+            'description': 'Current Instantaneous Power',
+            'profile': '\xc2\x16',
+            'cluster': '\x00\xef',
+            'source_endpoint': '\x02',
+            'dest_endpoint': '\x02',
+            'data': '\tj\x81\x00\x00'
+        }
+        self.assertEqual(result, expected)
+
+        self.device_obj.power = 10
+        result = self.device_obj.generate_power_factor()
+        expected = {
+            'description': 'Current Instantaneous Power',
+            'profile': '\xc2\x16',
+            'cluster': '\x00\xef',
+            'source_endpoint': '\x02',
+            'dest_endpoint': '\x02',
+            'data': '\tj\x81\n\x00'
+        }
+        self.assertEqual(result, expected)
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

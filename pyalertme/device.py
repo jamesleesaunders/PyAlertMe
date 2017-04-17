@@ -102,12 +102,12 @@ class Device(Base):
         data = checksum + cluster_cmd + payload
 
         message = {
-            'description':   'Type Info',
+            'description':  'Type Info',
             'profile': self.ALERTME_PROFILE_ID,
             'cluster': b'\x00\xf6',
-            'src_endpoint':  b'\x00',
+            'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'data':          data,
+            'data': data,
         }
         return(message)
 
@@ -123,12 +123,12 @@ class Device(Base):
         data = checksum + cluster_cmd + payload
 
         message = {
-            'description':   'Range Info',
+            'description': 'Range Info',
             'profile': self.ALERTME_PROFILE_ID,
             'cluster': b'\x00\xf6',
-            'src_endpoint':  b'\x00',
+            'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'data':          data,
+            'data': data,
         }
         return(message)
 

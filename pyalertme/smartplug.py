@@ -23,6 +23,7 @@ class SmartPlug(Device):
 
         # Relay State
         self.state = 0
+        self.power = 0
 
     def process_message(self, message):
         """
@@ -112,12 +113,12 @@ class SmartPlug(Device):
         data = checksum + cluster_cmd + payload
 
         message = {
-            'description':   'Switch State Update',
-            'src_endpoint':  b'\x00',
+            'description': 'Switch State Update',
+            'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster':       b'\x00\xee',
-            'profile':       self.ALERTME_PROFILE_ID,
-            'data':          data,
+            'cluster': b'\x00\xee',
+            'profile': self.ALERTME_PROFILE_ID,
+            'data': data
         }
         return(message)
 
@@ -130,9 +131,30 @@ class SmartPlug(Device):
         :return: Bool 1 = On, 0 = Off
         """
         # Parse Switch State Request
-        if (rf_data == b'\x11\x00\x02\x01\x01'):
+        if rf_data == b'\x11\x00\x02\x01\x01':
             return 1
-        elif (rf_data == b'\x11\x00\x02\x00\x01'):
+        elif rf_data == b'\x11\x00\x02\x00\x01':
             return 0
         else:
             logging.error('Unknown State Request')
+
+    def generate_power_factor(self):
+        """
+        Generate Current Instantaneous Power Update
+
+        :return: Message
+        """
+        checksum = b'\tj'
+        cluster_cmd = b'\x81'
+        payload = struct.pack('H', self.power)
+        data = checksum + cluster_cmd + payload
+
+        message = {
+            'description': 'Current Instantaneous Power',
+            'profile': self.ALERTME_PROFILE_ID,
+            'cluster': b'\x00\xef',
+            'source_endpoint': b'\x02',
+            'dest_endpoint': b'\x02',
+            'data': data
+        }
+        return(message)
