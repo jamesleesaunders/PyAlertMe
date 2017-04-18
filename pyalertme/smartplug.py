@@ -78,23 +78,6 @@ class SmartPlug(Device):
                         self.send_message(self.generate_switch_state_update(), source_addr_long, source_addr_short)
                         self._callback('Attribute', self.get_node_id(), 'State', 'ON')
 
-                    elif cluster_cmd == b'\xfa':
-                        # Set Mode
-                        if message['rf_data'][4] == b'\x00\x01':
-                            # Normal
-                            # b'\x11\x00\xfa\x00\x01'
-                            self._logger.debug('Normal Mode')
-
-                        elif message['rf_data'][4] == b'\x00\x01':
-                            # Locked
-                            # b'\x11\x00\xfa\x02\x01'
-                            self._logger.debug('Locked Mode')
-
-                        elif message['rf_data'][4] == b'\x03\x01':
-                            # Silent
-                            # b'\x11\x00\xfa\x03\x01'
-                            self._logger.debug('Silent Mode')
-
                     else:
                         self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 

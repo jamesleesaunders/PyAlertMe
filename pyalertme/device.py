@@ -27,6 +27,7 @@ class Device(Base):
         self.hub_addr_short = None
 
         self.rssi = 197
+        self.mode = 'NORMAL'
 
     def process_message(self, message):
         """
@@ -50,7 +51,7 @@ class Device(Base):
             if profile_id == self.ZDP_PROFILE_ID:
                 # Zigbee Device Profile ID
                 if cluster_id == b'\x00\x32':
-                    self._logger.debug('Received Broacast Discover TBC')
+                    self._logger.debug('Received Management Routing Table Request')
 
                 elif cluster_id == b'\x00\x05':
                     self._logger.debug('Received Active Endpoint Request')
@@ -72,23 +73,41 @@ class Device(Base):
                     self._logger.debug('Received Version Request')
                     self.send_message(self.generate_type_update(), self.hub_addr_long, self.hub_addr_short)
 
-                # elif cluster_id == b'\x00\xf6':
-                    # b'\x11\x01\xfc'
-                    # Almost the same as type above? Not sure on link yet?
-                    # self._logger.debug('Received Hardware Join Message 1')
-
                 elif cluster_id == b'\x00\xf0':
-                    self._logger.debug('Received Hardware Join Message 2')
-                    # Take note of hub address
-                    self.hub_addr_long = message['source_addr_long']
-                    self.hub_addr_short = message['source_addr']
-                    # We are now fully associated
-                    self.associated = True
-
-                elif cluster_id == b'\x00\xee':
                     if cluster_cmd == b'\xfa':
-                        self._logger.debug('Received Range Test Request')
-                        self.send_message(self.generate_range_update(), self.hub_addr_long, self.hub_addr_short)
+                        self._logger.debug('Received Mode Change Request')
+                        # Take note of hub address
+                        self.hub_addr_long = source_addr_long
+                        self.hub_addr_short = source_addr_short
+                        # We are now fully associated
+                        self.associated = True
+
+                        modeCmd = message['rf_data'][3] + message['rf_data'][4]
+                        if modeCmd == b'\x00\x01':
+                            # Normal
+                            # b'\x11\x00\xfa\x00\x01'
+                            self._logger.debug('Normal Mode')
+                            self.mode = 'NORMAL'
+
+                        elif modeCmd == b'\x01\x01':
+                            # Range Test
+                            # b'\x11\x00\xfa\x01\x01'
+                            self._logger.debug('Range Test Mode')
+                            self.mode = 'RANGE'
+                            # TODO Setup thread loop to send regular range RSSI updates - for now just send one...
+                            self.send_message(self.generate_range_update(), self.hub_addr_long, self.hub_addr_short)
+
+                        elif modeCmd == b'\x02\x01':
+                            # Locked
+                            # b'\x11\x00\xfa\x02\x01'
+                            self._logger.debug('Locked Mode')
+                            self.mode = 'LOCKED'
+
+                        elif modeCmd == b'\x03\x01':
+                            # Silent
+                            # b'\x11\x00\xfa\x03\x01'
+                            self._logger.debug('Silent Mode')
+                            self.mode = 'SILENT'
 
             else:
                 self._logger.error('Unrecognised Profile ID: %r', profile_id)
@@ -126,7 +145,7 @@ class Device(Base):
         """
         checksum = b'\t+'
         cluster_cmd = b'\xfd'
-        payload = struct.pack('B', self.rssi)
+        payload = struct.pack('H', self.rssi)
         data = checksum + cluster_cmd + payload
 
         message = {

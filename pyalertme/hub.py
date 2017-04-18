@@ -175,7 +175,9 @@ class Hub(Base):
             node_id = self.addr_long_to_node_id(source_addr_long)
 
             if node_id:
-                self.save_node_properties(node_id, {'AddressLong': source_addr_long, 'AddressShort': source_addr_short})
+                self.nodes[node_id]['AddressLong'] = source_addr_long
+                self.nodes[node_id]['AddressShort'] = source_addr_short
+
                 profile_id = message['profile']
                 cluster_id = message['cluster']
 
@@ -226,9 +228,9 @@ class Hub(Base):
                         # The next message is directed at the hardware code (rather than the network code).
                         time.sleep(2)
                         # The device has to receive this message to stay joined.
-                        reply = self.generate_hardware_join_1()
+                        reply = self.generate_type_request()
                         self.send_message(reply, source_addr_long, source_addr_short)
-                        reply = self.generate_hardware_join_2()
+                        reply = self.generate_mode_change_request('NORMAL')
                         self.send_message(reply, source_addr_long, source_addr_short)
 
                         # We are fully associated!
@@ -516,37 +518,7 @@ class Hub(Base):
             'cluster': b'\x00\xf6',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'data': b'\x11\x00\xfc\x00\x01'
-        }
-        return message
-
-    def generate_hardware_join_1(self):
-        """
-        Generate Hardware Join 1
-
-        """
-        message = {
-            'description': 'Hardware Join Messages 1',
-            'profile': self.ALERTME_PROFILE_ID,
-            'cluster': b'\x00\xf6',
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
-            'data': b'\x11\x01\xfc'
-        }
-        return message
-
-    def generate_hardware_join_2(self):
-        """
-        Generate Hardware Join 2
-
-        """
-        message = {
-            'description': 'Hardware Join Messages 2',
-            'profile': self.ALERTME_PROFILE_ID,
-            'cluster': b'\x00\xf0',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'data': b'\x19\x01\xfa\x00\x01'
+            'data': b'\x11\x00\xfc'
         }
         return message
 

@@ -218,14 +218,6 @@ class Base(object):
             'profile': ZDP_PROFILE_ID,
             'data': '\xff\x00'
         },
-        'hardware_join_1': {
-            'description': 'Hardware Join Message 1',  # Device (also note similarity to Version req)
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf6',
-            'profile': ALERTME_PROFILE_ID,
-            'data': b'\x11\x01\xfc'
-        },
         'active_endpoint_request': {
             'description': 'Active Endpoint Request',  # Device
             'src_endpoint': b'\x00',
@@ -248,7 +240,7 @@ class Base(object):
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xf6',
             'profile': ALERTME_PROFILE_ID,
-            'data': b'\x11\x00\xfc\x00\x01'
+            'data': b'\x11\x00\xfc'
         },
         'plug_off': {
             'description': 'Switch Plug Off',  # SmartPlug
@@ -273,14 +265,6 @@ class Base(object):
             'cluster': b'\x00\xee',
             'profile': ALERTME_PROFILE_ID,
             'data': b'\x11\x00\x01\x01'
-        },
-        'hardware_join_2': {
-            'description': 'Hardware Join Message 2',  # Device (also note similarity to Normal Mode)
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf0',
-            'profile': ALERTME_PROFILE_ID,
-            'data': b'\x19\x01\xfa\x00\x01'
         },
         'normal_mode': {
             'description': 'Normal Mode',  # SmartPlug
