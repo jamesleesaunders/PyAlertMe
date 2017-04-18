@@ -21,16 +21,20 @@ class SmartPlug(Device):
         self.date = '2013-09-26'
         self.version = 20045
 
-        # Relay State and Power
-        self.state = 0
-        self.power = 60
+        # Relay State and Power Values
+        self.state = False
+        self.power_demand = 60
+        self.power_consumption = 0
 
-    def updates(self):
+    def _updates(self):
         """
         Continual Updates
 
         """
-        self.send_message(self.generate_power_factor(), self.hub_addr_long, self.hub_addr_short)
+        while self.started:
+            if self.associated:
+                self.send_message(self.generate_power_demand_update(), self.hub_addr_long, self.hub_addr_short)
+            time.sleep(2.00)
 
     def process_message(self, message):
         """
@@ -66,7 +70,8 @@ class SmartPlug(Device):
                         # Change State
                         # b'\x11\x00\x02\x01\x01' On
                         # b'\x11\x00\x02\x00\x01' Off
-                        self.state = self.parse_switch_state_request(message['rf_data'])
+                        state = self.parse_switch_state_request(message['rf_data'])
+                        self.set_state(state)
                         self._logger.debug('Switch State Changed to: %s', self.state)
                         self.send_message(self.generate_switch_state_update(), self.hub_addr_long, self.hub_addr_short)
                         self._callback('Attribute', self.get_node_id(), 'State', 'ON')
@@ -107,8 +112,21 @@ class SmartPlug(Device):
         self.state = state
         self._logger.debug('Switch State Changed to: %s', self.state)
         self.send_message(self.generate_switch_state_update(), self.hub_addr_long, self.hub_addr_short)
+
+        # Temporary code while testing power code...
+        # Randomly set the power usage value.
         from random import randint
-        self.power = randint(0, 100)
+        self.set_power_demand(randint(0, 100))
+
+    def set_power_demand(self, power_demand):
+        """
+        Set Power Demand
+
+        :param state:
+        :return:
+        """
+        self.power_demand = power_demand
+        self._logger.debug('Power Demand Changed to: %s', self.power_demand)
 
     def generate_switch_state_update(self):
         """
@@ -131,6 +149,27 @@ class SmartPlug(Device):
         }
         return(message)
 
+    def generate_power_demand_update(self):
+        """
+        Generate Power Demand Update
+
+        :return: Message
+        """
+        checksum = b'\tj'
+        cluster_cmd = b'\x81'
+        payload = struct.pack('H', self.power_demand)
+        data = checksum + cluster_cmd + payload
+
+        message = {
+            'description': 'Current Power Demand',
+            'profile': self.ALERTME_PROFILE_ID,
+            'cluster': b'\x00\xef',
+            'src_endpoint': b'\x02',
+            'dest_endpoint': b'\x02',
+            'data': data
+        }
+        return(message)
+
     @staticmethod
     def parse_switch_state_request(rf_data):
         """
@@ -141,29 +180,8 @@ class SmartPlug(Device):
         """
         # Parse Switch State Request
         if rf_data == b'\x11\x00\x02\x01\x01':
-            return 1
+            return True
         elif rf_data == b'\x11\x00\x02\x00\x01':
-            return 0
+            return False
         else:
             logging.error('Unknown State Request')
-
-    def generate_power_factor(self):
-        """
-        Generate Current Instantaneous Power Update
-
-        :return: Message
-        """
-        checksum = b'\tj'
-        cluster_cmd = b'\x81'
-        payload = struct.pack('H', self.power)
-        data = checksum + cluster_cmd + payload
-
-        message = {
-            'description': 'Current Instantaneous Power',
-            'profile': self.ALERTME_PROFILE_ID,
-            'cluster': b'\x00\xef',
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
-            'data': data
-        }
-        return(message)

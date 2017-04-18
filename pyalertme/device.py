@@ -25,27 +25,8 @@ class Device(Base):
         self.associated = False
         self.hub_addr_long = None
         self.hub_addr_short = None
-        self._updates_thread = threading.Thread(target=self._updates)
-        self._updates_thread.start()
 
         self.rssi = 197
-
-    def updates(self):
-        """
-        Continual Updates
-        Overwrite this function with things you want running every 2 seconds.
-        """
-        return None
-
-    def _updates(self):
-        """
-        Continual Updates Thread
-
-        """
-        while True:
-            if self.associated == True:
-                self.updates()
-            time.sleep(2.00)
 
     def process_message(self, message):
         """
@@ -55,6 +36,7 @@ class Device(Base):
         :return:
         """
         super(Device, self).process_message(message)
+
         # Zigbee Explicit Packets
         if message['id'] == 'rx_explicit':
             profile_id = message['profile']

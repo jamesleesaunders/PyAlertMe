@@ -29,6 +29,7 @@ class Base(object):
         self._xbee = None
         self._serial = None
         self._callback = callback if callback else self._callback
+        self._updates_thread = threading.Thread(target=self._updates)
 
         # Type Info
         self.manu = None
@@ -42,12 +43,21 @@ class Base(object):
         self._addr_long_list = [None, None]
 
         self.associated = False
+        self.started = False
 
     def _callback(self, type, node_id, field, value):
         if type == 'Attribute':
             print("Attribute Update [Node ID: " + node_id + "\tField: " + field + "\tValue: " + str(value) + "]")
         elif type == 'Property':
             print("Property Update [Node ID: " + node_id + "\tField: " + field + "\tValue: " + str(value) + "]")
+
+    def _updates(self):
+        """
+        Continual Updates Thread
+
+        """
+        while self.started:
+            time.sleep(2.00)
 
     def start(self, serial):
         """
@@ -61,9 +71,8 @@ class Base(object):
             self._serial = serial
             self._xbee = ZigBee(ser=self._serial, callback=self.receive_message, error_callback=self.xbee_error, escaped=True)
             self.read_addresses()
-
-    def get_node_id(self):
-        return self.pretty_mac(self.addr_long)
+            self.started = True
+            self._updates_thread.start()
 
     def halt(self):
         """
@@ -72,8 +81,15 @@ class Base(object):
 
         :return:
         """
+        self.started = False # ...This should kill the updated thread
+        # Wait 2 seconds for things to clear
+        time.sleep(2.00)
         self._xbee.halt()
         self._serial.close()
+
+
+    def get_node_id(self):
+        return self.pretty_mac(self.addr_long)
 
     def xbee_error(self, error):
         """

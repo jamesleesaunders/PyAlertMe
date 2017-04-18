@@ -42,7 +42,7 @@ class Hub(Base):
         # First, send out a broadcast every 2 seconds for 30 seconds
         timeout = time.time() + 30
         i = 1
-        while time.time() < timeout:
+        while time.time() < timeout and self.started:
             self._logger.debug('Sending Discovery Request #%s', i)
             message = {
                 'description': 'Management Routing Table Request',
@@ -268,12 +268,12 @@ class Hub(Base):
 
                     elif cluster_id == b'\x00\xef':
                         if cluster_cmd == b'\x81':
-                            self._logger.debug('Received Current Instantaneous Power Update')
-                            attributes = self.parse_power_factor(message['rf_data'])
+                            self._logger.debug('Received Power Demand Update')
+                            attributes = self.parse_power_demand(message['rf_data'])
                             self.save_node_attributes(node_id, attributes)
 
                         elif cluster_cmd == b'\x82':
-                            self._logger.debug('Received Uptime Update')
+                            self._logger.debug('Received Power Consumption & Uptime Update')
                             attributes = self.parse_power_consumption(message['rf_data'])
                             self.save_node_attributes(node_id, attributes)
 
@@ -633,24 +633,25 @@ class Hub(Base):
         return {'RSSI' : rssi}
 
     @staticmethod
-    def parse_power_factor(rf_data):
+    def parse_power_demand(rf_data):
         """
-        Process message, parse for current instantaneous power value
+        Process message, parse for power demand value.
 
         :param rf_data: Message data
         :return: Parameter dict of power value
         """
         values = dict(zip(
-            ('cluster_cmd', 'Power'),
+            ('cluster_cmd', 'powerDemand'),
             struct.unpack('< 2x s H', rf_data)
         ))
 
-        return {'PowerFactor' : values['Power']}
+        return {'PowerDemand' : values['powerDemand']}
 
     @staticmethod
     def parse_power_consumption(rf_data):
         """
-        Process message, parse for usage stats
+        Process message, parse for power consumption value.
+
 
         :param rf_data: Message data
         :return: Parameter dict of usage stats
@@ -661,7 +662,7 @@ class Hub(Base):
             struct.unpack('< 2x s I I 1x', rf_data)
         ))
         ret['PowerConsumption'] = values['powerConsumption']
-        ret['UpTime']           = values['upTime']
+        ret['UpTime'] = values['upTime']
 
         return ret
 
