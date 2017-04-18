@@ -23,7 +23,7 @@ class SmartPlug(Device):
 
         # Relay State and Power Values
         self.state = False
-        self.power_demand = 60
+        self.power_demand = 0
         self.power_consumption = 0
 
     def _updates(self):

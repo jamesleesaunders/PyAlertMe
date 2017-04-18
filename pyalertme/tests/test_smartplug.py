@@ -128,5 +128,17 @@ class TestSmartPlug(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
+        self.device_obj.set_power_demand(22.4)
+        result = self.device_obj.generate_power_demand_update()
+        expected = {
+            'description': 'Current Power Demand',
+            'profile': b'\xc2\x16',
+            'cluster': b'\x00\xef',
+            'src_endpoint': b'\x02',
+            'dest_endpoint': b'\x02',
+            'data': b'\tj\x81\x16\x00'
+        }
+        self.assertEqual(result, expected)
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
