@@ -181,16 +181,7 @@ class Hub(Base):
 
                 if profile_id == self.ZDP_PROFILE_ID:
                     # Zigbee Device Profile ID
-
-                    if cluster_id == b'\x13':
-                        # Device Announce Message.
-                        self._logger.debug('Received Device Announce Message')
-                        # This will tell me the address of the new thing
-                        # so we're going to send an active endpoint request
-                        reply = self.generate_active_endpoints_request(source_addr_short)
-                        self.send_message(reply, source_addr_long, source_addr_short)
-
-                    elif cluster_id == b'\x00\x00':
+                    if cluster_id == b'\x00\x00':
                         # Network (16-bit) Address Request.
                         self._logger.debug('Received Network (16-bit) Address Request')
 
@@ -201,27 +192,24 @@ class Hub(Base):
                         # http://ftp1.digi.com/support/images/APP_NOTE_XBee_ZigBee_Device_Profile.pdf
                         self._logger.debug('Received Network (16-bit) Address Response')
 
+                    elif cluster_id == b'\x80\x02':
+                        # Node Descriptor Response.
+                        self._logger.debug('Received Node Descriptor Response')
+                        
+                    elif cluster_id == b'\x00\x04':
+                        # Simple Descriptor Request.
+                        self._logger.debug('Received Simple Descriptor Request')
+                        
                     elif cluster_id == b'\x00\x05':
                         # Active Endpoint Request.
                         self._logger.debug('Received Active Endpoint Request')
 
                     elif cluster_id == b'\x80\x05':
-                        # Active Endpoint Response.
+                        # Active Endpoints Response.
                         # This message tells us what the device can do, but it isn't constructed correctly to match what
                         # the switch can do according to the spec. This is another message that gets it's response after
                         # we receive the Match Descriptor below.
                         self._logger.debug('Received Active Endpoint Response')
-
-                    elif cluster_id == b'\x00\x04':
-                        # Route Record Broadcast Response.
-                        self._logger.debug('Received Simple Descriptor Request')
-
-                    elif cluster_id == b'\x80\x38':
-                        self._logger.debug('Received Management Network Update Request')
-
-                    elif cluster_id == b'\x802':
-                        # Route Record Broadcast Response.
-                        self._logger.debug('Received Route Record Broadcast Response')
 
                     elif cluster_id == b'\x00\x06':
                         # Match Descriptor Request.
@@ -244,6 +232,18 @@ class Hub(Base):
 
                         # We are fully associated!
                         self._logger.debug('New Device Fully Associated')
+                        
+                    if cluster_id == b'\x00\x13':
+                        # Device Announce Message.
+                        self._logger.debug('Received Device Announce Message')
+                        # This will tell me the address of the new thing
+                        # so we're going to send an active endpoint request
+                        reply = self.generate_active_endpoints_request(source_addr_short)
+                        self.send_message(reply, source_addr_long, source_addr_short)
+                        
+                    elif cluster_id == b'\x80\x38':
+                        # Management Network Update Notify.
+                        self._logger.debug('Received Management Network Update Notify')
 
                     else:
                         self._logger.error('Unrecognised Cluster ID: %r', cluster_id)
@@ -303,7 +303,6 @@ class Hub(Base):
                         self._logger.debug('Received Button Press Update')
                         attributes = self.parse_button_press(message['rf_data'])
                         self.save_node_attributes(node_id, attributes)
-
 
                     elif cluster_id == b'\x00\xf6':
                         if cluster_cmd == b'\xfd':
