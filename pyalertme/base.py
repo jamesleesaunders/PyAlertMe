@@ -40,7 +40,7 @@ class Base(object):
         # My addresses
         self.addr_short = b'\x00\x00\x00\x00\x00\x00\x00\x00'
         self.addr_long = b'\x00\x00'
-        self._addr_long_list = [None, None]
+        self._addr_long_list = [b'', b'']
 
         self.associated = False
         self.started = False
