@@ -42,7 +42,7 @@ class Hub(Base):
         # First, send out a broadcast every 2 seconds for 30 seconds
         timeout = time.time() + 30
         i = 1
-        while time.time() < timeout and self.started:
+        while time.time() < timeout:
             self._logger.debug('Sending Discovery Request #%s', i)
             message = {
                 'description': 'Management Routing Table Request',

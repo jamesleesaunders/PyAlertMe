@@ -57,7 +57,7 @@ class Base(object):
 
         """
         while self.started:
-            time.sleep(2.00)
+            time.sleep(0.00)
 
     def start(self, serial):
         """
@@ -81,12 +81,10 @@ class Base(object):
 
         :return:
         """
-        self.started = False # ...This should kill the updated thread
-        # Wait 2 seconds for things to clear
-        time.sleep(2.00)
+        self.started = False # This should kill the updates thread
+        self._updates_thread.join() # Wait for updates thread to finish
         self._xbee.halt()
         self._serial.close()
-
 
     def get_node_id(self):
         return self.pretty_mac(self.addr_long)
