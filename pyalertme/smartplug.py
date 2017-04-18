@@ -18,8 +18,8 @@ class SmartPlug(Device):
         # Type Info
         self.manu = 'PyAlertMe'
         self.type = 'SmartPlug'
-        self.date = '2013-09-26'
-        self.version = 20045
+        self.date = '2017-01-01'
+        self.version = 12345
 
         # Relay State and Power Values
         self.state = False

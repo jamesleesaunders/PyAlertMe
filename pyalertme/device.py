@@ -18,8 +18,8 @@ class Device(Base):
         # Type Info
         self.manu = 'PyAlertMe'
         self.type = 'Generic Device'
-        self.date = '2016-09-18'
-        self.version = 00001
+        self.date = '2017-01-01'
+        self.version = 12345
 
         # Start off not associated
         self.associated = False

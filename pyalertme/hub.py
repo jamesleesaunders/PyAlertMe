@@ -21,7 +21,7 @@ class Hub(Base):
         self.manu = 'PyAlertMe'
         self.type = 'Nano Hub'
         self.date = '2017-01-01'
-        self.version = None
+        self.version = 12345
 
         # List of Associated Nodes
         self.nodes = {}
@@ -192,8 +192,9 @@ class Hub(Base):
                         # http://ftp1.digi.com/support/images/APP_NOTE_XBee_ZigBee_Device_Profile.pdf
                         self._logger.debug('Received Network (16-bit) Address Response')
 
-                    elif cluster_id == b'\x80\x02':
+                    elif cluster_id == b'\x802':
                         # Node Descriptor Response.
+                        # Why not b'\x80\x02' ?
                         self._logger.debug('Received Node Descriptor Response')
                         
                     elif cluster_id == b'\x00\x04':
@@ -233,8 +234,9 @@ class Hub(Base):
                         # We are fully associated!
                         self._logger.debug('New Device Fully Associated')
                         
-                    if cluster_id == b'\x00\x13':
+                    elif cluster_id == b'\x13':
                         # Device Announce Message.
+                        # Why not b'\x00\x13' ?
                         self._logger.debug('Received Device Announce Message')
                         # This will tell me the address of the new thing
                         # so we're going to send an active endpoint request

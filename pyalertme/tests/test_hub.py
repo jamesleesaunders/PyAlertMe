@@ -99,10 +99,10 @@ class TestHub(unittest.TestCase):
         message = device_obj.generate_type_update()
         result = Hub.parse_version_info(message['data'])
         expected = {
-            'Version': 1,
+            'Version': 12345,
             'Manufacturer': 'PyAlertMe',
             'Type': 'Generic Device',
-            'ManufactureDate': '2016-09-18'
+            'ManufactureDate': '2017-01-01'
         }
         self.assertEqual(result, expected)
         device_obj.halt()

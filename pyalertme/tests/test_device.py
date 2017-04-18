@@ -48,7 +48,7 @@ class TestDevice(unittest.TestCase):
             'cluster': b'\x00\xf6',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'data': b'\tq\xfe\x01\x00\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bPyAlertMe\nGeneric Device\n2016-09-18'
+            'data': b'\tq\xfe90\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bPyAlertMe\nGeneric Device\n2017-01-01'
         }
         self.assertEqual(result, expected)
 

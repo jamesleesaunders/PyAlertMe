@@ -8,7 +8,7 @@ Possibly also British Gas Hive.
 ## XBee Setup
 XBee Modem XB24-ZB, ZIGBEE Coordinator API, Version 21A7 (or better)
 
-#### Co-ordinator
+#### Coordinator (Hub)
 ZigBee Stack Profile (ZS): 2
 * Encryption Enable (EE): 1
 * Encryption Options (EO): 1
@@ -16,11 +16,11 @@ ZigBee Stack Profile (ZS): 2
 * API Enable (AP): 2
 * API Output Mode (AO): 3
 
-#### Router
+#### Router (Device)
 * ZigBee Stack Profile (ZS): 2
 * Encryption Enable (EE): 1
 * Encryption Options (EO): 0
-* Encryption Key (KY): 5a6967426565416c6c69616e63653039 (possibly empty?)
+* Encryption Key (KY): EMPTY
 * API Enable (AP): 2
 * API Output Mode (AO): 3
 

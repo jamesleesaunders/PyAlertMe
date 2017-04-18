@@ -18,8 +18,8 @@ class Sensor(Device):
         # Type Info
         self.manu = 'PyAlertMe'
         self.type = 'Button Device'
-        self.date = '2010-11-15'
-        self.version = 59435
+        self.date = '2017-01-01'
+        self.version = 12345
 
         # Relay State
         self.tamper = 0
