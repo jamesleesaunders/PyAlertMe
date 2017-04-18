@@ -49,6 +49,8 @@ class SmartPlug(Device):
         if message['id'] == 'rx_explicit':
             profile_id = message['profile']
             cluster_id = message['cluster']
+            source_addr_long = message['source_addr_long']
+            source_addr_short = message['source_addr']
 
             if profile_id == self.ALERTME_PROFILE_ID:
                 # AlertMe Profile ID
@@ -64,7 +66,7 @@ class SmartPlug(Device):
                         # State Request
                         # b'\x11\x00\x01\x01'
                         self._logger.debug('Switch State is: %s', self.state)
-                        self.send_message(self.generate_switch_state_update(), self.hub_addr_long, self.hub_addr_short)
+                        self.send_message(self.generate_switch_state_update(), source_addr_long, source_addr_short)
 
                     elif cluster_cmd == b'\02':
                         # Change State
@@ -73,7 +75,7 @@ class SmartPlug(Device):
                         state = self.parse_switch_state_request(message['rf_data'])
                         self.set_state(state)
                         self._logger.debug('Switch State Changed to: %s', self.state)
-                        self.send_message(self.generate_switch_state_update(), self.hub_addr_long, self.hub_addr_short)
+                        self.send_message(self.generate_switch_state_update(), source_addr_long, source_addr_short)
                         self._callback('Attribute', self.get_node_id(), 'State', 'ON')
 
                     elif cluster_cmd == b'\xfa':
@@ -111,7 +113,8 @@ class SmartPlug(Device):
         """
         self.state = state
         self._logger.debug('Switch State Changed to: %s', self.state)
-        self.send_message(self.generate_switch_state_update(), self.hub_addr_long, self.hub_addr_short)
+        if self.associated:
+            self.send_message(self.generate_switch_state_update(), self.hub_addr_long, self.hub_addr_short)
 
         # Temporary code while testing power code...
         # Randomly set the power usage value.

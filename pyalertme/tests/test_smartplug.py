@@ -40,7 +40,7 @@ class TestSmartPlug(unittest.TestCase):
             'src_endpoint': b'\x02'
         }
         self.device_obj.receive_message(message_on)
-        self.assertEqual(self.device_obj.state, 1)
+        self.assertEqual(self.device_obj.state, True)
 
         message_off = {
             'cluster': b'\x00\xee',
@@ -54,7 +54,7 @@ class TestSmartPlug(unittest.TestCase):
             'src_endpoint': b'\x02'
         }
         self.device_obj.receive_message(message_off)
-        self.assertEqual(self.device_obj.state, 0)
+        self.assertEqual(self.device_obj.state, False)
 
     def test_generate_state_update(self):
         self.device_obj.state = 1
@@ -104,10 +104,10 @@ class TestSmartPlug(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_power_factor(self):
-        self.device_obj.power = 0
-        result = self.device_obj.generate_power_factor()
+        self.device_obj.set_power_demand(0)
+        result = self.device_obj.generate_power_demand_update()
         expected = {
-            'description': 'Current Instantaneous Power',
+            'description': 'Current Power Demand',
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xef',
             'src_endpoint': b'\x02',
@@ -116,15 +116,15 @@ class TestSmartPlug(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        self.device_obj.power = 10
-        result = self.device_obj.generate_power_factor()
+        self.device_obj.set_power_demand(60)
+        result = self.device_obj.generate_power_demand_update()
         expected = {
-            'description': 'Current Instantaneous Power',
+            'description': 'Current Power Demand',
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xef',
             'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
-            'data': b'\tj\x81\n\x00'
+            'data': b'\tj\x81<\x00'
         }
         self.assertEqual(result, expected)
 
