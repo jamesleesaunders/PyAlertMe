@@ -25,7 +25,7 @@ formatter = logging.Formatter('%(asctime)s %(levelname)-3s %(module)-5s %(messag
 
 # Create console handler and set level to info
 sh = logging.StreamHandler()
-sh.setLevel(logging.ERROR)
+sh.setLevel(logging.DEBUG)
 sh.setFormatter(formatter)
 logger.addHandler(sh)
 
@@ -36,9 +36,8 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 # Serial Configuration
-XBEE_PORT = '/dev/tty.usbserial-DN018OI6'
-# XBEE_PORT = '/dev/tty.usbserial-A1014P7W'
-
+# XBEE_PORT = '/dev/tty.usbserial-DN018OI6'
+XBEE_PORT = '/dev/tty.usbserial-A1014P7W'
 XBEE_BAUD = 9600
 ser = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
@@ -49,29 +48,15 @@ def callback(type, node_id, field, value):
         print("Node Update\n\tNode ID: " + node_id + "  Field: " + field + "  Value: " + str(value))
 
 # Create Hub Object
-hub_obj = Hub()
-hub_obj.start(ser)
-
-# Kick Off Discovery
-hub_obj.discovery()
+device_obj = SmartPlug()
+device_obj.start(ser)
 
 # Actions Phase
 while True:
     try:
         time.sleep(0.001)
-
-        nodes = hub_obj.get_nodes()
-        pp.pprint(nodes)
-        print("Select device:\n")
-        node_id = raw_input("")
-
-        while True:
-            pp.pprint(hub_obj.list_actions())
-            print("Select command:\n")
-            action = raw_input("")
-            message = hub_obj.get_action(action)
-            addresses = hub_obj.node_id_to_addrs(node_id)
-            hub_obj.send_message(message, *addresses)
+        state = int(raw_input(""))
+        device_obj.set_state(state)
 
     except IndexError:
         print("No Command")
@@ -90,4 +75,4 @@ while True:
 
 # Close up shop
 print("Closing Serial Port")
-hub_obj.halt()
+device_obj.halt()

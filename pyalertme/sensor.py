@@ -8,18 +8,18 @@ import threading
 
 class Sensor(Device):
 
-    def __init__(self):
+    def __init__(self, callback=None):
         """
         Sensor Constructor
 
         """
-        Device.__init__(self)
+        Device.__init__(self, callback)
 
         # Type Info
-        self.manu = 'AlertMe.com'
+        self.manu = 'PyAlertMe'
         self.type = 'Button Device'
-        self.date = '2010-11-15'
-        self.version = 59435
+        self.date = '2017-01-01'
+        self.version = 12345
 
         # Relay State
         self.tamper = 0
@@ -35,28 +35,28 @@ class Sensor(Device):
         super(Sensor, self).process_message(message)
 
         # Zigbee Explicit Packets
-        if (message['id'] == 'rx_explicit'):
+        if message['id'] == 'rx_explicit':
             profile_id = message['profile']
             cluster_id = message['cluster']
 
             source_addr_long = message['source_addr_long']
             source_addr_short = message['source_addr']
 
-            if (profile_id == self.ALERTME_PROFILE_ID):
+            if profile_id == self.ALERTME_PROFILE_ID:
                 # AlertMe Profile ID
 
                 # Python 2 / 3 hack
-                if (hasattr(bytes(), 'encode')):
+                if hasattr(bytes(), 'encode'):
                     cluster_cmd = message['rf_data'][2]
                 else:
                     cluster_cmd = bytes([message['rf_data'][2]])
 
-                if (cluster_id == b'\x05\x00'):
+                if cluster_id == b'\x05\x00':
                     # Security Initialization
-                    self.logger.info('Security Initialization')
+                    self._logger.info('Received Security Initialization')
 
                 else:
-                    self.logger.error('Unrecognised Cluster ID: %r', cluster_id)
+                    self._logger.error('Unrecognised Cluster ID: %r', cluster_id)
 
             else:
-                self.logger.error('Unrecognised Profile ID: %r', profile_id)
+                self._logger.error('Unrecognised Profile ID: %r', profile_id)

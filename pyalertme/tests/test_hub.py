@@ -16,41 +16,32 @@ class TestHub(unittest.TestCase):
         self.hub_obj.halt()
 
     def test_receive_message(self):
-        self.maxDiff = None
-
         message = {
-            'cluster':          b'\x00\xf6',
-            'dest_endpoint':    b'\x02',
-            'id':               'rx_explicit',
-            'options':          b'\x01',
-            'profile':          b'\xc2\x16',
-            'rf_data':          b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\tSmartPlug\n2013-09-26',
-            'source_addr':      b'\x88\x9f',
+            'cluster': b'\x00\xf6',
+            'dest_endpoint': b'\x02',
+            'id': 'rx_explicit',
+            'options': b'\x01',
+            'profile': b'\xc2\x16',
+            'rf_data': b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\tSmartPlug\n2013-09-26',
+            'source_addr': b'\x88\x9f',
             'source_addr_long': b'\x00\ro\x00\x03\xbb\xb9\xf8',
-            'src_endpoint':     b'\x02'
+            'src_endpoint': b'\x02'
         }
         self.hub_obj.receive_message(message)
         result = self.hub_obj.get_nodes()
         expected = {
-            1: {
-                'Id': 1,
-                'Name': 'Unspecified',
-                'AddressLong': b'\x00\ro\x00\x03\xbb\xb9\xf8',
-                'AddressShort': b'\x88\x9f',
-                'Type': 'SmartPlug',
-                'Manufacturer': 'AlertMe.com',
-                'Version': 20045,
+            '00:0d:6f:00:03:bb:b9:f8': {
                 'ManufactureDate': '2013-09-26',
-                'FirstSeen': '2017-03-04 19:57:39',
-                'LastSeen': '2017-03-04 19:58:49',
-                'MessagesReceived': 4,
+                'Manufacturer': 'AlertMe.com',
+                'Type': 'SmartPlug',
+                'Version': 20045,
+                'AddressLong': '\x00\ro\x00\x03\xbb\xb9\xf8',
+                'AddressShort': '\x88\x9f',
                 'Attributes': {}
             }
         }
-        a = result[1].keys().sort()
-        b = expected[1].keys().sort()
 
-        self.assertEqual(a, b)
+        self.assertEqual(result, expected)
 
     def test_endpoint_request(self):
         message = {
@@ -66,7 +57,7 @@ class TestHub(unittest.TestCase):
         }
         self.hub_obj.receive_message(message)
         result = self.ser.get_data_written()
-        expected = b'~\x00\x19}1\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x00\x02\x00\xf0\xc2\x16\x00\x00\x19\x01\xfa\x00\x01\xfd'
+        expected = b'~\x00\x19}1\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x00\x02\x00\xf0\xc2\x16\x00\x00}1\x00\xfa\x00\x01\x06'
         self.assertEqual(result, expected)
 
     def test_parse_tamper_state(self):
@@ -78,9 +69,9 @@ class TestHub(unittest.TestCase):
         expected = {'TamperSwitch': 'CLOSED'}
         self.assertEqual(result, expected, "Tamper OK")
 
-    def test_parse_power_factor(self):
-        result = Hub.parse_power_factor(b'\t\x00\x81%\x00')
-        expected = {'PowerFactor': 37}
+    def test_parse_power_demand(self):
+        result = Hub.parse_power_demand(b'\t\x00\x81%\x00')
+        expected = {'PowerDemand': 37}
         self.assertEqual(result, expected)
 
     def test_parse_power_consumption(self):
@@ -93,11 +84,11 @@ class TestHub(unittest.TestCase):
 
     def test_parse_switch_state(self):
         result = Hub.parse_switch_state(b'\th\x80\x07\x01')
-        expected = {'State' : 'ON'}
+        expected = {'State': 'ON'}
         self.assertEqual(result, expected)
 
         result = Hub.parse_switch_state(b'\th\x80\x06\x00')
-        expected = {'State' : 'OFF'}
+        expected = {'State': 'OFF'}
         self.assertEqual(result, expected)
 
     def test_parse_version_info(self):
@@ -108,10 +99,10 @@ class TestHub(unittest.TestCase):
         message = device_obj.generate_type_update()
         result = Hub.parse_version_info(message['data'])
         expected = {
-            'Version': 1,
-            'Manufacturer': 'Acme.co.uk',
+            'Version': 12345,
+            'Manufacturer': 'PyAlertMe',
             'Type': 'Generic Device',
-            'ManufactureDate': '2016-09-18'
+            'ManufactureDate': '2017-01-01'
         }
         self.assertEqual(result, expected)
         device_obj.halt()
@@ -286,7 +277,7 @@ class TestHub(unittest.TestCase):
             'cluster': b'\x00\xf6',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'data': b'\x11\x00\xfc\x00\x01'
+            'data': b'\x11\x00\xfc'
         }
         self.assertEqual(result, expected)
 
@@ -295,11 +286,11 @@ class TestHub(unittest.TestCase):
         result = self.hub_obj.generate_active_endpoints_request(source_addr_short)
         expected = {
             'description': 'Active Endpoints Request',
-            'profile': '\x00\x00',
-            'cluster': '\x00\x05',
-            'src_endpoint': '\x00',
-            'dest_endpoint': '\x00',
-            'data': '\xaa\x9f\x88'
+            'profile': b'\x00\x00',
+            'cluster': b'\x00\x05',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'data': b'\xaa\x9f\x88'
         }
         self.assertEqual(result, expected)
 
@@ -308,35 +299,11 @@ class TestHub(unittest.TestCase):
         result = self.hub_obj.generate_match_descriptor_response(rf_data)
         expected = {
             'description': 'Match Descriptor Response',
-            'profile': '\x00\x00',
-            'cluster': '\x80\x06',
-            'src_endpoint': '\x00',
-            'dest_endpoint': '\x00',
-            'data': '\x03\x00\x00\x00\x01\x02'
-        }
-        self.assertEqual(result, expected)
-
-    def test_generate_hardware_join_1(self):
-        result = self.hub_obj.generate_hardware_join_1()
-        expected = {
-            'description': 'Hardware Join Messages 1',
-            'profile': b'\xc2\x16',
-            'cluster': b'\x00\xf6',
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
-            'data': b'\x11\x01\xfc'
-        }
-        self.assertEqual(result, expected)
-
-    def test_generate_hardware_join_2(self):
-        result = self.hub_obj.generate_hardware_join_2()
-        expected = {
-            'description': 'Hardware Join Messages 2',
-            'profile': b'\xc2\x16',
-            'cluster': b'\x00\xf0',
+            'profile': b'\x00\x00',
+            'cluster': b'\x80\x06',
             'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'data': b'\x19\x01\xfa\x00\x01'
+            'dest_endpoint': b'\x00',
+            'data': b'\x03\x00\x00\x00\x01\x02'
         }
         self.assertEqual(result, expected)
 
@@ -358,13 +325,29 @@ class TestHub(unittest.TestCase):
         result = self.hub_obj.generate_missing_link(src_endpoint, dest_endpoint)
         expected = {
             'description': 'Missing Link',
-            'profile': '\xc2\x16',
-            'cluster': '\x00\xf0',
-            'src_endpoint': '\x02',
-            'dest_endpoint': '\x02',
-            'data': '\x119\xfd'
+            'profile': b'\xc2\x16',
+            'cluster': b'\x00\xf0',
+            'src_endpoint': b'\x02',
+            'dest_endpoint': b'\x02',
+            'data': b'\x119\xfd'
         }
         self.assertEqual(result, expected)
+
+    def test_unknown_message(self):
+        # Temporary Test while investigating...
+        # 2017-04-14 21:59:57,078 ERROR hub   Unrecognised Cluster Command: '\xfc'
+        message = {
+            'profile': b'\xc2\x16',
+            'source_addr': b'\x00\x00',
+            'dest_endpoint': b'\x02',
+            'rf_data': b'\x11\x00\xfc\x00\x01',
+            'source_endpoint': b'\x00',
+            'options': b'\x01',
+            'source_addr_long': b'\x00\x13\xa2\x00@\xe9\xa4\xc0',
+            'cluster': b'\x00\xf6',
+            'id': 'rx_explicit'
+        }
+        self.hub_obj.receive_message(message)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

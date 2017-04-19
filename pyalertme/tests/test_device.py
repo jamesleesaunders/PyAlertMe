@@ -19,24 +19,24 @@ class TestDevice(unittest.TestCase):
         self.device_obj.rssi = 0
         result = self.device_obj.generate_range_update()
         expected = {
-            'cluster': '\x00\xf6',
-            'data': '\t+\xfd\x00',
+            'cluster': b'\x00\xf6',
+            'data': b'\t+\xfd\x00\x00',
             'description': 'Range Info',
-            'dest_endpoint': '\x02',
-            'profile': '\xc2\x16',
-            'src_endpoint': '\x00'
+            'dest_endpoint': b'\x02',
+            'profile': b'\xc2\x16',
+            'src_endpoint': b'\x00'
         }
         self.assertEqual(result, expected)
 
         self.device_obj.rssi = 197
         result = self.device_obj.generate_range_update()
         expected = {
-            'cluster': '\x00\xf6',
-            'data': '\t+\xfd\xc5',
+            'cluster': b'\x00\xf6',
+            'data': b'\t+\xfd\xc5\x00',
             'description': 'Range Info',
-            'dest_endpoint': '\x02',
-            'profile': '\xc2\x16',
-            'src_endpoint': '\x00'
+            'dest_endpoint': b'\x02',
+            'profile': b'\xc2\x16',
+            'src_endpoint': b'\x00'
         }
         self.assertEqual(result, expected)
 
@@ -44,11 +44,11 @@ class TestDevice(unittest.TestCase):
         result = self.device_obj.generate_type_update()
         expected = {
             'description': 'Type Info',
-            'profile': '\xc2\x16',
-            'cluster': '\x00\xf6',
-            'src_endpoint': '\x00',
-            'dest_endpoint': '\x02',
-            'data': '\tq\xfe\x01\x00\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAcme.co.uk\nGeneric Device\n2016-09-18'
+            'profile': b'\xc2\x16',
+            'cluster': b'\x00\xf6',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'data': b'\tq\xfe90\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bPyAlertMe\nGeneric Device\n2017-01-01'
         }
         self.assertEqual(result, expected)
 

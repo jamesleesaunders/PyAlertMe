@@ -39,3 +39,13 @@ v0.2.0 - 12 Apr 2017
 * Mode escaped=True.
 * Adding Generate Match Descriptor Request.
 * New setup-xbee.py script to auto configure module.
+
+v0.2.1 - 19 Apr 2017
+* Fix Issue #19 Removed SQLite DB code - it was over complicating the class and would be superfluous if the developer wanted to use a different DB like MySQL.
+* Fix Issue #26 Combining Type Req / Hardware Join 1 & Range Test / Hardware Join 2. 
+* Partially addressed #5. Device.py now has facility to send updates at regular intervals using Threads.
+* Improvements to SmartPlug class.
+* Improvements to Current Instantaneous Power and RSSI messages.
+* Simpler terminology 'Power Demand' and 'Power Consumption'.
+* Making more use of callback.
+* Further PEP formatting.

@@ -25,12 +25,14 @@ class TestBase(unittest.TestCase):
         self.assertEqual(result, expected, 'Test MAC 2')
 
     def test_get_addresses(self):
-        self.device_obj.receive_message({'status': '\x00', 'frame_id': '\x01', 'parameter': '\x88\x9f', 'command': 'MY', 'id': 'at_response'})
+        self.device_obj.receive_message({'status': b'\x00', 'frame_id': b'\x01', 'parameter': b'\x88\x9f', 'command': 'MY', 'id': 'at_response'})
         self.assertEqual(self.device_obj.addr_short, b'\x88\x9f')
 
-        self.device_obj.receive_message({'status': '\x00', 'frame_id': '\x01', 'parameter': '\x00\x13\xa2\x00', 'command': 'SH', 'id': 'at_response'})
-        self.device_obj.receive_message({'status': '\x00', 'frame_id': '\x01', 'parameter': '@\xe9\xa4\xc0', 'command': 'SL', 'id': 'at_response'})
+        self.device_obj.receive_message({'status': b'\x00', 'frame_id': b'\x01', 'parameter': b'\x00\x13\xa2\x00', 'command': 'SH', 'id': 'at_response'})
+        self.device_obj.receive_message({'status': b'\x00', 'frame_id': b'\x01', 'parameter': b'@\xe9\xa4\xc0', 'command': 'SL', 'id': 'at_response'})
         self.assertEqual(self.device_obj.addr_long, b'\x00\x13\xa2\x00@\xe9\xa4\xc0')
+
+        self.assertEqual(self.device_obj.get_node_id(), '00:13:a2:00:40:e9:a4:c0')
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
