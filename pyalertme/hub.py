@@ -196,7 +196,6 @@ class Hub(Base):
 
                     elif cluster_id == b'\x802':
                         # Node Descriptor Response.
-                        # Why not b'\x80\x02' ?
                         self._logger.debug('Received Node Descriptor Response')
                         
                     elif cluster_id == b'\x00\x04':
@@ -236,9 +235,8 @@ class Hub(Base):
                         # We are fully associated!
                         self._logger.debug('New Device Fully Associated')
                         
-                    elif cluster_id == b'\x13':
+                    elif cluster_id == b'\x00\x13':
                         # Device Announce Message.
-                        # Why not b'\x00\x13' ?
                         self._logger.debug('Received Device Announce Message')
                         # This will tell me the address of the new thing
                         # so we're going to send an active endpoint request
@@ -749,5 +747,13 @@ class Hub(Base):
 
         else:
             logging.error('Unrecognised Device Status %r', rf_data)
+            # From PowerClamp ?...
+            # ERROR:root:Unrecognised Device Status '\t\x00\xfb\x1b\x97H\x00\x00H\x0c\x9c\x01\xd4\xff\x00\x00'
+            # 2017-04-19 22:38:33,316 DEBUG base  Received Message: {'profile': '\xc2\x16', 'source_addr': 'hp', 'dest_endpoint': '\x02', 'rf_data': '\t\x00\xfb\x1b\x97H\x00\x00H\x0c\x9c\x01\xd4\xff\x00\x00', 'source_endpoint': '\x02', 'options': '\x01', 'source_addr_long': '\x00\ro\x00\x00\xc2\x8a\xb2', 'cluster': '\x00\xf0', 'id': 'rx_explicit'}
+            # 2017-04-19 22:38:33,316 DEBUG base  Received AlertMe Specific Profile Packet
+            # 2017-04-19 22:38:33,316 DEBUG hub   Received Status Update
+            # 2017-04-19 22:38:33,317 DEBUG hub   Sending Missing Link
+            # 2017-04-19 22:38:33,317 DEBUG base  Sending Message: {'profile': '\xc2\x16', 'dest_addr_long': '\x00\ro\x00\x00\xc2\x8a\xb2', 'description': 'Missing Link', 'src_endpoint': '\x02', 'cluster': '\x00\xf0', 'dest_addr': 'hp', 'data': '\x119\xfd', 'dest_endpoint': '\x02'}
+            # 2017-04-19 22:38:33,348 DEBUG base  Received Message: {'profile': '\xc2\x16', 'source_addr': 'hp', 'dest_endpoint': '\x02', 'rf_data': '\t\x00\x81\x00\x00', 'source_endpoint': '\x02', 'options': '\x01', 'source_addr_long': '\x00\ro\x00\x00\xc2\x8a\xb2', 'cluster': '\x00\xef', 'id': 'rx_explicit'}
 
         return ret

@@ -94,3 +94,8 @@ Request:
 ```
 2017-04-17 21:28:52,751 DEBUG hub   Received Current Instantaneous Power Update
 2017-04-17 21:28:52,752 DEBUG hub   Updating Node Attribute: PowerFactor Value: 0
+
+## MAC Address Manufacturers
+00:0d:6f:00:03:bb:b9:f8 = Ember Corporation
+00:13:a2:00:40:a2:3b:09 = MaxStream, Inc
+00:1E:5E:09:02:14:C5:AB = Computime Ltd.
