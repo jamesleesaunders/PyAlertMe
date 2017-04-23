@@ -133,7 +133,7 @@ class Hub(Base):
         :return: Node ID
         """
         # If this address is me, don't add to nodes list and don't generate node_id, also if we dont know what our own address is yet.
-        if not self.addr_long or addr_long == self.addr_long:
+        if self.addr_long == addr_long or self.addr_long == None:
             return None
 
         # See if we already know about this device.
@@ -174,7 +174,7 @@ class Hub(Base):
             source_addr_short = message['source_addr']
             node_id = self.addr_long_to_node_id(source_addr_long)
 
-            if node_id:
+            if node_id != None:
                 self.nodes[node_id]['AddressLong'] = source_addr_long
                 self.nodes[node_id]['AddressShort'] = source_addr_short
 
@@ -224,11 +224,12 @@ class Hub(Base):
                         reply = self.generate_match_descriptor_response(message['rf_data'])
                         self.send_message(reply, source_addr_long, source_addr_short)
 
-                        # The next message is directed at the hardware code (rather than the network code).
+                        # The next messages are directed at the hardware code (rather than the network code).
+                        # The device has to receive these two message to stay joined.
                         time.sleep(2)
-                        # The device has to receive this message to stay joined.
                         reply = self.generate_type_request()
                         self.send_message(reply, source_addr_long, source_addr_short)
+                        time.sleep(2)
                         reply = self.generate_mode_change_request('NORMAL')
                         self.send_message(reply, source_addr_long, source_addr_short)
 
