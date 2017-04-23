@@ -67,7 +67,7 @@ class Base(object):
         :param serial: Serial Object
         :return:
         """
-        if(serial != None):
+        if serial:
             self._serial = serial
             self._xbee = ZigBee(ser=self._serial, callback=self.receive_message, error_callback=self.xbee_error, escaped=True)
             self.read_addresses()

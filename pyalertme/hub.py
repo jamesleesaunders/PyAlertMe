@@ -720,40 +720,35 @@ class Hub(Base):
         """
         ret = {}
         status = rf_data[3]
-        if (status == b'\x1c'):
-            # Power Switch
-            # Never found anything useful in this
+        if status == b'\x1b':
+            # Power Clamp
+            # Unknown
             pass
 
-        if (status == b'\x1d'):
+        elif status == b'\x1c':
+            # Power Switch
+            # Unknown
+            pass
+
+        elif status == b'\x1d':
             # Key Fob
+            ret['TempFahrenheit'] = float(struct.unpack("<h", rf_data[8:10])[0]) / 100.0 * 1.8 + 32
             ret['Counter'] = struct.unpack('<I', rf_data[4:8])[0]
 
-        if (status == b'\x1e') or (status == b'\x1f'):
+        elif status == b'\x1e' or status == b'\x1f':
             # Door Sensor
-            if (ord(rf_data[-1]) & 0x01 == 1):
+            ret['TempFahrenheit'] = float(struct.unpack("<h", rf_data[8:10])[0]) / 100.0 * 1.8 + 32
+            if ord(rf_data[-1]) & 0x01 == 1:
                 ret['ReedSwitch']  = 'OPEN'
             else:
                 ret['ReedSwitch']  = 'CLOSED'
 
-            if (ord(rf_data[-1]) & 0x02 == 0):
+            if ord(rf_data[-1]) & 0x02 == 0:
                 ret['TamperSwitch'] = 'OPEN'
             else:
                 ret['TamperSwitch'] = 'CLOSED'
 
-        if ((status == b'\x1f') or (status == b'\x1d')):
-            # Door Sensor & Key Fob
-            ret['TempFahrenheit'] = float(struct.unpack("<h", rf_data[8:10])[0]) / 100.0 * 1.8 + 32
-
         else:
-            logging.error('Unrecognised Device Status %r', rf_data)
-            # From PowerClamp ?...
-            # ERROR:root:Unrecognised Device Status '\t\x00\xfb\x1b\x97H\x00\x00H\x0c\x9c\x01\xd4\xff\x00\x00'
-            # 2017-04-19 22:38:33,316 DEBUG base  Received Message: {'profile': '\xc2\x16', 'source_addr': 'hp', 'dest_endpoint': '\x02', 'rf_data': '\t\x00\xfb\x1b\x97H\x00\x00H\x0c\x9c\x01\xd4\xff\x00\x00', 'source_endpoint': '\x02', 'options': '\x01', 'source_addr_long': '\x00\ro\x00\x00\xc2\x8a\xb2', 'cluster': '\x00\xf0', 'id': 'rx_explicit'}
-            # 2017-04-19 22:38:33,316 DEBUG base  Received AlertMe Specific Profile Packet
-            # 2017-04-19 22:38:33,316 DEBUG hub   Received Status Update
-            # 2017-04-19 22:38:33,317 DEBUG hub   Sending Missing Link
-            # 2017-04-19 22:38:33,317 DEBUG base  Sending Message: {'profile': '\xc2\x16', 'dest_addr_long': '\x00\ro\x00\x00\xc2\x8a\xb2', 'description': 'Missing Link', 'src_endpoint': '\x02', 'cluster': '\x00\xf0', 'dest_addr': 'hp', 'data': '\x119\xfd', 'dest_endpoint': '\x02'}
-            # 2017-04-19 22:38:33,348 DEBUG base  Received Message: {'profile': '\xc2\x16', 'source_addr': 'hp', 'dest_endpoint': '\x02', 'rf_data': '\t\x00\x81\x00\x00', 'source_endpoint': '\x02', 'options': '\x01', 'source_addr_long': '\x00\ro\x00\x00\xc2\x8a\xb2', 'cluster': '\x00\xef', 'id': 'rx_explicit'}
+            logging.error('Unrecognised Device Status %r  %r', status, rf_data)
 
         return ret

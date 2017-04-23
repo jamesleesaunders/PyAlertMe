@@ -207,6 +207,10 @@ class TestHub(unittest.TestCase):
         expected = {'TempFahrenheit': 87.008, 'Counter': 13019}
         self.assertEqual(result, expected)
 
+        result = Hub.parse_status_update(b'\t\x00\xfb\x1b\x97H\x00\x00H\x0c\x9c\x01\xd4\xff\x00\x00')
+        expected = {}
+        self.assertEqual(result, expected)
+
     def test_parse_security_state(self):
         result = Hub.parse_security_state(b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00')
         expected = {'ReedSwitch': 'OPEN', 'TamperSwitch': 'CLOSED'}
@@ -332,22 +336,6 @@ class TestHub(unittest.TestCase):
             'data': b'\x119\xfd'
         }
         self.assertEqual(result, expected)
-
-    def test_unknown_message(self):
-        # Temporary Test while investigating...
-        # 2017-04-14 21:59:57,078 ERROR hub   Unrecognised Cluster Command: '\xfc'
-        message = {
-            'profile': b'\xc2\x16',
-            'source_addr': b'\x00\x00',
-            'dest_endpoint': b'\x02',
-            'rf_data': b'\x11\x00\xfc\x00\x01',
-            'source_endpoint': b'\x00',
-            'options': b'\x01',
-            'source_addr_long': b'\x00\x13\xa2\x00@\xe9\xa4\xc0',
-            'cluster': b'\x00\xf6',
-            'id': 'rx_explicit'
-        }
-        self.hub_obj.receive_message(message)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

@@ -45,7 +45,7 @@ class Device(Base):
             source_addr_long = message['source_addr_long']
             source_addr_short = message['source_addr']
 
-            if self.associated == False:
+            if not self.associated:
                 self.send_message(self.generate_match_descriptor_request(), source_addr_long, source_addr_short)
 
             if profile_id == self.ZDP_PROFILE_ID:
@@ -59,7 +59,7 @@ class Device(Base):
                 elif cluster_id == b'\x80\x06':
                     self._logger.debug('Received Match Descriptor Response')
 
-            elif (profile_id == self.ALERTME_PROFILE_ID):
+            elif profile_id == self.ALERTME_PROFILE_ID:
                 # AlertMe Profile ID
 
                 # Python 2 / 3 hack
@@ -71,7 +71,7 @@ class Device(Base):
                 if cluster_id == b'\x00\xf6':
                     # b'\x11\x00\xfc\x00\x01'
                     self._logger.debug('Received Version Request')
-                    self.send_message(self.generate_type_update(), self.hub_addr_long, self.hub_addr_short)
+                    self.send_message(self.generate_type_update(), source_addr_long, source_addr_short)
 
                 elif cluster_id == b'\x00\xf0':
                     if cluster_cmd == b'\xfa':
@@ -95,7 +95,7 @@ class Device(Base):
                             self._logger.debug('Range Test Mode')
                             self.mode = 'RANGE'
                             # TODO Setup thread loop to send regular range RSSI updates - for now just send one...
-                            self.send_message(self.generate_range_update(), self.hub_addr_long, self.hub_addr_short)
+                            self.send_message(self.generate_range_update(), source_addr_long, source_addr_short)
 
                         elif modeCmd == b'\x02\x01':
                             # Locked
@@ -121,7 +121,7 @@ class Device(Base):
         checksum = b'\tq'
         cluster_cmd = b'\xfe'
         payload = struct.pack('H', self.version) \
-            +  b'\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0b' \
+            + b'\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0b' \
             + self.manu \
             + '\n' + self.type \
             + '\n' + self.date

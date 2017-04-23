@@ -108,7 +108,7 @@ class SmartPlug(Device):
         """
         Set Power Demand
 
-        :param state:
+        :param power_demand:
         :return:
         """
         self.power_demand = power_demand
