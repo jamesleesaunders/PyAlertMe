@@ -132,7 +132,8 @@ class Hub(Base):
         :param addr_long: 48-bits Long Address
         :return: Node ID
         """
-        # If this address is me, don't add to nodes list and don't generate node_id, also if we dont know what our own address is yet.
+        # If this address is me, don't add to nodes list and don't generate node_id,
+        # also if we dont know what our own address is yet.
         if self.addr_long == addr_long or self.addr_long == None:
             return None
 

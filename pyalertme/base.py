@@ -38,8 +38,8 @@ class Base(object):
         self.version = None
 
         # My addresses
-        self.addr_short = b'\x00\x00\x00\x00\x00\x00\x00\x00'
-        self.addr_long = b'\x00\x00'
+        self.addr_short = None
+        self.addr_long = None
         self._addr_long_list = [b'', b'']
 
         self.associated = False
