@@ -9,7 +9,6 @@ Inspired by code written by D. Thiebaut http://cs.smith.edu/dftwiki/index.php/Py
 
 Provides fake device objects for other unit tests.
 """
-import sys
 
 class Serial(object):
     def __init__(self, port='/dev/null', baudrate=19200, timeout=1,
