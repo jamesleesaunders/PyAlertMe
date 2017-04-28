@@ -199,6 +199,12 @@ class Base(object):
         str1 = str(binascii.b2a_hex(address_long).decode())
         arr1 = [str1[i:i+2] for i in range(0, len(str1), 2)]
         ret1 = ':'.join(b for b in arr1)
+        
+        ## MAC Address Manufacturers
+        # 00:0d:6f:00:03:bb:b9:f8 = Ember Corporation
+        # 00:13:a2:00:40:a2:3b:09 = MaxStream, Inc
+        # 00:1E:5E:09:02:14:C5:AB = Computime Ltd.
+                            
         return ret1
 
     messages = {
