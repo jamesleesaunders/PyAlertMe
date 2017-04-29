@@ -29,7 +29,11 @@ class Base(object):
         self._xbee = None
         self._serial = None
         self._callback = callback if callback else self._callback
-        self._updates_thread = threading.Thread(target=self._updates)
+        self._updates_thread = threading.Thread(target=self._updates_loop)
+        self.update_interval = 2.00
+
+        self.associated = False
+        self.started = False
 
         # Type Info
         self.manu = None
@@ -42,22 +46,28 @@ class Base(object):
         self.addr_long = None
         self._addr_long_list = [b'', b'']
 
-        self.associated = False
-        self.started = False
-
     def _callback(self, type, node_id, field, value):
         if type == 'Attribute':
             print("Attribute Update [Node ID: " + node_id + "\tField: " + field + "\tValue: " + str(value) + "]")
         elif type == 'Property':
             print("Property Update [Node ID: " + node_id + "\tField: " + field + "\tValue: " + str(value) + "]")
 
-    def _updates(self):
+    def _updates_loop(self):
         """
-        Continual Updates Thread
+        Continual Updates Thread calls the _updates() function every at intervals set in self.update_interval.
 
         """
         while self.started:
-            time.sleep(0.00)
+            if self.associated:
+                self._updates()
+                time.sleep(self.update_interval)
+
+    def _updates(self):
+        """
+        The _updates function is called by the _updates_loop() thread function called at regular intervals.
+
+        """
+        self._logger.debug('Continual Update')
 
     def start(self, serial):
         """
@@ -81,8 +91,8 @@ class Base(object):
 
         :return:
         """
-        self.started = False # This should kill the updates thread
-        self._updates_thread.join() # Wait for updates thread to finish
+        self.started = False          # This should kill the updates thread
+        self._updates_thread.join()   # Wait for updates thread to finish
         self._xbee.halt()
         self._serial.close()
 

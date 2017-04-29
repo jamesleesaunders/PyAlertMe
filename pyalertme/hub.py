@@ -23,6 +23,9 @@ class Hub(Base):
         self.date = '2017-01-01'
         self.version = 12345
 
+        # By default the Hub is associated
+        self.associated = True
+
         # List of Associated Nodes
         self.nodes = {}
 

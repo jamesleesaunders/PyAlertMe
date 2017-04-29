@@ -15,6 +15,9 @@ class SmartPlug(Device):
         """
         Device.__init__(self, callback)
 
+        # Set continual updates to every 5 seconds
+        self.update_interval = 5.00
+
         # Type Info
         self.manu = 'PyAlertMe'
         self.type = 'SmartPlug'
@@ -31,10 +34,7 @@ class SmartPlug(Device):
         Continual Updates
 
         """
-        while self.started:
-            if self.associated:
-                self.send_message(self.generate_power_demand_update(), self.hub_addr_long, self.hub_addr_short)
-            time.sleep(2.00)
+        self.send_message(self.generate_power_demand_update(), self.hub_addr_long, self.hub_addr_short)
 
     def process_message(self, message):
         """
