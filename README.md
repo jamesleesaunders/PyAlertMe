@@ -23,6 +23,21 @@ def callback(type, node_id, field, value):
 hub_obj = Hub(callback)
 hub_obj.start(ser)
 ```
+Example output:
+```
+Property Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: ManufactureDate	Value: 2013-09-26]
+Property Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: Version	Value: 44722]
+Property Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: Type	Value: SmartPlug]
+Property Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: Manufacturer	Value: AlertMe.com]
+Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: PowerDemand	Value: 54]
+Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: PowerDemand	Value: 53]
+Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: State	Value: OFF]
+Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: PowerDemand	Value: 0]
+Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: State	Value: ON]
+Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: PowerDemand	Value: 31]
+Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: RSSI	Value: 194]
+Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: RSSI	Value: 196]
+```
 The hub supports the following devices:
 * SmartPlug
 * Power Clamp
