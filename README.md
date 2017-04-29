@@ -54,3 +54,6 @@ ZigBee Stack Profile (ZS): 2
 * Encryption Key (KY): None
 * API Enable (AP): 2
 * API Output Mode (AO): 3
+
+## Credits
+Huge thanks goto Desert Home http://www.desert-home.com/2014/02/raspberry-pi-and-lowes-iris-smart-switch.html
