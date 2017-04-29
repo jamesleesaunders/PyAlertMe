@@ -61,7 +61,8 @@ device_obj.start(ser)
 
 ## XBee Setup
 Configure XBee as follows:
-XBee Modem XB24-ZB, ZIGBEE Coordinator API, Version 21A7 (or better)
+XBee Modem XB24-ZB, ZIGBEE Coordinator API, Version 21A7 (or better).
+You can also use /scripts/setup_xbee.py to configure the Xbee. 
 
 ### Coordinator (Hub) ###
 ZigBee Stack Profile (ZS): 2
