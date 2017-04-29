@@ -23,6 +23,17 @@ def callback(type, node_id, field, value):
 hub_obj = Hub(callback)
 hub_obj.start(ser)
 ```
+The hub supports the following devices:
+* SmartPlug
+* Power Clamp
+* Button Device
+* PIR Device
+* Door/Window sensor
+* Alarm Detector
+* Keyfob Device
+* Beacon
+* Lamp
+
 ### SmartPlug ###
 ```python
 # Setup Serial
