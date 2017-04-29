@@ -1,3 +1,5 @@
+import sys
+sys.path.insert(0, '../')
 from pyalertme import *
 import unittest
 from mock_serial import Serial

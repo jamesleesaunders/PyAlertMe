@@ -1,3 +1,5 @@
+import sys
+sys.path.insert(0, '../')
 from pyalertme import *
 import unittest
 from mock_serial import Serial
@@ -13,12 +15,12 @@ class TestBase(unittest.TestCase):
         self.device_obj.halt()
 
     def test_pretty_mac(self):
-        result = Base.pretty_mac(b'\x00\ro\x00\x03\xbb\xb9\xf8')
-        expected = '00:0d:6f:00:03:bb:b9:f8'
+        result = Base.pretty_mac(b'\x00\x1E\x5E\x09\x02\x14\xC5\xAB')
+        expected = '00:1e:5e:09:02:14:c5:ab'
         self.assertEqual(result, expected, 'Test MAC 1')
 
-        result = Base.pretty_mac(b'\x00\ro\x00\x02\xbb\xb7\xe8')
-        expected = '00:0d:6f:00:02:bb:b7:e8'
+        result = Base.pretty_mac(b'\x00\ro\x00\x03\xbb\xb9\xf8')
+        expected = '00:0d:6f:00:03:bb:b9:f8'
         self.assertEqual(result, expected, 'Test MAC 2')
 
     def test_get_addresses(self):
