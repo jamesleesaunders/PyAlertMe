@@ -175,7 +175,7 @@ class Base(object):
                 self._addr_long_list[1] = message['parameter']
             # If we have worked out both the High and Low addresses then calculate the full addr_long
             if self._addr_long_list[0] and self._addr_long_list[1]:
-                self.addr_long = b''.join(self._addr_long_list)
+                self.set_addr_long(b''.join(self._addr_long_list))
 
         # Zigbee Explicit Packets
         if message['id'] == 'rx_explicit':
