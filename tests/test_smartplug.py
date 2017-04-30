@@ -10,7 +10,7 @@ class TestSmartPlug(unittest.TestCase):
         self.ser = Serial()
         self.device_obj = SmartPlug()
         self.device_obj.start(self.ser)
-        self.device_obj.addr_long = b'\x00\x1E\x5E\x09\x02\x14\xC5\xAB'
+        self.device_obj.set_addr_long(b'\x00\x1E\x5E\x09\x02\x14\xC5\xAB')
 
     def tearDown(self):
         self.device_obj.halt()
