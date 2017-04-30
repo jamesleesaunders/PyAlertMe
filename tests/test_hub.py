@@ -10,7 +10,7 @@ class TestHub(unittest.TestCase):
         self.ser = Serial()
         self.hub_obj = Hub()
         self.hub_obj.start(self.ser)
-        self.hub_obj.addr_long = b'\x00\x1E\x5E\x09\x02\x14\xC5\xAB'
+        self.hub_obj.set_addr_long(b'\x00\x1E\x5E\x09\x02\x14\xC5\xAB')
 
     def tearDown(self):
         self.hub_obj.halt()
