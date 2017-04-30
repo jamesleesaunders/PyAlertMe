@@ -148,6 +148,16 @@ class Base(object):
         self._logger.debug('Received Message: %s', message)
         self.process_message(message)
 
+    def set_addr_long(self, addr_long):
+        """
+        Set Long Address
+
+        :param addr_long: Long Address
+        :return:
+        """
+        self._logger.debug('Setting Long Address: %s', addr_long)
+        self.addr_long = addr_long
+
     def process_message(self, message):
         """
         Process incoming message
