@@ -93,7 +93,7 @@ class Base(object):
         :return:
         """
         self.started = False          # This should kill the updates thread
-        self._updates_thread.join()   # Wait for updates thread to finish
+        #self._updates_thread.join()   # Wait for updates thread to finish
         self._xbee.halt()
         self._serial.close()
 
