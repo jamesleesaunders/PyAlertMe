@@ -46,34 +46,6 @@ class Base(object):
         self.addr_long = None
         self._addr_long_list = [b'', b'']
 
-    def _callback(self, type, node_id, field, value):
-        if type == 'Attribute':
-            print("Attribute Update [Node ID: " + node_id + "\tField: " + field + "\tValue: " + str(value) + "]")
-        elif type == 'Property':
-            print("Property Update [Node ID: " + node_id + "\tField: " + field + "\tValue: " + str(value) + "]")
-
-    def _updates_loop(self):
-        """
-        Continual Updates Thread calls the _updates() function every at intervals set in self.update_interval.
-
-        """
-        while self.started:
-            if self.associated:
-                self._updates()
-
-                # The following for loop is being used in place of a simple
-                # time.sleep(self.update_interval)
-                # This is done so we can interrupt the thread quicker.
-                for i in range(self.update_interval * 10):
-                    if self.started :
-                        time.sleep(0.1)
-
-    def _updates(self):
-        """
-        The _updates function is called by the _updates_loop() thread function called at regular intervals.
-
-        """
-        self._logger.debug('Continual Update')
 
     def start(self, serial):
         """
@@ -101,6 +73,36 @@ class Base(object):
         self._updates_thread.join()   # Wait for updates thread to finish
         self._xbee.halt()
         self._serial.close()
+
+    @staticmethod
+    def _callback(type, node_id, field, value):
+        if type == 'Attribute':
+            print("Attribute Update [Node ID: " + node_id + "\tField: " + field + "\tValue: " + str(value) + "]")
+        elif type == 'Property':
+            print("Property Update [Node ID: " + node_id + "\tField: " + field + "\tValue: " + str(value) + "]")
+
+    def _updates_loop(self):
+        """
+        Continual Updates Thread calls the _updates() function every at intervals set in self.update_interval.
+
+        """
+        while self.started:
+            if self.associated:
+                self._updates()
+
+                # The following for loop is being used in place of a simple
+                # time.sleep(self.update_interval)
+                # This is done so we can interrupt the thread quicker.
+                for i in range(self.update_interval * 10):
+                    if self.started :
+                        time.sleep(0.1)
+
+    def _updates(self):
+        """
+        The _updates function is called by the _updates_loop() thread function called at regular intervals.
+
+        """
+        self._logger.debug('Continual Update')
 
     def get_node_id(self):
         return self.pretty_mac(self.addr_long)
@@ -203,14 +205,6 @@ class Base(object):
             else:
                 self._logger.error('Unrecognised Profile ID: %r', profile_id)
 
-    def __str__(self):
-        """
-        Object to String
-
-        :return: String
-        """
-        return "Device Type: %s" % (self.type)
-
     @staticmethod
     def pretty_mac(address_long):
         """
@@ -226,7 +220,7 @@ class Base(object):
         arr1 = [str1[i:i+2] for i in range(0, len(str1), 2)]
         ret1 = ':'.join(b for b in arr1)
         
-        ## MAC Address Manufacturers
+        # MAC Address Manufacturers
         # 00:0d:6f:00:03:bb:b9:f8 = Ember Corporation
         # 00:13:a2:00:40:a2:3b:09 = MaxStream, Inc
         # 00:1E:5E:09:02:14:C5:AB = Computime Ltd.
