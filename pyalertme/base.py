@@ -29,7 +29,7 @@ class Base(object):
         self._xbee = None
         self._serial = None
         self._callback = callback if callback else self._callback
-        self._updates_thread = threading.Thread(target=self._updates_loop)
+        self._updates_thread = threading.Thread(target=self._updates_loop).daemon = True  # set the Thread as a "daemon thread"
         self.update_interval = 2.00
 
         self.associated = False
