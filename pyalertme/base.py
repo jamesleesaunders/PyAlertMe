@@ -30,8 +30,7 @@ class Base(object):
         self._serial = None
         self._callback = callback if callback else self._callback
         self._updates_thread = threading.Thread(target=self._updates_loop)
-        self._updates_thread.daemon = True  # set the Thread as a "daemon thread"
-        self.update_interval = 2.00
+        self.update_interval = 2
 
         self.associated = False
         self.started = False
@@ -61,7 +60,13 @@ class Base(object):
         while self.started:
             if self.associated:
                 self._updates()
-                time.sleep(self.update_interval)
+
+                # The following for loop is being used in place of a simple
+                # time.sleep(self.update_interval)
+                # This is done so we can interrupt the thread quicker.
+                for i in range(self.update_interval * 10):
+                    if self.started :
+                        time.sleep(0.1)
 
     def _updates(self):
         """
@@ -93,7 +98,7 @@ class Base(object):
         :return:
         """
         self.started = False          # This should kill the updates thread
-        #self._updates_thread.join()   # Wait for updates thread to finish
+        self._updates_thread.join()   # Wait for updates thread to finish
         self._xbee.halt()
         self._serial.close()
 
