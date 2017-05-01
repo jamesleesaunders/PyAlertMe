@@ -46,7 +46,6 @@ class Base(object):
         self.addr_long = None
         self._addr_long_list = [b'', b'']
 
-
     def start(self, serial):
         """
         Start Device
@@ -69,7 +68,7 @@ class Base(object):
 
         :return:
         """
-        self.started = False          # This should kill the updates thread
+        self._started = False         # This should kill the updates thread
         self._schedule_thread.join()  # Wait for updates thread to finish
         self._xbee.halt()
         self._serial.close()
@@ -94,7 +93,7 @@ class Base(object):
                 # time.sleep(self._schedule_interval)
                 # This is done so we can interrupt the thread quicker.
                 for i in range(self._schedule_interval * 10):
-                    if self._started :
+                    if self._started:
                         time.sleep(0.1)
 
     def _schedule(self):
