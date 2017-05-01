@@ -29,7 +29,7 @@ class SmartPlug(Device):
         self.power_demand = 0
         self.power_consumption = 0
 
-    def _updates(self):
+    def _schedule(self):
         """
         Continual Updates
 
