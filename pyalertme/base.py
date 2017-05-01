@@ -29,8 +29,8 @@ class Base(object):
         self._xbee = None
         self._serial = None
         self._callback = callback if callback else self._callback
-        self._updates_thread = threading.Thread(target=self._updates_loop)
-        self.update_interval = 2
+        self._schedule_thread = threading.Thread(target=self._schedule_loop)
+        self._schedule_interval = 2
 
         self.associated = False
         self.started = False
@@ -59,8 +59,8 @@ class Base(object):
             self._serial = serial
             self._xbee = ZigBee(ser=self._serial, callback=self.receive_message, error_callback=self.xbee_error, escaped=True)
             self.read_addresses()
-            self.started = True
-            self._updates_thread.start()
+            self._started = True
+            self._schedule_thread.start()
 
     def halt(self):
         """
@@ -70,7 +70,7 @@ class Base(object):
         :return:
         """
         self.started = False          # This should kill the updates thread
-        self._updates_thread.join()   # Wait for updates thread to finish
+        self._schedule_thread.join()  # Wait for updates thread to finish
         self._xbee.halt()
         self._serial.close()
 
@@ -81,25 +81,25 @@ class Base(object):
         elif type == 'Property':
             print("Property Update [Node ID: " + node_id + "\tField: " + field + "\tValue: " + str(value) + "]")
 
-    def _updates_loop(self):
+    def _schedule_loop(self):
         """
-        Continual Updates Thread calls the _updates() function every at intervals set in self.update_interval.
+        Continual Updates Thread calls the _updates() function every at intervals set in self._schedule_interval.
 
         """
-        while self.started:
+        while self._started:
             if self.associated:
-                self._updates()
+                self._schedule()
 
                 # The following for loop is being used in place of a simple
-                # time.sleep(self.update_interval)
+                # time.sleep(self._schedule_interval)
                 # This is done so we can interrupt the thread quicker.
-                for i in range(self.update_interval * 10):
-                    if self.started :
+                for i in range(self._schedule_interval * 10):
+                    if self._started :
                         time.sleep(0.1)
 
-    def _updates(self):
+    def _schedule(self):
         """
-        The _updates function is called by the _updates_loop() thread function called at regular intervals.
+        The _schedule function is called by the _schedule_loop() thread function called at regular intervals.
 
         """
         self._logger.debug('Continual Update')
