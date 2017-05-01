@@ -15,8 +15,6 @@ class Hub(Base):
         """
         Base.__init__(self, callback)
 
-        self._discovery_thread = threading.Thread(target=self._discovery)
-
         # Type Info
         self.manu = 'PyAlertMe'
         self.type = 'Nano Hub'
@@ -25,6 +23,7 @@ class Hub(Base):
 
         # By default the Hub is associated
         self.associated = True
+        self._discovery_thread = threading.Thread(target=self._discovery)
 
         # List of Associated Nodes
         self.nodes = {}
