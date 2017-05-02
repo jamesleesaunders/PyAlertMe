@@ -18,6 +18,8 @@ class Base(object):
     BROADCAST_LONG  = b'\x00\x00\x00\x00\x00\x00\xff\xff'
     BROADCAST_SHORT = b'\xff\xfe'
 
+
+
     def __init__(self, callback=None):
         """
         Base Constructor
@@ -205,6 +207,27 @@ class Base(object):
 
             else:
                 self._logger.error('Unrecognised Profile ID: %r', profile_id)
+
+    test_message = {
+        'active': {
+            'name': 'Active Endpoints Request',
+            'frame': {
+                'profile': ZDP_PROFILE_ID,
+                'cluster': b'\x00\x05',
+                'src_endpoint': b'\x00',
+                'dest_endpoint': b'\x00',
+                'data': None
+            },
+            'parse': lambda self, param: self.test_parse(param)
+        }
+    }
+
+    def generate_test_message(self, message_id, param):
+        self.test_message[message_id]['frame']['data'] = self.test_message[message_id]['parse'](self, param)
+        return self.test_message[message_id]['frame']
+
+    def test_parse(self, param):
+        return param
 
     @staticmethod
     def pretty_mac(address_long):

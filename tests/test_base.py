@@ -33,5 +33,9 @@ class TestBase(unittest.TestCase):
 
         self.assertEqual(self.device_obj.get_node_id(), '00:13:a2:00:40:e9:a4:c0')
 
+
+    def test_generate_test(self):
+        self.assertEqual(self.device_obj.generate_test_message('active', 'Hello World'), None)
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
