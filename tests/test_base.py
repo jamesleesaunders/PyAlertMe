@@ -35,7 +35,10 @@ class TestBase(unittest.TestCase):
 
 
     def test_generate_test(self):
-        self.assertEqual(self.device_obj.generate_test_message('active', 'Hello World'), None)
+        result = self.device_obj.generate_test_message('active', 'Hello World')
+        expected = {'profile': '\x00\x00', 'cluster': '\x00\x05', 'data': 'Hello World', 'dest_endpoint': '\x00',
+         'src_endpoint': '\x00'}
+        self.assertEqual(result, expected)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
