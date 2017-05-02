@@ -24,16 +24,10 @@ class Base(object):
 
         :param callback: Optional
         """
+        # Resources
         self._logger = logging.getLogger('pyalertme')
-
         self._xbee = None
         self._serial = None
-        self._callback = callback if callback else self._callback
-        self._schedule_thread = threading.Thread(target=self._schedule_loop)
-        self._schedule_interval = 2
-
-        self.associated = False
-        self.started = False
 
         # Type Info
         self.manu = None
@@ -41,10 +35,19 @@ class Base(object):
         self.date = None
         self.version = None
 
+        # Scheduler Thread
+        self._schedule_thread = threading.Thread(target=self._schedule_loop)
+        self._schedule_interval = 2
+        self._callback = callback if callback else self._callback
+
         # My addresses
-        self.addr_short = None
-        self.addr_long = None
         self._addr_long_list = [b'', b'']
+        self.addr_long = None
+        self.addr_short = None
+
+        # Status Flags
+        self.associated = False
+        self.started = False
 
     def start(self, serial):
         """
@@ -73,8 +76,7 @@ class Base(object):
         self._xbee.halt()
         self._serial.close()
 
-    @staticmethod
-    def _callback(type, node_id, field, value):
+    def _callback(self, type, node_id, field, value):
         if type == 'Attribute':
             print("Attribute Update [Node ID: " + node_id + "\tField: " + field + "\tValue: " + str(value) + "]")
         elif type == 'Property':
@@ -87,7 +89,7 @@ class Base(object):
         """
         while self._started:
             if self.associated:
-                self._schedule()
+                self._schedule_event()
 
                 # The following for loop is being used in place of a simple
                 # time.sleep(self._schedule_interval)
@@ -96,9 +98,9 @@ class Base(object):
                     if self._started:
                         time.sleep(0.1)
 
-    def _schedule(self):
+    def _schedule_event(self):
         """
-        The _schedule function is called by the _schedule_loop() thread function called at regular intervals.
+        The _schedule_event() function is called by the _schedule_loop() thread function called at regular intervals.
 
         """
         self._logger.debug('Continual Update')

@@ -40,7 +40,7 @@ class TestSmartPlug(unittest.TestCase):
             'src_endpoint': b'\x02'
         }
         self.device_obj.receive_message(message_on)
-        self.assertEqual(self.device_obj.state, True)
+        self.assertEqual(self.device_obj.relay_state, True)
 
         message_off = {
             'cluster': b'\x00\xee',
@@ -54,11 +54,11 @@ class TestSmartPlug(unittest.TestCase):
             'src_endpoint': b'\x02'
         }
         self.device_obj.receive_message(message_off)
-        self.assertEqual(self.device_obj.state, False)
+        self.assertEqual(self.device_obj.relay_state, False)
 
     def test_generate_state_update(self):
-        self.device_obj.state = 1
-        result = self.device_obj.generate_switch_state_update()
+        self.device_obj.relay_state = 1
+        result = self.device_obj.generate_relay_state_update()
         expected = {
             'profile': b'\xc2\x16',
             'description': 'Switch State Update',
@@ -68,8 +68,8 @@ class TestSmartPlug(unittest.TestCase):
             'dest_endpoint': '\x02'
         }
         self.assertEqual(result, expected)
-        self.device_obj.state = 0
-        result = self.device_obj.generate_switch_state_update()
+        self.device_obj.relay_state = 0
+        result = self.device_obj.generate_relay_state_update()
         expected = {
             'profile': b'\xc2\x16',
             'description': 'Switch State Update',
@@ -80,10 +80,10 @@ class TestSmartPlug(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-    def test_parse_switch_state_change(self):
-        result = SmartPlug.parse_switch_state_request(b'\x11\x00\x02\x01\x01')
+    def test_parse_relay_state_change(self):
+        result = SmartPlug.parse_relay_state_request(b'\x11\x00\x02\x01\x01')
         self.assertEqual(result, 1)
-        result = SmartPlug.parse_switch_state_request(b'\x11\x00\x02\x00\x01')
+        result = SmartPlug.parse_relay_state_request(b'\x11\x00\x02\x00\x01')
         self.assertEqual(result, 0)
 
     def test_send_message(self):

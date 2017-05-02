@@ -23,9 +23,9 @@ class Hub(Base):
 
         # By default the Hub is associated
         self.associated = True
-        self._discovery_thread = threading.Thread(target=self._discovery)
 
-        # List of Associated Nodes
+        # Discovery thread and list of discovered nodes
+        self._discovery_thread = threading.Thread(target=self._discovery)
         self.nodes = {}
 
     def discovery(self):

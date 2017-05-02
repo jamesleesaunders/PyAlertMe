@@ -15,23 +15,23 @@ class SmartPlug(Device):
         """
         Device.__init__(self, callback)
 
-        # Set continual updates to every 5 seconds
-        self._schedule_interval = 5
-
         # Type Info
         self.manu = 'PyAlertMe'
         self.type = 'SmartPlug'
         self.date = '2017-01-01'
         self.version = 12345
 
-        # Relay State and Power Values
-        self.state = False
+        # Set continual updates to every 5 seconds
+        self._schedule_interval = 5
+
+        # Attributes - Relay State and Power Values
+        self.relay_state = False
         self.power_demand = 0
         self.power_consumption = 0
 
-    def _schedule(self):
+    def _schedule_event(self):
         """
-        Continual Updates
+        The _schedule_event function is called by the _schedule_loop() thread function called at regular intervals.
 
         """
         self.send_message(self.generate_power_demand_update(), self.hub_addr_long, self.hub_addr_short)
@@ -65,17 +65,17 @@ class SmartPlug(Device):
                     if cluster_cmd == b'\01':
                         # State Request
                         # b'\x11\x00\x01\x01'
-                        self._logger.debug('Switch State is: %s', self.state)
-                        self.send_message(self.generate_switch_state_update(), source_addr_long, source_addr_short)
+                        self._logger.debug('Switch State is: %s', self.relay_state)
+                        self.send_message(self.generate_relay_state_update(), source_addr_long, source_addr_short)
 
                     elif cluster_cmd == b'\02':
                         # Change State
                         # b'\x11\x00\x02\x01\x01' On
                         # b'\x11\x00\x02\x00\x01' Off
-                        state = self.parse_switch_state_request(message['rf_data'])
-                        self.set_state(state)
-                        self._logger.debug('Switch State Changed to: %s', self.state)
-                        self.send_message(self.generate_switch_state_update(), source_addr_long, source_addr_short)
+                        state = self.parse_relay_state_request(message['rf_data'])
+                        self.set_relay_state(state)
+                        self._logger.debug('Switch State Changed to: %s', self.relay_state)
+                        self.send_message(self.generate_relay_state_update(), source_addr_long, source_addr_short)
                         self._callback('Attribute', self.get_node_id(), 'State', 'ON')
 
                     else:
@@ -87,17 +87,17 @@ class SmartPlug(Device):
             # else:
                 # self._logger.error('Unrecognised Profile ID: %r', profile_id)
 
-    def set_state(self, state):
+    def set_relay_state(self, state):
         """
         This simulates the physical button being pressed
 
         :param state:
         :return:
         """
-        self.state = state
-        self._logger.debug('Switch State Changed to: %s', self.state)
+        self.relay_state = state
+        self._logger.debug('Switch State Changed to: %s', self.relay_state)
         if self.associated:
-            self.send_message(self.generate_switch_state_update(), self.hub_addr_long, self.hub_addr_short)
+            self.send_message(self.generate_relay_state_update(), self.hub_addr_long, self.hub_addr_short)
 
         # Temporary code while testing power code...
         # Randomly set the power usage value.
@@ -114,7 +114,7 @@ class SmartPlug(Device):
         self.power_demand = power_demand
         self._logger.debug('Power Demand Changed to: %s', self.power_demand)
 
-    def generate_switch_state_update(self):
+    def generate_relay_state_update(self):
         """
         Generate State Message
 
@@ -122,7 +122,7 @@ class SmartPlug(Device):
         """
         checksum = b'\th'
         cluster_cmd = b'\x80'
-        payload = b'\x07\x01' if self.state else b'\x06\x00'
+        payload = b'\x07\x01' if self.relay_state else b'\x06\x00'
         data = checksum + cluster_cmd + payload
 
         message = {
@@ -157,9 +157,9 @@ class SmartPlug(Device):
         return(message)
 
     @staticmethod
-    def parse_switch_state_request(rf_data):
+    def parse_relay_state_request(rf_data):
         """
-        Process message, parse for state change request
+        Process message, parse for relay state change request
 
         :param rf_data:
         :return: Bool 1 = On, 0 = Off

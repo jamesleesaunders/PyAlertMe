@@ -23,9 +23,12 @@ class Device(Base):
 
         # Start off not associated
         self.associated = False
+
+        # Addresses of the hub we are associated with
         self.hub_addr_long = None
         self.hub_addr_short = None
 
+        # Attributes
         self.rssi = 197
         self.mode = 'NORMAL'
 
