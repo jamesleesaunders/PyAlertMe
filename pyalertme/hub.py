@@ -651,9 +651,9 @@ class Hub(Base):
         """
         values = struct.unpack('< 2x b b b', rf_data)
         if (values[2] & 0x01):
-            return {'State': 'ON'}
+            return {'State': 1}
         else:
-            return {'State': 'OFF'}
+            return {'State': 0}
 
     @staticmethod
     def parse_tamper_state(rf_data):
@@ -681,9 +681,9 @@ class Hub(Base):
         """
         ret = {}
         if rf_data[2] == b'\x00':
-            ret['State'] = 'OFF'
+            ret['State'] = 0
         elif rf_data[2] == b'\x01':
-            ret['State'] = 'ON'
+            ret['State'] = 1
 
         ret['Counter'] = struct.unpack('<H', rf_data[5:7])[0]
 

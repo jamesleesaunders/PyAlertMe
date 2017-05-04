@@ -33,11 +33,13 @@ class TestBase(unittest.TestCase):
 
         self.assertEqual(self.device_obj.get_node_id(), '00:13:a2:00:40:e9:a4:c0')
 
+    def test_get_message(self):
+        result = self.device_obj.get_message('plug', {'State': 1})
+        expected = {'profile': '\xc2\x16', 'cluster': '\x00\xee', 'data': b'\th\x80\x07\x01', 'dest_endpoint': '\x02', 'src_endpoint': '\x00'}
+        self.assertEqual(result, expected)
 
-    def test_generate_test(self):
-        result = self.device_obj.generate_test_message('active', 'Hello World')
-        expected = {'profile': '\x00\x00', 'cluster': '\x00\x05', 'data': 'Hello World', 'dest_endpoint': '\x00',
-         'src_endpoint': '\x00'}
+        result = self.device_obj.get_message('plug', {'State': 0})
+        expected = {'profile': '\xc2\x16', 'cluster': '\x00\xee', 'data': b'\th\x80\x06\x00', 'dest_endpoint': '\x02', 'src_endpoint': '\x00'}
         self.assertEqual(result, expected)
 
 if __name__ == '__main__':

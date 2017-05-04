@@ -84,11 +84,11 @@ class TestHub(unittest.TestCase):
 
     def test_parse_switch_state(self):
         result = Hub.parse_switch_state(b'\th\x80\x07\x01')
-        expected = {'State': 'ON'}
+        expected = {'State': 1}
         self.assertEqual(result, expected)
 
         result = Hub.parse_switch_state(b'\th\x80\x06\x00')
-        expected = {'State': 'OFF'}
+        expected = {'State': 0}
         self.assertEqual(result, expected)
 
     def test_parse_version_info(self):
@@ -195,11 +195,11 @@ class TestHub(unittest.TestCase):
 
     def test_parse_button_press(self):
         result = Hub.parse_button_press(b'\t\x00\x00\x00\x02\xbf\xc3\x00\x00')
-        expected = {'Counter': 50111, 'State': 'OFF'}
+        expected = {'Counter': 50111, 'State': 0}
         self.assertEqual(result, expected, "State OFF, Counter 50111")
 
         result = Hub.parse_button_press(b'\t\x00\x01\x00\x01\x12\xca\x00\x00')
-        expected = {'Counter': 51730, 'State': 'ON'}
+        expected = {'Counter': 51730, 'State': 1}
         self.assertEqual(result, expected, "State ON, Counter 51730")
 
     def test_parse_status_update(self):
