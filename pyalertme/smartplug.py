@@ -121,7 +121,7 @@ class SmartPlug(Device):
 
         :return: Message of switch state
         """
-        return self.get_message('switch_state', {'State': self.relay_state})
+        return get_message('switch_state_response', {'State': self.relay_state})
 
     def generate_power_demand_update(self):
         """

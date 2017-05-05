@@ -1,5 +1,6 @@
 import logging
 import struct
+import copy
 
 # ZigBee Profile IDs
 ZDP_PROFILE_ID     = b'\x00\x00'  # Zigbee Device Profile
@@ -62,8 +63,8 @@ messages = {
             'data': b'\x11\x00\xfc'
         }
     },
-    'switch_state': {
-        'description': 'Switch State Update',
+    'switch_state_response': {
+        'name': 'Switch State Update',
         'frame': {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
@@ -153,6 +154,43 @@ messages = {
         }
     }
 }
+
+
+def get_message(message_id, params=None):
+    """
+    Get message
+
+    :param message_id: Message ID
+    :param params: Optional
+    :return:
+    """
+    if message_id in messages.keys():
+        # Make a copy of the message
+        message = copy.deepcopy(messages[message_id])
+        data = message['frame']['data']
+
+        # If data is a lambda then call it and replace with return value
+        if callable(data):
+            message['frame']['data'] = data(params)
+
+        # Return processed message
+        return message['frame']
+
+    else:
+        raise Exception('Message does not exist')
+
+
+def list_messages():
+    """
+    List messages
+
+    :return:
+    """
+    actions = {}
+    for id, message in messages.items():
+        actions[id] = message['name']
+    return actions
+
 
 def parse_version_info(data):
     """

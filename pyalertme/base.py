@@ -2,7 +2,6 @@ import logging
 from pyalertme import *
 from pyalertme.messages import *
 import struct
-import copy
 import time
 import binascii
 import threading
@@ -218,33 +217,3 @@ class Base(object):
         # 00:1E:5E:09:02:14:C5:AB = Computime Ltd.
                             
         return ret1
-
-    def list_messages(self):
-        """
-        List messages
-
-        :return:
-        """
-        actions = {}
-        for id, message in messages.items():
-            actions[id] = message['name']
-        return actions
-
-    def get_message(self, message_id, params=None):
-        """
-        Get message
-
-        :param message_id:
-        :param param:
-        :return:
-        """
-        # Make a copy of the message
-        message = copy.deepcopy(messages[message_id])
-        data = message['frame']['data']
-
-        # If data is a lambda then call it and replace with return value
-        if callable(data):
-            message['frame']['data'] = data(params)
-
-        # Return processed message
-        return message['frame']

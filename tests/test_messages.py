@@ -5,6 +5,25 @@ import unittest
 
 class TestMessages(unittest.TestCase):
 
+    def test_get_message(self):
+        # Test message with data lambda
+        result = get_message('switch_state_response', {'State': 1})
+        expected = {'profile': b'\xc2\x16', 'cluster': b'\x00\xee', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x00', 'data': b'\th\x80\x07\x01'}
+        self.assertEqual(result, expected)
+        result = get_message('switch_state_response', {'State': 0})
+        expected = {'profile': b'\xc2\x16', 'cluster': b'\x00\xee', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x00', 'data': b'\th\x80\x06\x00'}
+        self.assertEqual(result, expected)
+
+        # Test message without data lambda
+        result = get_message('match_descriptor_response')
+        expected = {'profile': b'\x00\x00', 'cluster': b'\x80\x06', 'dest_endpoint': b'\x00', 'src_endpoint': b'\x00', 'data': b'\x00\x00\x00\x00\x01\x02'}
+        self.assertEqual(result, expected)
+
+        # Test message that does not exist throws exception
+        with self.assertRaises(Exception) as context:
+            get_message('does_not_exist')
+        self.assertTrue('Message does not exist' in context.exception)
+
     def test_parse_tamper_state(self):
         result = parse_tamper_state(b'\t\x00\x00\x02\xe8\xa6\x00\x00')
         expected = {'TamperSwitch': 'OPEN'}

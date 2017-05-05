@@ -66,10 +66,10 @@ while True:
         node_id = raw_input("")
 
         while True:
-            pp.pprint(hub_obj.list_messages())
+            pp.pprint(list_messages())
             print("Select command:\n")
             action = raw_input("")
-            message = hub_obj.get_message(action)
+            message = get_message(action)
             addresses = hub_obj.node_id_to_addrs(node_id)
             hub_obj.send_message(message, *addresses)
 
