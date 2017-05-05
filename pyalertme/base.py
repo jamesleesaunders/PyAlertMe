@@ -1,5 +1,6 @@
 import logging
 from pyalertme import *
+from pyalertme.messages import *
 import struct
 import copy
 import time
@@ -8,19 +9,6 @@ import threading
 from xbee import ZigBee
 
 class Base(object):
-
-    # ZigBee Profile IDs
-    ZDP_PROFILE_ID     = b'\x00\x00'  # Zigbee Device Profile
-    HA_PROFILE_ID      = b'\x01\x04'  # HA Device Profile
-    LL_PROFILE_ID      = b'\xc0\x5e'  # Light Link Profile
-    ALERTME_PROFILE_ID = b'\xc2\x16'  # AlertMe Private Profile
-
-    # ZigBee Addressing
-    BROADCAST_LONG  = b'\x00\x00\x00\x00\x00\x00\xff\xff'
-    BROADCAST_SHORT = b'\xff\xfe'
-
-
-
     def __init__(self, callback=None):
         """
         Base Constructor
@@ -194,15 +182,15 @@ class Base(object):
             profile_id = message['profile']
             cluster_id = message['cluster']
 
-            if profile_id == self.ZDP_PROFILE_ID:
+            if profile_id == ZDP_PROFILE_ID:
                 # Zigbee Device Profile ID
                 self._logger.debug('Received Zigbee Device Profile Packet')
 
-            elif profile_id == self.ALERTME_PROFILE_ID:
+            elif profile_id == ALERTME_PROFILE_ID:
                 # AlertMe Profile ID
                 self._logger.debug('Received AlertMe Specific Profile Packet')
 
-            elif profile_id == self.HA_PROFILE_ID:
+            elif profile_id == HA_PROFILE_ID:
                 # HA Profile ID
                 self._logger.debug('Received HA Profile Packet')
 
@@ -231,157 +219,6 @@ class Base(object):
                             
         return ret1
 
-    messages = {
-        'routing_table_request': {
-            'name': 'Management Routing Table Request',
-            'frame': {
-                'src_endpoint': b'\x00',
-                'dest_endpoint': b'\x00',
-                'cluster': b'\x00\x32',
-                'profile': ZDP_PROFILE_ID,
-                'data': '\x12\x01'
-            }
-        },
-        'permit_join_request': {
-            'name': 'Management Permit Join Request',
-            'frame': {
-                'src_endpoint': b'\x00',
-                'dest_endpoint': b'\x00',
-                'cluster': b'\x00\x36',
-                'profile': ZDP_PROFILE_ID,
-                'data': '\xff\x00'
-            }
-        },
-        'active_endpoint_request': {
-            'name': 'Active Endpoints Request',
-            'frame': {
-                'src_endpoint': b'\x00',
-                'dest_endpoint': b'\x00',
-                'cluster': b'\x00\x05',
-                'profile': ZDP_PROFILE_ID,
-                'data': b'\x00\x00'
-            }
-        },
-        'match_descriptor_response': {
-            'name': 'Match Descriptor Response',
-            'frame': {
-                'src_endpoint': b'\x00',
-                'dest_endpoint': b'\x00',
-                'cluster': b'\x80\x06',
-                'profile': ZDP_PROFILE_ID,
-                'data': b'\x00\x00\x00\x00\x01\x02'
-            }
-        },
-        'version_info': {
-            'name': 'Version Request',
-            'frame': {
-                'src_endpoint': b'\x00',
-                'dest_endpoint': b'\x02',
-                'cluster': b'\x00\xf6',
-                'profile': ALERTME_PROFILE_ID,
-                'data': b'\x11\x00\xfc'
-            }
-        },
-        'plug': {
-            'name': 'Plug State Change',
-            'frame': {
-                'src_endpoint': b'\x00',
-                'dest_endpoint': b'\x02',
-                'cluster': b'\x00\xee',
-                'profile': ALERTME_PROFILE_ID,
-                'data': lambda self, params: self.generate_relay_state(params)
-            }
-        },
-        'plug_off': {
-            'name': 'Switch Plug Off',
-            'frame': {
-                'src_endpoint': b'\x00',
-                'dest_endpoint': b'\x02',
-                'cluster': b'\x00\xee',
-                'profile': ALERTME_PROFILE_ID,
-                'data': b'\x11\x00\x02\x00\x01'
-            }
-        },
-        'plug_on': {
-            'name': 'Switch Plug On',
-            'frame': {
-                'src_endpoint': b'\x00',
-                'dest_endpoint': b'\x02',
-                'cluster': b'\x00\xee',
-                'profile': ALERTME_PROFILE_ID,
-                'data': b'\x11\x00\x02\x01\x01'
-            }
-        },
-        'switch_status': {
-            'name': 'Switch Status',
-            'frame': {
-                'src_endpoint': b'\x00',
-                'dest_endpoint': b'\x02',
-                'cluster': b'\x00\xee',
-                'profile': ALERTME_PROFILE_ID,
-                'data': b'\x11\x00\x01\x01'
-            }
-        },
-        'normal_mode': {
-            'name': 'Normal Mode',
-            'frame': {
-                'src_endpoint': b'\x00',
-                'dest_endpoint': b'\x02',
-                'cluster': b'\x00\xf0',
-                'profile': ALERTME_PROFILE_ID,
-                'data': b'\x11\x00\xfa\x00\x01'
-            }
-        },
-        'range_test': {
-            'name': 'Range Test',
-            'frame': {
-                'src_endpoint': b'\x00',
-                'dest_endpoint': b'\x02',
-                'cluster': b'\x00\xf0',
-                'profile': ALERTME_PROFILE_ID,
-                'data': b'\x11\x00\xfa\x01\x01'
-            }
-        },
-        'locked_mode': {
-            'name': 'Locked Mode',
-            'frame': {
-                'src_endpoint': b'\x00',
-                'dest_endpoint': b'\x02',
-                'cluster': b'\x00\xf0',
-                'profile': ALERTME_PROFILE_ID,
-                'data': b'\x11\x00\xfa\x02\x01'
-            }
-        },
-        'silent_mode': {
-            'name': 'Silent Mode',
-            'frame': {
-                'src_endpoint': b'\x00',
-                'dest_endpoint': b'\x02',
-                'cluster': b'\x00\xf0',
-                'profile': ALERTME_PROFILE_ID,
-                'data': b'\x11\x00\xfa\x03\x01'
-            }
-        },
-        'security_initialization': {
-            'name': 'Security Initialization',
-            'frame': {
-                'src_endpoint': b'\x00',
-                'dest_endpoint': b'\x02',
-                'cluster': b'\x05\x00',
-                'profile': ALERTME_PROFILE_ID,
-                'data': b'\x11\x80\x00\x00\x05'
-            }
-        }
-    }
-
-    @staticmethod
-    def generate_relay_state(params):
-        checksum = b'\th'
-        cluster_cmd = b'\x80'
-        payload = b'\x07\x01' if params['State'] else b'\x06\x00'
-        data = checksum + cluster_cmd + payload
-        return data
-
     def list_messages(self):
         """
         List messages
@@ -389,11 +226,11 @@ class Base(object):
         :return:
         """
         actions = {}
-        for id, message in self.messages.items():
+        for id, message in messages.items():
             actions[id] = message['name']
         return actions
 
-    def get_message(self, message_id, params):
+    def get_message(self, message_id, params=None):
         """
         Get message
 
@@ -402,12 +239,12 @@ class Base(object):
         :return:
         """
         # Make a copy of the message
-        message = copy.deepcopy(self.messages[message_id])
+        message = copy.deepcopy(messages[message_id])
         data = message['frame']['data']
 
         # If data is a lambda then call it and replace with return value
         if callable(data):
-            message['frame']['data'] = data(self, params)
+            message['frame']['data'] = data(params)
 
         # Return processed message
         return message['frame']
