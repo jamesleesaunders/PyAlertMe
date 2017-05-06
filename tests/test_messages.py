@@ -47,6 +47,10 @@ class TestMessages(unittest.TestCase):
         expected = b'\tj\x81%\x00'
         self.assertEqual(result, expected)
 
+        result = generate_power_demand_update({'PowerDemand': 22.4})
+        expected = b'\tj\x81\x16\x00'
+        self.assertEqual(result, expected)
+
     def test_parse_power_consumption(self):
         result = parse_power_consumption(b'\t\x00\x82Z\xbb\x04\x00\xdf\x86\x04\x00\x00')
         expected = {
