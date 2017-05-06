@@ -95,7 +95,7 @@ class TestSmartPlug(unittest.TestCase):
         expected = b'~\x00\x19}1\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x00\x02\x00\xee\xc2\x16\x00\x00\th\x80\x06\x00\x1d'
         self.assertEqual(result, expected)
 
-    def test_generate_power_demand(self):
+    def test_generate_power_demand_update(self):
         self.device_obj.set_power_demand(0)
         result = self.device_obj.generate_power_demand_update()
         expected = {
@@ -108,7 +108,7 @@ class TestSmartPlug(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        self.device_obj.set_power_demand(60)
+        self.device_obj.set_power_demand(37)
         result = self.device_obj.generate_power_demand_update()
         expected = {
             'description': 'Current Power Demand',
@@ -116,7 +116,7 @@ class TestSmartPlug(unittest.TestCase):
             'cluster': b'\x00\xef',
             'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
-            'data': b'\tj\x81<\x00'
+            'data': b'\tj\x81%\x00'
         }
         self.assertEqual(result, expected)
 
