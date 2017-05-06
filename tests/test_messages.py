@@ -39,7 +39,6 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_power_demand_update(self):
-        # Not sure this is right?
         result = generate_power_demand_update({'PowerDemand': 0})
         expected = b'\tj\x81\x00\x00'
         self.assertEqual(result, expected)
