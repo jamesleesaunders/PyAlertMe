@@ -70,7 +70,17 @@ messages = {
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xee',
             'profile': ALERTME_PROFILE_ID,
-            'data': lambda params: generate_relay_state_response(params)
+            'data': lambda params: generate_relay_state_update(params)
+        }
+    },
+    'pwr': {
+        'name': 'Current Power Demand',
+        'frame': {
+            'profile': ALERTME_PROFILE_ID,
+            'cluster': b'\x00\xef',
+            'src_endpoint': b'\x02',
+            'dest_endpoint': b'\x02',
+            'data': lambda params: generate_power_demand_update(params)
         }
     },
     'plug_off': {
@@ -248,14 +258,27 @@ def parse_power_demand(data):
     Process message, parse for power demand value.
 
     :param data: Message data
-    :return: Parameter dictionary of power value
+    :return: Parameter dictionary of power demand value
     """
     values = dict(zip(
-        ('cluster_cmd', 'powerDemand'),
+        ('cluster_cmd', 'power_demand'),
         struct.unpack('< 2x s H', data)
     ))
 
-    return {'PowerDemand' : values['powerDemand']}
+    return {'PowerDemand' : values['power_demand']}
+
+def generate_power_demand_update(params):
+    """
+    Generate Power Demand Update message data
+
+    :param params: Parameter dictionary of power demand value
+    :return: Message data
+    """
+    checksum = b'\tj'
+    cluster_cmd = b'\x81'
+    payload = struct.pack('H', params['PowerDemand'])
+    data = checksum + cluster_cmd + payload
+    return data
 
 
 def parse_power_consumption(data):
@@ -294,9 +317,9 @@ def parse_relay_state_request(data):
         logging.error('Unknown State Request')
 
 
-def generate_relay_state_response(params):
+def generate_relay_state_update(params):
     """
-    Generate Switch State Update Message
+    Generate Switch State Update message data
 
     :param params: Parameter dictionary of relay state
     :return: Message data

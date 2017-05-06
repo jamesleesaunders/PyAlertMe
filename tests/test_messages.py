@@ -38,6 +38,16 @@ class TestMessages(unittest.TestCase):
         expected = {'PowerDemand': 37}
         self.assertEqual(result, expected)
 
+    def test_generate_power_demand_update(self):
+        # Not sure this is right?
+        result = generate_power_demand_update({'PowerDemand': 0})
+        expected = b'\tj\x81\x00\x00'
+        self.assertEqual(result, expected)
+
+        result = generate_power_demand_update({'PowerDemand': 37})
+        expected = b'\tj\x81%\x00'
+        self.assertEqual(result, expected)
+
     def test_parse_power_consumption(self):
         result = parse_power_consumption(b'\t\x00\x82Z\xbb\x04\x00\xdf\x86\x04\x00\x00')
         expected = {
@@ -63,11 +73,11 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_relay_state_response(self):
-        result = generate_relay_state_response({'State': 1})
+        result = generate_relay_state_update({'State': 1})
         expected = b'\th\x80\x07\x01'
         self.assertEqual(result, expected)
 
-        result = generate_relay_state_response({'State': 0})
+        result = generate_relay_state_update({'State': 0})
         expected = b'\th\x80\x06\x00'
         self.assertEqual(result, expected)
 
