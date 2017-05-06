@@ -129,18 +129,5 @@ class SmartPlug(Device):
 
         :return: Message
         """
-        checksum = b'\tj'
-        cluster_cmd = b'\x81'
-        payload = struct.pack('H', self.power_demand)
-        data = checksum + cluster_cmd + payload
-
-        message = {
-            'description': 'Current Power Demand',
-            'profile': ALERTME_PROFILE_ID,
-            'cluster': b'\x00\xef',
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
-            'data': data
-        }
-        return(message)
+        return get_message('power_demand_update', {'PowerDemand': self.power_demand})
 

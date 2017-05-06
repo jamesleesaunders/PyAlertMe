@@ -34,8 +34,16 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(result, expected, "Tamper OK")
 
     def test_parse_power_demand(self):
-        result = parse_power_demand(b'\t\x00\x81%\x00')
+        result = parse_power_demand(b'\tj\x81\x00\x00')
+        expected = {'PowerDemand': 0}
+        self.assertEqual(result, expected)
+
+        result = parse_power_demand(b'\tj\x81%\x00')
         expected = {'PowerDemand': 37}
+        self.assertEqual(result, expected)
+        
+        result = parse_power_demand(b'\tj\x81\x16\x00')
+        expected = {'PowerDemand': 22.4}
         self.assertEqual(result, expected)
 
     def test_generate_power_demand_update(self):

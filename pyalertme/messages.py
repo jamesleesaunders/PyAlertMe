@@ -73,7 +73,7 @@ messages = {
             'data': lambda params: generate_relay_state_update(params)
         }
     },
-    'pwr': {
+    'power_demand_update': {
         'name': 'Current Power Demand',
         'frame': {
             'profile': ALERTME_PROFILE_ID,

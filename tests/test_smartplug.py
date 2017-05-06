@@ -99,7 +99,6 @@ class TestSmartPlug(unittest.TestCase):
         self.device_obj.set_power_demand(0)
         result = self.device_obj.generate_power_demand_update()
         expected = {
-            'description': 'Current Power Demand',
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xef',
             'src_endpoint': b'\x02',
@@ -111,7 +110,6 @@ class TestSmartPlug(unittest.TestCase):
         self.device_obj.set_power_demand(37)
         result = self.device_obj.generate_power_demand_update()
         expected = {
-            'description': 'Current Power Demand',
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xef',
             'src_endpoint': b'\x02',
@@ -123,7 +121,6 @@ class TestSmartPlug(unittest.TestCase):
         self.device_obj.set_power_demand(22.4)
         result = self.device_obj.generate_power_demand_update()
         expected = {
-            'description': 'Current Power Demand',
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xef',
             'src_endpoint': b'\x02',
