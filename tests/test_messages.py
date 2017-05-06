@@ -43,7 +43,7 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(result, expected)
         
         result = parse_power_demand(b'\tj\x81\x16\x00')
-        expected = {'PowerDemand': 22.4}
+        expected = {'PowerDemand': 22}
         self.assertEqual(result, expected)
 
     def test_generate_power_demand_update(self):
