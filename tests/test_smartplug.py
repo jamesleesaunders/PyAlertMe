@@ -95,7 +95,7 @@ class TestSmartPlug(unittest.TestCase):
         expected = b'~\x00\x19}1\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x00\x02\x00\xee\xc2\x16\x00\x00\th\x80\x06\x00\x1d'
         self.assertEqual(result, expected)
 
-    def test_generate_power_factor(self):
+    def test_generate_power_demand(self):
         self.device_obj.set_power_demand(0)
         result = self.device_obj.generate_power_demand_update()
         expected = {
