@@ -17,10 +17,10 @@ class Hub(Base):
         Base.__init__(self, callback)
 
         # Type Info
-        self.manu = 'PyAlertMe'
         self.type = 'Nano Hub'
-        self.date = '2017-01-01'
         self.version = 12345
+        self.manu = 'PyAlertMe'
+        self.manu_date = '2017-01-01'
 
         # By default the Hub is associated
         self.associated = True

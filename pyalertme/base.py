@@ -20,10 +20,10 @@ class Base(object):
         self._serial = None
 
         # Type Info
-        self.manu = None
         self.type = None
-        self.date = None
         self.version = None
+        self.manu = None
+        self.manu_date = None
 
         # Scheduler Thread
         self._schedule_thread = threading.Thread(target=self._schedule_loop)

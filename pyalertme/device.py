@@ -17,10 +17,10 @@ class Device(Base):
         Base.__init__(self, callback)
 
         # Type Info
-        self.manu = 'PyAlertMe'
         self.type = 'Generic Device'
-        self.date = '2017-01-01'
         self.version = 12345
+        self.manu = 'PyAlertMe'
+        self.manu_date = '2017-01-01'
 
         # Start off not associated
         self.associated = False
@@ -122,24 +122,13 @@ class Device(Base):
 
         :return: Message of device type
         """
-        checksum = b'\tq'
-        cluster_cmd = b'\xfe'
-        payload = struct.pack('H', self.version) \
-            + b'\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0b' \
-            + self.manu \
-            + '\n' + self.type \
-            + '\n' + self.date
-        data = checksum + cluster_cmd + payload
-
-        message = {
-            'description':  'Type Info',
-            'profile': ALERTME_PROFILE_ID,
-            'cluster': b'\x00\xf6',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'data': data,
+        version_params = {
+            'Type': self.type,
+            'Version': self.version,
+            'Manufacturer': self.manu,
+            'ManufactureDate': self.manu_date
         }
-        return(message)
+        return get_message('version_info_response', version_params)
 
     def generate_range_update(self):
         """
@@ -147,20 +136,7 @@ class Device(Base):
 
         :return: Message of range value
         """
-        checksum = b'\t+'
-        cluster_cmd = b'\xfd'
-        payload = struct.pack('H', self.rssi)
-        data = checksum + cluster_cmd + payload
-
-        message = {
-            'description': 'Range Info',
-            'profile': ALERTME_PROFILE_ID,
-            'cluster': b'\x00\xf6',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'data': data,
-        }
-        return(message)
+        return get_message('range_info', {'RSSI': self.rssi})
 
     def generate_match_descriptor_request(self):
         """

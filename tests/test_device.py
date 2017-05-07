@@ -20,7 +20,6 @@ class TestDevice(unittest.TestCase):
         expected = {
             'cluster': b'\x00\xf6',
             'data': b'\t+\xfd\x00\x00',
-            'description': 'Range Info',
             'dest_endpoint': b'\x02',
             'profile': b'\xc2\x16',
             'src_endpoint': b'\x00'
@@ -32,7 +31,6 @@ class TestDevice(unittest.TestCase):
         expected = {
             'cluster': b'\x00\xf6',
             'data': b'\t+\xfd\xc5\x00',
-            'description': 'Range Info',
             'dest_endpoint': b'\x02',
             'profile': b'\xc2\x16',
             'src_endpoint': b'\x00'
@@ -42,7 +40,6 @@ class TestDevice(unittest.TestCase):
     def test_generate_type_update(self):
         result = self.device_obj.generate_type_update()
         expected = {
-            'description': 'Type Info',
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xf6',
             'src_endpoint': b'\x00',

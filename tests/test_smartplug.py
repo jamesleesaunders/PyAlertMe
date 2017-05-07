@@ -10,7 +10,7 @@ class TestSmartPlug(unittest.TestCase):
         self.ser = Serial()
         self.device_obj = SmartPlug()
         self.device_obj.start(self.ser)
-        self.device_obj.set_addr_long(b'\x00\x1E\x5E\x09\x02\x14\xC5\xAB')
+        self.device_obj.set_addr_long(b'\x00\x1e\x5e\x09\x02\x14\xc5\xab')
 
     def tearDown(self):
         self.device_obj.halt()
@@ -18,7 +18,6 @@ class TestSmartPlug(unittest.TestCase):
     def test_generate_type_update(self):
         result = self.device_obj.generate_type_update()
         expected = {
-            'description': 'Type Info',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xf6',

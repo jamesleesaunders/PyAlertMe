@@ -17,10 +17,10 @@ class Sensor(Device):
         Device.__init__(self, callback)
 
         # Type Info
-        self.manu = 'PyAlertMe'
         self.type = 'Button Device'
-        self.date = '2017-01-01'
         self.version = 12345
+        self.manu = 'PyAlertMe'
+        self.manu_date = '2017-01-01'
 
         # Relay State
         self.tamper = 0

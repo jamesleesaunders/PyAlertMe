@@ -17,10 +17,11 @@ class SmartPlug(Device):
         Device.__init__(self, callback)
 
         # Type Info
-        self.manu = 'PyAlertMe'
         self.type = 'SmartPlug'
-        self.date = '2017-01-01'
         self.version = 12345
+        self.manu = 'PyAlertMe'
+        self.manu_date = '2017-01-01'
+
 
         # Set continual updates to every 5 seconds
         self._schedule_interval = 5
