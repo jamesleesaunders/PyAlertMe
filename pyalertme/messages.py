@@ -281,6 +281,54 @@ def generate_power_demand_update(params):
     return data
 
 
+def generate_type_update(params):
+    """
+    Generate type message
+
+    :return: Message of device type
+    """
+    checksum = b'\tq'
+    cluster_cmd = b'\xfe'
+    payload = struct.pack('H', params['Version']) \
+        + b'\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0b' \
+        + self.manu \
+        + '\n' + self.type \
+        + '\n' + self.date
+    data = checksum + cluster_cmd + payload
+
+    message = {
+        'description':  'Type Info',
+        'profile': ALERTME_PROFILE_ID,
+        'cluster': b'\x00\xf6',
+        'src_endpoint': b'\x00',
+        'dest_endpoint': b'\x02',
+        'data': data,
+    }
+    return(message)
+
+
+def generate_range_update(params):
+    """
+    Generate range message
+
+    :return: Message of range value
+    """
+    checksum = b'\t+'
+    cluster_cmd = b'\xfd'
+    payload = struct.pack('H', params['RSSI'])
+    data = checksum + cluster_cmd + payload
+
+    message = {
+        'description': 'Range Info',
+        'profile': ALERTME_PROFILE_ID,
+        'cluster': b'\x00\xf6',
+        'src_endpoint': b'\x00',
+        'dest_endpoint': b'\x02',
+        'data': data,
+    }
+    return(message)
+
+
 def parse_power_consumption(data):
     """
     Process message, parse for power consumption value.
