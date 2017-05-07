@@ -193,7 +193,7 @@ class TestMessages(unittest.TestCase):
 
     def test_generate_range_update(self):
         result = generate_range_update({'RSSI': 197})
-        expected = b'\t+\xfd\xc5w' # b'\t+\xfd\xc5\x00'
+        expected = b'\t+\xfd\xc5\x00'
         self.assertEqual(result, expected)
 
     def test_parse_button_press(self):

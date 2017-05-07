@@ -286,7 +286,7 @@ def parse_range_info(data):
     """
     values = dict(zip(
         ('cluster_cmd', 'RSSI'),
-        struct.unpack('< 2x s H', data)
+        struct.unpack('< 2x s B 1x', data)
     ))
     rssi = values['RSSI']
     return {'RSSI' : rssi}
@@ -301,7 +301,7 @@ def generate_range_update(params):
     """
     checksum = b'\t+'
     cluster_cmd = b'\xfd'
-    payload = struct.pack('H', params['RSSI'])
+    payload = struct.pack('B 1x', params['RSSI'])
     data = checksum + cluster_cmd + payload
 
     return data
