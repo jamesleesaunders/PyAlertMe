@@ -53,7 +53,17 @@ messages = {
             'data': b'\x00\x00\x00\x00\x01\x02'
         }
     },
-    'version_info': {
+    'version_info_response': {
+        'name': 'Version Responce',
+        'frame': {
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf6',
+            'profile': ALERTME_PROFILE_ID,
+            'data': lambda params: generate_version_info_response(params)
+        }
+    },
+    'version_info_request': {
         'name': 'Version Request',
         'frame': {
             'src_endpoint': b'\x00',
@@ -133,6 +143,16 @@ messages = {
             'data': b'\x11\x00\xfa\x01\x01'
         }
     },
+    'range_info': {
+        'name': 'Range Info',
+        'frame': {
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf6',
+            'profile': ALERTME_PROFILE_ID,
+            'data': lambda params: generate_range_update(params)
+        }
+    },
     'locked_mode': {
         'name': 'Locked Mode',
         'frame': {
@@ -202,7 +222,7 @@ def list_messages():
     return actions
 
 
-def parse_version_info(data):
+def parse_version_info_response(data):
     """
     Process message, parse for version information:
     Type, Version, Manufacturer and Manufacturer Date
@@ -238,6 +258,25 @@ def parse_version_info(data):
     return ret
 
 
+def generate_version_info_response(params):
+    """
+    Generate type message
+
+    :param params: Parameter dictionary of version info
+    :return: Message data
+    """
+    checksum = b'\tq'
+    cluster_cmd = b'\xfe'
+    payload = struct.pack('H', params['Version']) \
+              + b'\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0b' \
+              + params['Manufacturer'] \
+              + '\n' + params['Type'] \
+              + '\n' + params['ManufactureDate']
+    data = checksum + cluster_cmd + payload
+
+    return data
+
+
 def parse_range_info(data):
     """
     Process message, parse for RSSI range test value
@@ -253,6 +292,21 @@ def parse_range_info(data):
     return {'RSSI' : rssi}
 
 
+def generate_range_update(params):
+    """
+    Generate range message
+
+    :param params: Parameter dictionary of RSSI value
+    :return: Message data
+    """
+    checksum = b'\t+'
+    cluster_cmd = b'\xfd'
+    payload = struct.pack('H', params['RSSI'])
+    data = checksum + cluster_cmd + payload
+
+    return data
+
+
 def parse_power_demand(data):
     """
     Process message, parse for power demand value.
@@ -265,7 +319,8 @@ def parse_power_demand(data):
         struct.unpack('< 2x s H', data)
     ))
 
-    return {'PowerDemand' : values['power_demand']}
+    return {'PowerDemand': values['power_demand']}
+
 
 def generate_power_demand_update(params):
     """
@@ -279,54 +334,6 @@ def generate_power_demand_update(params):
     payload = struct.pack('H', params['PowerDemand'])
     data = checksum + cluster_cmd + payload
     return data
-
-
-def generate_type_update(params):
-    """
-    Generate type message
-
-    :return: Message of device type
-    """
-    checksum = b'\tq'
-    cluster_cmd = b'\xfe'
-    payload = struct.pack('H', params['Version']) \
-        + b'\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0b' \
-        + self.manu \
-        + '\n' + self.type \
-        + '\n' + self.date
-    data = checksum + cluster_cmd + payload
-
-    message = {
-        'description':  'Type Info',
-        'profile': ALERTME_PROFILE_ID,
-        'cluster': b'\x00\xf6',
-        'src_endpoint': b'\x00',
-        'dest_endpoint': b'\x02',
-        'data': data,
-    }
-    return(message)
-
-
-def generate_range_update(params):
-    """
-    Generate range message
-
-    :return: Message of range value
-    """
-    checksum = b'\t+'
-    cluster_cmd = b'\xfd'
-    payload = struct.pack('H', params['RSSI'])
-    data = checksum + cluster_cmd + payload
-
-    message = {
-        'description': 'Range Info',
-        'profile': ALERTME_PROFILE_ID,
-        'cluster': b'\x00\xf6',
-        'src_endpoint': b'\x00',
-        'dest_endpoint': b'\x02',
-        'data': data,
-    }
-    return(message)
 
 
 def parse_power_consumption(data):
