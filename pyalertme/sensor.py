@@ -1,5 +1,6 @@
 import logging
 from pyalertme import *
+from pyalertme.messages import *
 import struct
 import time
 import binascii

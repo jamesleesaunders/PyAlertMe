@@ -61,7 +61,6 @@ class TestSmartPlug(unittest.TestCase):
         result = self.device_obj.generate_relay_state_update()
         expected = {
             'profile': b'\xc2\x16',
-            'description': 'Switch State Update',
             'src_endpoint': b'\x00',
             'cluster': b'\x00\xee',
             'data': b'\th\x80\x07\x01',
@@ -72,19 +71,12 @@ class TestSmartPlug(unittest.TestCase):
         result = self.device_obj.generate_relay_state_update()
         expected = {
             'profile': b'\xc2\x16',
-            'description': 'Switch State Update',
             'src_endpoint': b'\x00',
             'cluster': b'\x00\xee',
             'data': b'\th\x80\x06\x00',
             'dest_endpoint': b'\x02'
         }
         self.assertEqual(result, expected)
-
-    def test_parse_relay_state_change(self):
-        result = SmartPlug.parse_relay_state_request(b'\x11\x00\x02\x01\x01')
-        self.assertEqual(result, 1)
-        result = SmartPlug.parse_relay_state_request(b'\x11\x00\x02\x00\x01')
-        self.assertEqual(result, 0)
 
     def test_send_message(self):
         message = {
@@ -103,11 +95,10 @@ class TestSmartPlug(unittest.TestCase):
         expected = b'~\x00\x19}1\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x00\x02\x00\xee\xc2\x16\x00\x00\th\x80\x06\x00\x1d'
         self.assertEqual(result, expected)
 
-    def test_generate_power_factor(self):
+    def test_generate_power_demand_update(self):
         self.device_obj.set_power_demand(0)
         result = self.device_obj.generate_power_demand_update()
         expected = {
-            'description': 'Current Power Demand',
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xef',
             'src_endpoint': b'\x02',
@@ -116,22 +107,20 @@ class TestSmartPlug(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        self.device_obj.set_power_demand(60)
+        self.device_obj.set_power_demand(37)
         result = self.device_obj.generate_power_demand_update()
         expected = {
-            'description': 'Current Power Demand',
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xef',
             'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
-            'data': b'\tj\x81<\x00'
+            'data': b'\tj\x81%\x00'
         }
         self.assertEqual(result, expected)
 
         self.device_obj.set_power_demand(22.4)
         result = self.device_obj.generate_power_demand_update()
         expected = {
-            'description': 'Current Power Demand',
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xef',
             'src_endpoint': b'\x02',

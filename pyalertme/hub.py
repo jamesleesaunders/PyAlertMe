@@ -1,5 +1,6 @@
 import logging
 from pyalertme import *
+from pyalertme.messages import *
 import struct
 import time
 import binascii
@@ -51,10 +52,10 @@ class Hub(Base):
                 'src_endpoint': b'\x00',
                 'dest_endpoint': b'\x00',
                 'cluster': b'\x00\x32',
-                'profile': self.ZDP_PROFILE_ID,
+                'profile': ZDP_PROFILE_ID,
                 'data': '\x12\x01'
             }
-            self.send_message(message, self.BROADCAST_LONG, self.BROADCAST_SHORT)
+            self.send_message(message, BROADCAST_LONG, BROADCAST_SHORT)
             i += 1
             time.sleep(2.00)
 
@@ -184,7 +185,7 @@ class Hub(Base):
                 profile_id = message['profile']
                 cluster_id = message['cluster']
 
-                if profile_id == self.ZDP_PROFILE_ID:
+                if profile_id == ZDP_PROFILE_ID:
                     # Zigbee Device Profile ID
                     if cluster_id == b'\x00\x00':
                         # Network (16-bit) Address Request.
@@ -254,7 +255,7 @@ class Hub(Base):
                     else:
                         self._logger.error('Unrecognised Cluster ID: %r', cluster_id)
 
-                elif profile_id == self.ALERTME_PROFILE_ID:
+                elif profile_id == ALERTME_PROFILE_ID:
                     # AlertMe Profile ID
 
                     # Python 2 / 3 hack
@@ -266,7 +267,7 @@ class Hub(Base):
                     if cluster_id == b'\x00\xee':
                         if cluster_cmd == b'\x80':
                             self._logger.debug('Received Switch Status Update')
-                            attributes = self.parse_switch_state(message['rf_data'])
+                            attributes = parse_switch_state(message['rf_data'])
                             self.save_node_attributes(node_id, attributes)
 
                         else:
@@ -275,12 +276,12 @@ class Hub(Base):
                     elif cluster_id == b'\x00\xef':
                         if cluster_cmd == b'\x81':
                             self._logger.debug('Received Power Demand Update')
-                            attributes = self.parse_power_demand(message['rf_data'])
+                            attributes = parse_power_demand(message['rf_data'])
                             self.save_node_attributes(node_id, attributes)
 
                         elif cluster_cmd == b'\x82':
                             self._logger.debug('Received Power Consumption & Uptime Update')
-                            attributes = self.parse_power_consumption(message['rf_data'])
+                            attributes = parse_power_consumption(message['rf_data'])
                             self.save_node_attributes(node_id, attributes)
 
                         else:
@@ -289,7 +290,7 @@ class Hub(Base):
                     elif cluster_id == b'\x00\xf0':
                         if cluster_cmd == b'\xfb':
                             self._logger.debug('Received Status Update')
-                            attributes = self.parse_status_update(message['rf_data'])
+                            attributes = parse_status_update(message['rf_data'])
                             self.save_node_attributes(node_id, attributes)
 
                             # This may be the missing link to this thing?
@@ -302,23 +303,23 @@ class Hub(Base):
 
                     elif cluster_id == b'\x00\xf2':
                         self._logger.debug('Received Tamper Switch Changed Update')
-                        attributes = self.parse_tamper_state(message['rf_data'])
+                        attributes = parse_tamper_state(message['rf_data'])
                         self.save_node_attributes(node_id, attributes)
 
                     elif cluster_id == b'\x00\xf3':
                         self._logger.debug('Received Button Press Update')
-                        attributes = self.parse_button_press(message['rf_data'])
+                        attributes = parse_button_press(message['rf_data'])
                         self.save_node_attributes(node_id, attributes)
 
                     elif cluster_id == b'\x00\xf6':
                         if cluster_cmd == b'\xfd':
                             self._logger.debug('Received RSSI Range Test Update')
-                            attributes = self.parse_range_info(message['rf_data'])
+                            attributes = parse_range_info(message['rf_data'])
                             self.save_node_attributes(node_id, attributes)
 
                         elif (cluster_cmd == b'\xfe'):
                             self._logger.debug('Received Version Information')
-                            properties = self.parse_version_info(message['rf_data'])
+                            properties = parse_version_info_response(message['rf_data'])
                             self.save_node_properties(node_id, properties)
 
                         else:
@@ -333,7 +334,7 @@ class Hub(Base):
                             reply = self.generate_security_init()
                             self.send_message(reply, source_addr_long, source_addr_short)
 
-                        attributes = self.parse_security_state(message['rf_data'])
+                        attributes = parse_security_state(message['rf_data'])
                         self.save_node_attributes(node_id, attributes)
 
                     else:
@@ -409,7 +410,7 @@ class Hub(Base):
         data = b'\xaa' + addr_short[1] + addr_short[0]
         message = {
             'description': 'Active Endpoints Request',
-            'profile': self.ZDP_PROFILE_ID,
+            'profile': ZDP_PROFILE_ID,
             'cluster': b'\x00\x05',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x00',
@@ -436,7 +437,7 @@ class Hub(Base):
         data = rf_data[0:1] + b'\x00\x00\x00\x01\x02'
         message = {
             'description': 'Match Descriptor Response',
-            'profile': self.ZDP_PROFILE_ID,
+            'profile': ZDP_PROFILE_ID,
             'cluster': b'\x80\x06',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x00',
@@ -454,7 +455,7 @@ class Hub(Base):
         :return: message
         """
         message = {
-            'profile': self.ALERTME_PROFILE_ID,
+            'profile': ALERTME_PROFILE_ID,
             'cluster': b'\x00\xee',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02'
@@ -484,7 +485,7 @@ class Hub(Base):
         :return: message
         """
         message = {
-            'profile': self.ALERTME_PROFILE_ID,
+            'profile': ALERTME_PROFILE_ID,
             'cluster': b'\x00\xf0',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
@@ -516,7 +517,7 @@ class Hub(Base):
         """
         message = {
             'description': 'Version Request',
-            'profile': self.ALERTME_PROFILE_ID,
+            'profile': ALERTME_PROFILE_ID,
             'cluster': b'\x00\xf6',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
@@ -531,7 +532,7 @@ class Hub(Base):
         """
         message = {
             'description': 'Security Initialization',
-            'profile': self.ALERTME_PROFILE_ID,
+            'profile': ALERTME_PROFILE_ID,
             'cluster': b'\x05\x00',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
@@ -548,211 +549,10 @@ class Hub(Base):
         """
         message = {
             'description': 'Missing Link',
-            'profile': self.ALERTME_PROFILE_ID,
+            'profile': ALERTME_PROFILE_ID,
             'cluster': b'\x00\xf0',
             'src_endpoint': src_endpoint,
             'dest_endpoint': dest_endpoint,
             'data': b'\x11\x39\xfd'
         }
         return message
-
-    @staticmethod
-    def parse_version_info(rf_data):
-        """
-        Process message, parse for version information:
-        Type, Version, Manufacturer and Manufacturer Date
-
-        :param rf_data: Message data
-        :return: Parameter dict of version info
-        """
-        # The version string is variable length. We therefore have to calculate the
-        # length of the string which we then use in the unpack
-        l = len(rf_data) - 22
-        values = dict(zip(
-            ('cluster_cmd', 'hw_version', 'string'),
-            struct.unpack('< 2x s H 17x %ds' % l, rf_data)
-        ))
-
-        # Break down the version string into its component parts
-        ret = {}
-        ret['Version'] = values['hw_version']
-        ret['String']  = str(values['string'].decode())\
-            .replace('\t', '\n')\
-            .replace('\r', '\n')\
-            .replace('\x0e', '\n')\
-            .replace('\x0b', '\n')\
-            .replace('\x06', '\n')\
-            .replace('\x04', '\n') \
-            .replace('\x12', '\n')
-
-        ret['Manufacturer']    = ret['String'].split('\n')[0]
-        ret['Type']            = ret['String'].split('\n')[1]
-        ret['ManufactureDate'] = ret['String'].split('\n')[2]
-        del ret['String']
-
-        return ret
-
-    @staticmethod
-    def parse_range_info(rf_data):
-        """
-        Process message, parse for RSSI range test value
-
-        :param rf_data: Message data
-        :return: Parameter dict of RSSI value
-        """
-        values = dict(zip(
-            ('cluster_cmd', 'RSSI'),
-            struct.unpack('< 2x s B 1x', rf_data)
-        ))
-        rssi = values['RSSI']
-        return {'RSSI' : rssi}
-
-    @staticmethod
-    def parse_power_demand(rf_data):
-        """
-        Process message, parse for power demand value.
-
-        :param rf_data: Message data
-        :return: Parameter dict of power value
-        """
-        values = dict(zip(
-            ('cluster_cmd', 'powerDemand'),
-            struct.unpack('< 2x s H', rf_data)
-        ))
-
-        return {'PowerDemand' : values['powerDemand']}
-
-    @staticmethod
-    def parse_power_consumption(rf_data):
-        """
-        Process message, parse for power consumption value.
-
-
-        :param rf_data: Message data
-        :return: Parameter dict of usage stats
-        """
-        ret = {}
-        values = dict(zip(
-            ('cluster_cmd', 'powerConsumption', 'upTime'),
-            struct.unpack('< 2x s I I 1x', rf_data)
-        ))
-        ret['PowerConsumption'] = values['powerConsumption']
-        ret['UpTime'] = values['upTime']
-
-        return ret
-
-    @staticmethod
-    def parse_switch_state(rf_data):
-        """
-        Process message, parse for switch status
-
-        :param rf_data: Message data
-        :return: Parameter dict of switch status
-        """
-        values = struct.unpack('< 2x b b b', rf_data)
-        if (values[2] & 0x01):
-            return {'State': 'ON'}
-        else:
-            return {'State': 'OFF'}
-
-    @staticmethod
-    def parse_tamper_state(rf_data):
-        """
-        Process message, parse for Tamper Switch State Change
-
-        :param rf_data: Message data
-        :return: Parameter dict of tamper status
-        """
-        ret = {}
-        if ord(rf_data[3]) == 0x02:
-            ret['TamperSwitch'] = 'OPEN'
-        else:
-            ret['TamperSwitch'] = 'CLOSED'
-
-        return ret
-
-    @staticmethod
-    def parse_button_press(rf_data):
-        """
-        Process message, parse for button press status
-
-        :param rf_data: Message data
-        :return: Parameter dict of button status
-        """
-        ret = {}
-        if rf_data[2] == b'\x00':
-            ret['State'] = 'OFF'
-        elif rf_data[2] == b'\x01':
-            ret['State'] = 'ON'
-
-        ret['Counter'] = struct.unpack('<H', rf_data[5:7])[0]
-
-        return ret
-
-    @staticmethod
-    def parse_security_state(rf_data):
-        """
-        Process message, parse for security state
-
-        :param rf_data: Message data
-        :return: Parameter dict of security state
-        """
-        ret = {}
-        # The switch state is in byte [3] and is a bitfield
-        # bit 0 is the magnetic reed switch state
-        # bit 3 is the tamper switch state
-        state = ord(rf_data[3])
-        if (state & 0x01):
-            ret['ReedSwitch']  = 'OPEN'
-        else:
-            ret['ReedSwitch']  = 'CLOSED'
-
-        if (state & 0x04):
-            ret['TamperSwitch'] = 'CLOSED'
-        else:
-            ret['TamperSwitch'] = 'OPEN'
-
-        return ret
-
-    @staticmethod
-    def parse_status_update(rf_data):
-        """
-        Process message, parse for status update
-
-        :param rf_data: Message data
-        :return: Parameter dict of state
-        """
-        ret = {}
-        status = rf_data[3]
-        if status == b'\x1b':
-            # Power Clamp
-            # Unknown
-            pass
-
-        elif status == b'\x1c':
-            # Power Switch
-            # Unknown
-            pass
-
-        elif status == b'\x1d':
-            # Key Fob
-            ret['TempFahrenheit'] = float(struct.unpack("<h", rf_data[8:10])[0]) / 100.0 * 1.8 + 32
-            ret['Counter'] = struct.unpack('<I', rf_data[4:8])[0]
-
-        elif status == b'\x1e' or status == b'\x1f':
-            # Door Sensor
-            ret['TempFahrenheit'] = float(struct.unpack("<h", rf_data[8:10])[0]) / 100.0 * 1.8 + 32
-            if ord(rf_data[-1]) & 0x01 == 1:
-                ret['ReedSwitch']  = 'OPEN'
-            else:
-                ret['ReedSwitch']  = 'CLOSED'
-
-            if ord(rf_data[-1]) & 0x02 == 0:
-                ret['TamperSwitch'] = 'OPEN'
-            else:
-                ret['TamperSwitch'] = 'CLOSED'
-
-        else:
-            logging.error('Unrecognised Device Status %r  %r', status, rf_data)
-
-        return ret

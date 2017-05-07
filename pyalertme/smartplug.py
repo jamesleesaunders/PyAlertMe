@@ -1,5 +1,6 @@
 import logging
 from pyalertme import *
+from pyalertme.messages import *
 import struct
 import time
 import binascii
@@ -52,7 +53,7 @@ class SmartPlug(Device):
             source_addr_long = message['source_addr_long']
             source_addr_short = message['source_addr']
 
-            if profile_id == self.ALERTME_PROFILE_ID:
+            if profile_id == ALERTME_PROFILE_ID:
                 # AlertMe Profile ID
 
                 # Python 2 / 3 hack
@@ -72,7 +73,7 @@ class SmartPlug(Device):
                         # Change State
                         # b'\x11\x00\x02\x01\x01' On
                         # b'\x11\x00\x02\x00\x01' Off
-                        state = self.parse_relay_state_request(message['rf_data'])
+                        state = parse_relay_state_request(message['rf_data'])
                         self.set_relay_state(state)
                         self._logger.debug('Switch State Changed to: %s', self.relay_state)
                         self.send_message(self.generate_relay_state_update(), source_addr_long, source_addr_short)
@@ -120,20 +121,7 @@ class SmartPlug(Device):
 
         :return: Message of switch state
         """
-        checksum = b'\th'
-        cluster_cmd = b'\x80'
-        payload = b'\x07\x01' if self.relay_state else b'\x06\x00'
-        data = checksum + cluster_cmd + payload
-
-        message = {
-            'description': 'Switch State Update',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xee',
-            'profile': self.ALERTME_PROFILE_ID,
-            'data': data
-        }
-        return(message)
+        return get_message('switch_state_response', {'State': self.relay_state})
 
     def generate_power_demand_update(self):
         """
@@ -141,33 +129,5 @@ class SmartPlug(Device):
 
         :return: Message
         """
-        checksum = b'\tj'
-        cluster_cmd = b'\x81'
-        payload = struct.pack('H', self.power_demand)
-        data = checksum + cluster_cmd + payload
+        return get_message('power_demand_update', {'PowerDemand': self.power_demand})
 
-        message = {
-            'description': 'Current Power Demand',
-            'profile': self.ALERTME_PROFILE_ID,
-            'cluster': b'\x00\xef',
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
-            'data': data
-        }
-        return(message)
-
-    @staticmethod
-    def parse_relay_state_request(rf_data):
-        """
-        Process message, parse for relay state change request
-
-        :param rf_data:
-        :return: Bool 1 = On, 0 = Off
-        """
-        # Parse Switch State Request
-        if rf_data == b'\x11\x00\x02\x01\x01':
-            return True
-        elif rf_data == b'\x11\x00\x02\x00\x01':
-            return False
-        else:
-            logging.error('Unknown State Request')

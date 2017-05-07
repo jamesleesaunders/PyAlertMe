@@ -42,6 +42,7 @@ XBEE_PORT = '/dev/cu.usbserial-DN02ZXKE'
 XBEE_BAUD = 9600
 ser = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
+
 def callback(type, node_id, field, value):
     if type == 'Attribute':
         print("Attribute Update\n\tNode ID: " + node_id + "  Field: " + field + "  Value: " + str(value))
@@ -57,7 +58,7 @@ while True:
     try:
         time.sleep(0.001)
         state = int(raw_input(""))
-        device_obj.set_state(state)
+        device_obj.set_relay_state(state)
 
     except IndexError:
         print("No Command")

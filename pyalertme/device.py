@@ -1,5 +1,6 @@
 import logging
 from pyalertme import *
+from pyalertme.messages import *
 import struct
 import time
 import binascii
@@ -51,7 +52,7 @@ class Device(Base):
             if not self.associated:
                 self.send_message(self.generate_match_descriptor_request(), source_addr_long, source_addr_short)
 
-            if profile_id == self.ZDP_PROFILE_ID:
+            if profile_id == ZDP_PROFILE_ID:
                 # Zigbee Device Profile ID
                 if cluster_id == b'\x00\x32':
                     self._logger.debug('Received Management Routing Table Request')
@@ -62,7 +63,7 @@ class Device(Base):
                 elif cluster_id == b'\x80\x06':
                     self._logger.debug('Received Match Descriptor Response')
 
-            elif profile_id == self.ALERTME_PROFILE_ID:
+            elif profile_id == ALERTME_PROFILE_ID:
                 # AlertMe Profile ID
 
                 # Python 2 / 3 hack
@@ -132,7 +133,7 @@ class Device(Base):
 
         message = {
             'description':  'Type Info',
-            'profile': self.ALERTME_PROFILE_ID,
+            'profile': ALERTME_PROFILE_ID,
             'cluster': b'\x00\xf6',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
@@ -153,7 +154,7 @@ class Device(Base):
 
         message = {
             'description': 'Range Info',
-            'profile': self.ALERTME_PROFILE_ID,
+            'profile': ALERTME_PROFILE_ID,
             'cluster': b'\x00\xf6',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
@@ -184,7 +185,7 @@ class Device(Base):
         data = b'\x03\xfd\xff\x16\xc2\x00\x01\xf0\x00'
         message = {
             'description': 'Match Descriptor Request',
-            'profile': self.ZDP_PROFILE_ID,
+            'profile': ZDP_PROFILE_ID,
             'cluster': b'\x00\x06',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x00',
