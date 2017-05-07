@@ -286,7 +286,7 @@ def parse_range_info(data):
     """
     values = dict(zip(
         ('cluster_cmd', 'RSSI'),
-        struct.unpack('< 2x s B 1x', data)
+        struct.unpack('< 2x s H 1x', data)
     ))
     rssi = values['RSSI']
     return {'RSSI' : rssi}
