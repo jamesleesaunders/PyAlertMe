@@ -182,7 +182,7 @@ class TestMessages(unittest.TestCase):
             'ManufactureDate': '2017-01-01'
         }
         result = generate_version_info_response(params)
-        expected = b'\t\x00\xfe\xde\xa4\xeav\x1b\x00\x00o\r\x009\x10\x02\x00\x06\x12\x01\x01\x0bPyAlertMe\x04Generic\n2017-01-01'
+        expected = b'\tq\xfe90\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bPyAlertMe\nGeneric\n2017-01-01'
 
         self.assertEqual(result, expected)
 
