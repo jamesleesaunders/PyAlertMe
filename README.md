@@ -1,5 +1,7 @@
 # PyAlertMe #
 
+[![codecov](https://codecov.io/gh/jamesleesaunders/PyAlertMe/branch/master/graph/badge.svg)](https://codecov.io/gh/jamesleesaunders/PyAlertMe)
+
 PyAlertMe is a set of classes which, when used in conjunction with a Digi XBee (Zigbee) module, can be used to simulate an AlertMe (Lowes Iris, British Gas Hive, Safe and Secure) Hub, SmartPlug or Sensor.
 
 ## Use ##
