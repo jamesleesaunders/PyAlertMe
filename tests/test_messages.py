@@ -21,7 +21,7 @@ class TestMessages(unittest.TestCase):
 
         # Test message that does not exist throws exception
         with self.assertRaises(Exception) as context:
-            get_message('foo_foo_foo')
+            get_message('foo_lorem_ipsum')
         self.assertTrue('Message does not exist' in context.exception)
 
     def test_parse_tamper_state(self):
