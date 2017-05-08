@@ -49,3 +49,13 @@ v0.2.1 - 19 Apr 2017
 * Simpler terminology 'Power Demand' and 'Power Consumption'.
 * Making more use of callback.
 * Further PEP formatting.
+
+v0.2.2 - 08 May 2017
+* New messages.py - Moving all parse* and generate* functions to this file.
+* Making use of lambda functions to generate messages.
+* New unit tests.
+* Adding Codecov and TravisCI support.
+* New regular updates thread for keep alives etc.
+* Improving thread quit speed.
+* Moved tests folder in package... again.
+
