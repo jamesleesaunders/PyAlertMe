@@ -15,8 +15,8 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(result, expected)
 
         # Test message without data lambda
-        result = get_message('match_descriptor_response')
-        expected = {'profile': b'\x00\x00', 'cluster': b'\x80\x06', 'dest_endpoint': b'\x00', 'src_endpoint': b'\x00', 'data': b'\x00\x00\x00\x00\x01\x02'}
+        result = get_message('missing_link')
+        expected = {'profile': b'\xc2\x16', 'cluster': b'\x00\xf0', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x00', 'data': b'\x11\x39\xfd'}
         self.assertEqual(result, expected)
 
         # Test message that does not exist throws exception
@@ -84,12 +84,38 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_relay_state_response(self):
-        result = generate_relay_state_update({'State': 1})
+        result = generate_switch_state_update({'State': 1})
         expected = b'\th\x80\x07\x01'
         self.assertEqual(result, expected)
 
-        result = generate_relay_state_update({'State': 0})
+        result = generate_switch_state_update({'State': 0})
         expected = b'\th\x80\x06\x00'
+        self.assertEqual(result, expected)
+
+    def test_generate_mode_change_request(self):
+        result = generate_mode_change_request({'Mode': 'Normal'})
+        expected = b'\x11\x00\xfa\x00\x01'
+        self.assertEqual(result, expected)
+
+        result = generate_mode_change_request({'Mode': 'RangeTest'})
+        expected = b'\x11\x00\xfa\x01\x01'
+        self.assertEqual(result, expected)
+
+        result = generate_mode_change_request({'Mode': 'Locked'})
+        expected = b'\x11\x00\xfa\x02\x01'
+        self.assertEqual(result, expected)
+
+        result = generate_mode_change_request({'Mode': 'Silent'})
+        expected = b'\x11\x00\xfa\x03\x01'
+        self.assertEqual(result, expected)
+
+    def test_generate_switch_state_request(self):
+        result = generate_switch_state_request({'State': 1})
+        expected = b'\x11\x00\x02\x01\x01'
+        self.assertEqual(result, expected)
+
+        result = generate_switch_state_request({'State': 0})
+        expected = b'\x11\x00\x02\x00\x01'
         self.assertEqual(result, expected)
 
     def test_parse_version_info(self):

@@ -231,10 +231,10 @@ class Hub(Base):
                         # The next messages are directed at the hardware code (rather than the network code).
                         # The device has to receive these two message to stay joined.
                         time.sleep(2)
-                        reply = self.generate_type_request()
+                        reply = self.generate_version_info_request()
                         self.send_message(reply, source_addr_long, source_addr_short)
                         time.sleep(2)
-                        reply = self.generate_mode_change_request('NORMAL')
+                        reply = self.generate_mode_change_request('Normal')
                         self.send_message(reply, source_addr_long, source_addr_short)
 
                         # We are fully associated!
@@ -295,7 +295,7 @@ class Hub(Base):
 
                             # This may be the missing link to this thing?
                             self._logger.debug('Sending Missing Link')
-                            reply = self.generate_missing_link(message['dest_endpoint'], message['source_endpoint'])
+                            reply = self.generate_missing_link()
                             self.send_message(reply, source_addr_long, source_addr_short)
 
                         else:
@@ -365,7 +365,7 @@ class Hub(Base):
 
         :param node_id: Integer Short Node ID
         """
-        message = self.generate_type_request()
+        message = self.generate_version_info_request()
         addresses = self.node_id_to_addrs(node_id)
         self.send_message(message, *addresses)
 
@@ -447,112 +447,43 @@ class Hub(Base):
 
     def generate_state_change_request(self, state):
         """
-        Generate Node State Change Request
-        States:
-            ON, OFF, CHECK
+        Generate Node State Change Request.
 
         :param state: Switch State
         :return: message
         """
-        message = {
-            'profile': ALERTME_PROFILE_ID,
-            'cluster': b'\x00\xee',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02'
-        }
-
-        if state == 'ON':
-            message['description'] = 'Switch Plug On'
-            message['data'] = b'\x11\x00\x02\x01\x01'
-        elif state == 'OFF':
-            message['description'] = 'Switch Plug Off'
-            message['data'] = b'\x11\x00\x02\x00\x01'
-        elif state == 'CHECK':
-            message['description'] = 'Switch State Request'
-            message['data'] = b'\x11\x00\x01\x01'
-        else:
-            self._logger.error('Invalid state request %s', state)
-
-        return message
+        return get_message('switch_state_change', {'State': state})
 
     def generate_mode_change_request(self, mode):
         """
         Generate Mode Change Request
-        Modes:
-            NORMAL, RANGE, LOCKED, SILENT
+        Available Modes: 'Normal', 'RangeTest', 'Locked', 'Silent'
 
         :param mode: Switch Mode
         :return: message
         """
-        message = {
-            'profile': ALERTME_PROFILE_ID,
-            'cluster': b'\x00\xf0',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-        }
+        return get_message('mode_change_request', {'Mode': mode})
 
-        if mode == 'NORMAL':
-            message['description'] = 'Normal Mode'
-            message['data'] = b'\x11\x00\xfa\x00\x01'
-        elif mode == 'RANGE':
-            message['description'] = 'Range Test'
-            message['data'] = b'\x11\x00\xfa\x01\x01'
-        elif mode == 'LOCKED':
-            message['description'] = 'Locked Mode'
-            message['data'] = b'\x11\x00\xfa\x02\x01'
-        elif mode == 'SILENT':
-            message['description'] = 'Silent Mode'
-            message['data'] = b'\x11\x00\xfa\x03\x01'
-        else:
-            self._logger.error('Invalid mode request %s', mode)
-
-        return message
-
-    def generate_type_request(self):
+    def generate_version_info_request(self):
         """
-        Generate Node Type Request
-            Version, Manufacturer, etc
+        Generate Node Type Request. Version, Manufacturer, etc.
 
         :return: Message
         """
-        message = {
-            'description': 'Version Request',
-            'profile': ALERTME_PROFILE_ID,
-            'cluster': b'\x00\xf6',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'data': b'\x11\x00\xfc'
-        }
-        return message
+        return get_message('version_info_request')
 
     def generate_security_init(self):
         """
         Generate Security Initialization
 
+        :return: Message
         """
-        message = {
-            'description': 'Security Initialization',
-            'profile': ALERTME_PROFILE_ID,
-            'cluster': b'\x05\x00',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'data': b'\x11\x80\x00\x00\x05'
-        }
-        return message
+        return get_message('security_init')
 
-    def generate_missing_link(self, src_endpoint, dest_endpoint):
+    def generate_missing_link(self):
         """
         Generate 'Missing Link'
 
-        :param src_endpoint: Note: This is the dest endpoint of the received message
-        :param dest_endpoint: Note: This is the dest endpoint of the received message
+        :return: Message
         """
-        message = {
-            'description': 'Missing Link',
-            'profile': ALERTME_PROFILE_ID,
-            'cluster': b'\x00\xf0',
-            'src_endpoint': src_endpoint,
-            'dest_endpoint': dest_endpoint,
-            'data': b'\x11\x39\xfd'
-        }
-        return message
+        return get_message('missing_link')

@@ -73,16 +73,6 @@ messages = {
             'data': b'\x11\x00\xfc'
         }
     },
-    'switch_state_response': {
-        'name': 'Switch State Update',
-        'frame': {
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xee',
-            'profile': ALERTME_PROFILE_ID,
-            'data': lambda params: generate_relay_state_update(params)
-        }
-    },
     'power_demand_update': {
         'name': 'Current Power Demand',
         'frame': {
@@ -93,24 +83,24 @@ messages = {
             'data': lambda params: generate_power_demand_update(params)
         }
     },
-    'plug_off': {
-        'name': 'Switch Plug Off',
+    'switch_state_change': {
+        'name': 'Switch State Change',
         'frame': {
+            'profile': ALERTME_PROFILE_ID,
+            'cluster': b'\x00\xee',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xee',
-            'profile': ALERTME_PROFILE_ID,
-            'data': b'\x11\x00\x02\x00\x01'
+            'data': lambda params: generate_switch_state_request(params)
         }
     },
-    'plug_on': {
-        'name': 'Switch Plug On',
+    'switch_state_response': {
+        'name': 'Switch State Update',
         'frame': {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xee',
             'profile': ALERTME_PROFILE_ID,
-            'data': b'\x11\x00\x02\x01\x01'
+            'data': lambda params: generate_switch_state_update(params)
         }
     },
     'switch_status': {
@@ -123,25 +113,15 @@ messages = {
             'data': b'\x11\x00\x01\x01'
         }
     },
-    'normal_mode': {
-        'name': 'Normal Mode',
-        'frame': {
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf0',
-            'profile': ALERTME_PROFILE_ID,
-            'data': b'\x11\x00\xfa\x00\x01'
-        }
-    },
-    'range_test': {
-        'name': 'Range Test',
-        'frame': {
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf0',
-            'profile': ALERTME_PROFILE_ID,
-            'data': b'\x11\x00\xfa\x01\x01'
-        }
+    'mode_change_request': {
+       'name': 'Normal Mode',
+       'frame': {
+           'profile': ALERTME_PROFILE_ID,
+           'cluster': b'\x00\xf0',
+           'src_endpoint': b'\x00',
+           'dest_endpoint': b'\x02',
+           'data': lambda params: generate_mode_change_request(params)
+       }
     },
     'range_info': {
         'name': 'Range Info',
@@ -153,33 +133,23 @@ messages = {
             'data': lambda params: generate_range_update(params)
         }
     },
-    'locked_mode': {
-        'name': 'Locked Mode',
+    'missing_link': {
+        'name': 'Missing Link',
         'frame': {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xf0',
             'profile': ALERTME_PROFILE_ID,
-            'data': b'\x11\x00\xfa\x02\x01'
+            'data': b'\x11\x39\xfd'
         }
     },
-    'silent_mode': {
-        'name': 'Silent Mode',
-        'frame': {
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf0',
-            'profile': ALERTME_PROFILE_ID,
-            'data': b'\x11\x00\xfa\x03\x01'
-        }
-    },
-    'security_initialization': {
+    'security_init': {
         'name': 'Security Initialization',
         'frame': {
+            'profile': ALERTME_PROFILE_ID,
+            'cluster': b'\x05\x00',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster': b'\x05\x00',
-            'profile': ALERTME_PROFILE_ID,
             'data': b'\x11\x80\x00\x00\x05'
         }
     }
@@ -336,10 +306,33 @@ def generate_power_demand_update(params):
     return data
 
 
+def generate_mode_change_request(params):
+    """
+    Generate Mode Change Request
+    Available Modes: 'Normal', 'RangeTest', 'Locked', 'Silent'
+
+    :param params: Parameter dictionary of requested mode
+    :return: Message data
+    """
+    mode = params['Mode']
+    data = b''
+    if mode == 'Normal':
+        data = b'\x11\x00\xfa\x00\x01'
+    elif mode == 'RangeTest':
+        data = b'\x11\x00\xfa\x01\x01'
+    elif mode == 'Locked':
+        data = b'\x11\x00\xfa\x02\x01'
+    elif mode == 'Silent':
+        data = b'\x11\x00\xfa\x03\x01'
+    else:
+        logging.error('Invalid mode request %s', mode)
+
+    return data
+
+
 def parse_power_consumption(data):
     """
     Process message, parse for power consumption value.
-
 
     :param data: Message data
     :return: Parameter dictionary of usage stats
@@ -372,20 +365,6 @@ def parse_relay_state_request(data):
         logging.error('Unknown State Request')
 
 
-def generate_relay_state_update(params):
-    """
-    Generate Switch State Update message data
-
-    :param params: Parameter dictionary of relay state
-    :return: Message data
-    """
-    checksum = b'\th'
-    cluster_cmd = b'\x80'
-    payload = b'\x07\x01' if params['State'] else b'\x06\x00'
-    data = checksum + cluster_cmd + payload
-    return data
-
-
 def parse_switch_state(data):
     """
     Process message, parse for switch status.
@@ -399,6 +378,33 @@ def parse_switch_state(data):
         return {'State': 1}
     else:
         return {'State': 0}
+
+
+def generate_switch_state_update(params):
+    """
+    Generate Switch State update message data.
+    This message is sent from the smartplug to the hub advertising current state.
+
+    :param params: Parameter dictionary of relay state
+    :return: Message data
+    """
+    checksum = b'\th'
+    cluster_cmd = b'\x80'
+    payload = b'\x07\x01' if params['State'] else b'\x06\x00'
+    data = checksum + cluster_cmd + payload
+    return data
+
+
+def generate_switch_state_request(params):
+    """
+    Generate Switch State Change request data.
+    This message is sent from the hub to the smartplug requesting state change.
+
+    :param params: Parameter dictionary of relay state
+    :return: Message data
+    """
+    data = b'\x11\x00\x02\x01\x01' if params['State'] else b'\x11\x00\x02\x00\x01'
+    return data
 
 
 def parse_tamper_state(data):
@@ -501,4 +507,3 @@ def parse_status_update(data):
         logging.error('Unrecognised Device Status %r  %r', status, data)
 
     return ret
-

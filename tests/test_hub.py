@@ -61,9 +61,8 @@ class TestHub(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_state_change_request(self):
-        result = self.hub_obj.generate_state_change_request('ON')
+        result = self.hub_obj.generate_state_change_request(1)
         expected = {
-            'description': 'Switch Plug On',
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xee',
             'src_endpoint': b'\x00',
@@ -72,9 +71,8 @@ class TestHub(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        result = self.hub_obj.generate_state_change_request('OFF')
+        result = self.hub_obj.generate_state_change_request(0)
         expected = {
-            'description': 'Switch Plug Off',
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xee',
             'src_endpoint': b'\x00',
@@ -83,21 +81,19 @@ class TestHub(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        result = self.hub_obj.generate_state_change_request('CHECK')
-        expected = {
-            'description': 'Switch State Request',
-            'profile': b'\xc2\x16',
-            'cluster': b'\x00\xee',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'data': b'\x11\x00\x01\x01'
-        }
-        self.assertEqual(result, expected)
+        #result = self.hub_obj.generate_state_change_request('CHECK')
+        #expected = {
+        #    'profile': b'\xc2\x16',
+        #    'cluster': b'\x00\xee',
+        #    'src_endpoint': b'\x00',
+        #    'dest_endpoint': b'\x02',
+        #    'data': b'\x11\x00\x01\x01'
+        #}
+        #self.assertEqual(result, expected)
 
     def test_generate_mode_change_request(self):
-        result = self.hub_obj.generate_mode_change_request('NORMAL')
+        result = self.hub_obj.generate_mode_change_request('Normal')
         expected = {
-            'description': 'Normal Mode',
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xf0',
             'src_endpoint': b'\x00',
@@ -106,9 +102,8 @@ class TestHub(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        result = self.hub_obj.generate_mode_change_request('RANGE')
+        result = self.hub_obj.generate_mode_change_request('RangeTest')
         expected = {
-            'description': 'Range Test',
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xf0',
             'src_endpoint': b'\x00',
@@ -117,10 +112,9 @@ class TestHub(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-    def test_generate_type_request(self):
-        result = self.hub_obj.generate_type_request()
+    def test_generate_version_info_request(self):
+        result = self.hub_obj.generate_version_info_request()
         expected = {
-            'description': 'Version Request',
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xf6',
             'src_endpoint': b'\x00',
@@ -158,7 +152,6 @@ class TestHub(unittest.TestCase):
     def test_generate_security_init(self):
         result = self.hub_obj.generate_security_init()
         expected = {
-            'description': 'Security Initialization',
             'profile': b'\xc2\x16',
             'cluster': b'\x05\x00',
             'src_endpoint': b'\x00',
@@ -168,14 +161,11 @@ class TestHub(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_missing_link(self):
-        src_endpoint =  b'\x02'
-        dest_endpoint = b'\x02'
-        result = self.hub_obj.generate_missing_link(src_endpoint, dest_endpoint)
+        result = self.hub_obj.generate_missing_link()
         expected = {
-            'description': 'Missing Link',
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xf0',
-            'src_endpoint': b'\x02',
+            'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
             'data': b'\x119\xfd'
         }
@@ -187,7 +177,7 @@ class TestHub(unittest.TestCase):
 #    device_obj = Device()
 #    device_obj.start(ser2)
 #
-#    message = device_obj.generate_type_update()
+#    message = device_obj.generate_version_info_request()
 #    result = Hub.parse_version_info(message['data'])
 #    expected = {
 #        'Version': 12345,
