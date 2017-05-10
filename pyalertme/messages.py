@@ -53,14 +53,14 @@ messages = {
             'data': b'\x00\x00\x00\x00\x01\x02'
         }
     },
-    'version_info_response': {
+    'version_info_update': {
         'name': 'Version Responce',
         'frame': {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xf6',
             'profile': ALERTME_PROFILE_ID,
-            'data': lambda params: generate_version_info_response(params)
+            'data': lambda params: generate_version_info_update(params)
         }
     },
     'version_info_request': {
@@ -83,17 +83,17 @@ messages = {
             'data': lambda params: generate_power_demand_update(params)
         }
     },
-    'switch_state_change': {
+    'switch_state_change_request': {
         'name': 'Switch State Change',
         'frame': {
             'profile': ALERTME_PROFILE_ID,
             'cluster': b'\x00\xee',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'data': lambda params: generate_switch_state_request(params)
+            'data': lambda params: generate_switch_state_change_request(params)
         }
     },
-    'switch_state_response': {
+    'switch_state_update': {
         'name': 'Switch State Update',
         'frame': {
             'src_endpoint': b'\x00',
@@ -192,7 +192,7 @@ def list_messages():
     return actions
 
 
-def parse_version_info_response(data):
+def parse_version_info_update(data):
     """
     Process message, parse for version information:
     Type, Version, Manufacturer and Manufacturer Date
@@ -228,7 +228,7 @@ def parse_version_info_response(data):
     return ret
 
 
-def generate_version_info_response(params):
+def generate_version_info_update(params):
     """
     Generate type message
 
@@ -348,7 +348,7 @@ def parse_power_consumption(data):
     return ret
 
 
-def parse_relay_state_request(data):
+def parse_switch_state_request(data):
     """
     Process message, parse for relay state change request.
     This message is sent from the hub to the smartplug requesting state change.
@@ -365,7 +365,7 @@ def parse_relay_state_request(data):
         logging.error('Unknown State Request')
 
 
-def parse_switch_state(data):
+def parse_switch_state_update(data):
     """
     Process message, parse for switch status.
     This message is sent from the smartplug to the hub advertising current state.
@@ -380,6 +380,18 @@ def parse_switch_state(data):
         return {'State': 0}
 
 
+def generate_switch_state_change_request(params):
+    """
+    Generate Switch State Change request data.
+    This message is sent from the hub to the smartplug requesting state change.
+
+    :param params: Parameter dictionary of relay state
+    :return: Message data
+    """
+    data = b'\x11\x00\x02\x01\x01' if params['State'] else b'\x11\x00\x02\x00\x01'
+    return data
+
+
 def generate_switch_state_update(params):
     """
     Generate Switch State update message data.
@@ -392,18 +404,6 @@ def generate_switch_state_update(params):
     cluster_cmd = b'\x80'
     payload = b'\x07\x01' if params['State'] else b'\x06\x00'
     data = checksum + cluster_cmd + payload
-    return data
-
-
-def generate_switch_state_request(params):
-    """
-    Generate Switch State Change request data.
-    This message is sent from the hub to the smartplug requesting state change.
-
-    :param params: Parameter dictionary of relay state
-    :return: Message data
-    """
-    data = b'\x11\x00\x02\x01\x01' if params['State'] else b'\x11\x00\x02\x00\x01'
     return data
 
 

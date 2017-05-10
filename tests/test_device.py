@@ -37,8 +37,8 @@ class TestDevice(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-    def test_generate_type_update(self):
-        result = self.device_obj.generate_type_update()
+    def test_generate_version_info_update(self):
+        result = self.device_obj.generate_version_info_update()
         expected = {
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xf6',

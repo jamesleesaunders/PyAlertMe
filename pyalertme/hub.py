@@ -319,7 +319,7 @@ class Hub(Base):
 
                         elif (cluster_cmd == b'\xfe'):
                             self._logger.debug('Received Version Information')
-                            properties = parse_version_info_response(message['rf_data'])
+                            properties = parse_version_info_update(message['rf_data'])
                             self.save_node_properties(node_id, properties)
 
                         else:
@@ -452,7 +452,7 @@ class Hub(Base):
         :param state: Switch State
         :return: message
         """
-        return get_message('switch_state_change', {'State': state})
+        return get_message('switch_state_change_request', {'State': state})
 
     def generate_mode_change_request(self, mode):
         """

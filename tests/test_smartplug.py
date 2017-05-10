@@ -15,8 +15,8 @@ class TestSmartPlug(unittest.TestCase):
     def tearDown(self):
         self.device_obj.halt()
 
-    def test_generate_type_update(self):
-        result = self.device_obj.generate_type_update()
+    def test_generate_version_info_update(self):
+        result = self.device_obj.generate_version_info_update()
         expected = {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',

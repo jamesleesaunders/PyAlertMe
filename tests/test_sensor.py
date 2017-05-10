@@ -15,7 +15,7 @@ class TestSensor(unittest.TestCase):
         self.device_obj.halt()
 
     def test_generate_type_update(self):
-        result = self.device_obj.generate_type_update()
+        result = self.device_obj.generate_version_info_update()
         expected = {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',

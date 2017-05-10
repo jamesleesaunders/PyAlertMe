@@ -75,7 +75,7 @@ class Device(Base):
                 if cluster_id == b'\x00\xf6':
                     # b'\x11\x00\xfc\x00\x01'
                     self._logger.debug('Received Version Request')
-                    self.send_message(self.generate_type_update(), source_addr_long, source_addr_short)
+                    self.send_message(self.generate_version_info_update(), source_addr_long, source_addr_short)
 
                 elif cluster_id == b'\x00\xf0':
                     if cluster_cmd == b'\xfa':
@@ -116,7 +116,7 @@ class Device(Base):
             else:
                 self._logger.error('Unrecognised Profile ID: %r', profile_id)
 
-    def generate_type_update(self):
+    def generate_version_info_update(self):
         """
         Generate type message
 
@@ -128,7 +128,7 @@ class Device(Base):
             'Manufacturer': self.manu,
             'ManufactureDate': self.manu_date
         }
-        return get_message('version_info_response', version_params)
+        return get_message('version_info_update', version_params)
 
     def generate_range_update(self):
         """

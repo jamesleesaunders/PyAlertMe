@@ -7,10 +7,10 @@ class TestMessages(unittest.TestCase):
 
     def test_get_message(self):
         # Test message with data lambda
-        result = get_message('switch_state_response', {'State': 1})
+        result = get_message('switch_state_update', {'State': 1})
         expected = {'profile': b'\xc2\x16', 'cluster': b'\x00\xee', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x00', 'data': b'\th\x80\x07\x01'}
         self.assertEqual(result, expected)
-        result = get_message('switch_state_response', {'State': 0})
+        result = get_message('switch_state_update', {'State': 0})
         expected = {'profile': b'\xc2\x16', 'cluster': b'\x00\xee', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x00', 'data': b'\th\x80\x06\x00'}
         self.assertEqual(result, expected)
 
@@ -68,18 +68,18 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_parse_relay_state_request(self):
-        result = parse_relay_state_request(b'\x11\x00\x02\x01\x01')
+        result = parse_switch_state_request(b'\x11\x00\x02\x01\x01')
         self.assertEqual(result, 1)
 
-        result = parse_relay_state_request(b'\x11\x00\x02\x00\x01')
+        result = parse_switch_state_request(b'\x11\x00\x02\x00\x01')
         self.assertEqual(result, 0)
 
     def test_parse_switch_state(self):
-        result = parse_switch_state(b'\th\x80\x07\x01')
+        result = parse_switch_state_update(b'\th\x80\x07\x01')
         expected = {'State': 1}
         self.assertEqual(result, expected)
 
-        result = parse_switch_state(b'\th\x80\x06\x00')
+        result = parse_switch_state_update(b'\th\x80\x06\x00')
         expected = {'State': 0}
         self.assertEqual(result, expected)
 
@@ -110,16 +110,16 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_switch_state_request(self):
-        result = generate_switch_state_request({'State': 1})
+        result = generate_switch_state_change_request({'State': 1})
         expected = b'\x11\x00\x02\x01\x01'
         self.assertEqual(result, expected)
 
-        result = generate_switch_state_request({'State': 0})
+        result = generate_switch_state_change_request({'State': 0})
         expected = b'\x11\x00\x02\x00\x01'
         self.assertEqual(result, expected)
 
     def test_parse_version_info(self):
-        result = parse_version_info_response(b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\tSmartPlug\n2013-09-26')
+        result = parse_version_info_update(b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\tSmartPlug\n2013-09-26')
         expected = {
             'Version': 20045,
             'Manufacturer': 'AlertMe.com',
@@ -128,7 +128,7 @@ class TestMessages(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        result = parse_version_info_response(b'\tp\xfebI\xb2\x8a\xc2\x00\x00o\r\x009\x10\r\x00\x03#\x01\x01\x0bAlertMe.com\x0bPower Clamp\n2010-05-19')
+        result = parse_version_info_update(b'\tp\xfebI\xb2\x8a\xc2\x00\x00o\r\x009\x10\r\x00\x03#\x01\x01\x0bAlertMe.com\x0bPower Clamp\n2010-05-19')
         expected = {
             'Version': 18786,
             'Manufacturer': 'AlertMe.com',
@@ -137,7 +137,7 @@ class TestMessages(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        result = parse_version_info_response(b'\tp\xfe+\xe8\xc0ax\x00\x00o\r\x009\x10\x01\x00\x01#\x00\x01\x0bAlertMe.com\rButton Device\n2010-11-15')
+        result = parse_version_info_update(b'\tp\xfe+\xe8\xc0ax\x00\x00o\r\x009\x10\x01\x00\x01#\x00\x01\x0bAlertMe.com\rButton Device\n2010-11-15')
         expected = {
             'Version': 59435,
             'Manufacturer': 'AlertMe.com',
@@ -146,7 +146,7 @@ class TestMessages(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        result = parse_version_info_response(b'\tp\xfe\xb6\xb7x\x1dx\x00\x00o\r\x009\x10\x06\x00\x00#\x00\x02\x0bAlertMe.com\nPIR Device\n2010-11-24')
+        result = parse_version_info_update(b'\tp\xfe\xb6\xb7x\x1dx\x00\x00o\r\x009\x10\x06\x00\x00#\x00\x02\x0bAlertMe.com\nPIR Device\n2010-11-24')
         expected = {
             'Version': 47030,
             'Manufacturer': 'AlertMe.com',
@@ -155,7 +155,7 @@ class TestMessages(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        result = parse_version_info_response(b'\t\x00\xfe\xad\xe3jj\x1b\x00\x00o\r\x009\x10\x05\x00\x06\x12\x00\x01\x0bAlertMe.com\x12Door/Window sensor\n2008-04-17')
+        result = parse_version_info_update(b'\t\x00\xfe\xad\xe3jj\x1b\x00\x00o\r\x009\x10\x05\x00\x06\x12\x00\x01\x0bAlertMe.com\x12Door/Window sensor\n2008-04-17')
         expected = {
             'Version': 58285,
             'Manufacturer': 'AlertMe.com',
@@ -164,7 +164,7 @@ class TestMessages(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        result = parse_version_info_response(b'\tp\xfe\x82@\xc1e\x1d\x00\x00o\r\x009\x10\x04\x00\x01#\x00\x01\x0bAlertMe.com\x0eAlarm Detector\n2010-11-24')
+        result = parse_version_info_update(b'\tp\xfe\x82@\xc1e\x1d\x00\x00o\r\x009\x10\x04\x00\x01#\x00\x01\x0bAlertMe.com\x0eAlarm Detector\n2010-11-24')
         expected = {
             'Version': 16514,
             'Manufacturer': 'AlertMe.com',
@@ -173,7 +173,7 @@ class TestMessages(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        result = parse_version_info_response(b'\t0\xfe3B\x08BI\x00\x00o\r\x009\x10\x03\x00\x03#\x00\x01\x0bAlertMe.com\rKeyfob Device\n2010-11-10')
+        result = parse_version_info_update(b'\t0\xfe3B\x08BI\x00\x00o\r\x009\x10\x03\x00\x03#\x00\x01\x0bAlertMe.com\rKeyfob Device\n2010-11-10')
         expected = {
             'Version': 16947,
             'Manufacturer': 'AlertMe.com',
@@ -182,7 +182,7 @@ class TestMessages(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        result = parse_version_info_response(b'\t\x00\xfe\x1b\x15V_\x1b\x00\x00o\r\x009\x10\x02\x00\x07\x12\x00\x02\x0bAlertMe.com\x06Beacon\n2008-07-08')
+        result = parse_version_info_update(b'\t\x00\xfe\x1b\x15V_\x1b\x00\x00o\r\x009\x10\x02\x00\x07\x12\x00\x02\x0bAlertMe.com\x06Beacon\n2008-07-08')
         expected = {
             'Version': 5403,
             'Manufacturer': 'AlertMe.com',
@@ -191,7 +191,7 @@ class TestMessages(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        result = parse_version_info_response(b'\t\x00\xfe\xde\xa4\xeav\x1b\x00\x00o\r\x009\x10\x02\x00\x06\x12\x01\x01\x0bAlertMe.com\x04Lamp\n2008-04-17')
+        result = parse_version_info_update(b'\t\x00\xfe\xde\xa4\xeav\x1b\x00\x00o\r\x009\x10\x02\x00\x06\x12\x01\x01\x0bAlertMe.com\x04Lamp\n2008-04-17')
         expected = {
             'Version': 42206,
             'Manufacturer': 'AlertMe.com',
@@ -200,14 +200,14 @@ class TestMessages(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-    def test_generate_version_info_response(self):
+    def test_generate_version_info_update(self):
         params = {
             'Version': 12345,
             'Manufacturer': 'PyAlertMe',
             'Type': 'Generic',
             'ManufactureDate': '2017-01-01'
         }
-        result = generate_version_info_response(params)
+        result = generate_version_info_update(params)
         expected = b'\tq\xfe90\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bPyAlertMe\nGeneric\n2017-01-01'
 
         self.assertEqual(result, expected)
