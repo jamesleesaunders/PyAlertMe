@@ -267,7 +267,7 @@ class Hub(Base):
                     if cluster_id == b'\x00\xee':
                         if cluster_cmd == b'\x80':
                             self._logger.debug('Received Switch Status Update')
-                            attributes = parse_switch_state(message['rf_data'])
+                            attributes = parse_switch_state_update(message['rf_data'])
                             self.save_node_attributes(node_id, attributes)
 
                         else:
@@ -314,7 +314,7 @@ class Hub(Base):
                     elif cluster_id == b'\x00\xf6':
                         if cluster_cmd == b'\xfd':
                             self._logger.debug('Received RSSI Range Test Update')
-                            attributes = parse_range_info(message['rf_data'])
+                            attributes = parse_range_info_update(message['rf_data'])
                             self.save_node_attributes(node_id, attributes)
 
                         elif (cluster_cmd == b'\xfe'):

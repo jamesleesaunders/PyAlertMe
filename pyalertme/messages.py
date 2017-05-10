@@ -247,7 +247,7 @@ def generate_version_info_update(params):
     return data
 
 
-def parse_range_info(data):
+def parse_range_info_update(data):
     """
     Process message, parse for RSSI range test value
 

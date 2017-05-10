@@ -118,7 +118,7 @@ class TestMessages(unittest.TestCase):
         expected = b'\x11\x00\x02\x00\x01'
         self.assertEqual(result, expected)
 
-    def test_parse_version_info(self):
+    def test_parse_version_info_update(self):
         result = parse_version_info_update(b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\tSmartPlug\n2013-09-26')
         expected = {
             'Version': 20045,
@@ -212,8 +212,8 @@ class TestMessages(unittest.TestCase):
 
         self.assertEqual(result, expected)
 
-    def test_parse_range_info(self):
-        result = parse_range_info(b'\t+\xfd\xc5w')
+    def test_parse_range_info_update(self):
+        result = parse_range_info_update(b'\t+\xfd\xc5w')
         expected = {'RSSI': 197}
         self.assertEqual(result, expected)
 
