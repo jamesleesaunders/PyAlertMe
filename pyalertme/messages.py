@@ -53,16 +53,6 @@ messages = {
             'data': b'\x00\x00\x00\x00\x01\x02'
         }
     },
-    'version_info_update': {
-        'name': 'Version Responce',
-        'frame': {
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf6',
-            'profile': ALERTME_PROFILE_ID,
-            'data': lambda params: generate_version_info_update(params)
-        }
-    },
     'version_info_request': {
         'name': 'Version Request',
         'frame': {
@@ -73,24 +63,24 @@ messages = {
             'data': b'\x11\x00\xfc'
         }
     },
-    'power_demand_update': {
-        'name': 'Current Power Demand',
+    'version_info_update': {
+        'name': 'Version Responce',
         'frame': {
-            'profile': ALERTME_PROFILE_ID,
-            'cluster': b'\x00\xef',
-            'src_endpoint': b'\x02',
+            'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'data': lambda params: generate_power_demand_update(params)
+            'cluster': b'\x00\xf6',
+            'profile': ALERTME_PROFILE_ID,
+            'data': lambda params: generate_version_info_update(params)
         }
     },
-    'switch_state_change_request': {
+    'switch_state_request': {
         'name': 'Switch State Change',
         'frame': {
             'profile': ALERTME_PROFILE_ID,
             'cluster': b'\x00\xee',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'data': lambda params: generate_switch_state_change_request(params)
+            'data': lambda params: generate_switch_state_request(params)
         }
     },
     'switch_state_update': {
@@ -103,14 +93,14 @@ messages = {
             'data': lambda params: generate_switch_state_update(params)
         }
     },
-    'switch_status': {
-        'name': 'Switch Status',
+    'power_demand_update': {
+        'name': 'Current Power Demand',
         'frame': {
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xee',
             'profile': ALERTME_PROFILE_ID,
-            'data': b'\x11\x00\x01\x01'
+            'cluster': b'\x00\xef',
+            'src_endpoint': b'\x02',
+            'dest_endpoint': b'\x02',
+            'data': lambda params: generate_power_demand_update(params)
         }
     },
     'mode_change_request': {
@@ -374,13 +364,13 @@ def parse_switch_state_update(data):
     :return: Parameter dictionary of switch status
     """
     values = struct.unpack('< 2x b b b', data)
-    if (values[2] & 0x01):
+    if values[2] & 0x01:
         return {'State': 1}
     else:
         return {'State': 0}
 
 
-def generate_switch_state_change_request(params):
+def generate_switch_state_request(params):
     """
     Generate Switch State Change request data.
     This message is sent from the hub to the smartplug requesting state change.
@@ -388,7 +378,18 @@ def generate_switch_state_change_request(params):
     :param params: Parameter dictionary of relay state
     :return: Message data
     """
-    data = b'\x11\x00\x02\x01\x01' if params['State'] else b'\x11\x00\x02\x00\x01'
+    data = b'\x11\x00\x01\x01'
+    if 'State' in params.keys():
+        if params['State'] == 1:
+            # On
+            data = b'\x11\x00\x02\x01\x01'
+        elif params['State'] == 0:
+            # Cff
+            data = b'\x11\x00\x02\x00\x01'
+        elif params['State'] == '':
+            # Check
+            data = b'\x11\x00\x01\x01'
+
     return data
 
 

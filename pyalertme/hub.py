@@ -376,7 +376,7 @@ class Hub(Base):
         :param node_id: Integer Short Node ID
         :param state:
         """
-        message = self.generate_state_change_request(state)
+        message = self.generate_state_request(state)
         addresses = self.node_id_to_addrs(node_id)
         self.send_message(message, *addresses)
 
@@ -445,14 +445,14 @@ class Hub(Base):
         }
         return message
 
-    def generate_state_change_request(self, state):
+    def generate_state_request(self, state=''):
         """
         Generate Node State Change Request.
 
         :param state: Switch State
         :return: message
         """
-        return get_message('switch_state_change_request', {'State': state})
+        return get_message('switch_state_request', {'State': state})
 
     def generate_mode_change_request(self, mode):
         """

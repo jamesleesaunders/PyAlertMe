@@ -60,8 +60,8 @@ class TestHub(unittest.TestCase):
         expected = b'~\x00\x19}1\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x00\x02\x00\xf0\xc2\x16\x00\x00}1\x00\xfa\x00\x01\x06'
         self.assertEqual(result, expected)
 
-    def test_generate_state_change_request(self):
-        result = self.hub_obj.generate_state_change_request(1)
+    def test_generate_state_request(self):
+        result = self.hub_obj.generate_state_request(1)
         expected = {
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xee',
@@ -71,7 +71,7 @@ class TestHub(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        result = self.hub_obj.generate_state_change_request(0)
+        result = self.hub_obj.generate_state_request(0)
         expected = {
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xee',
@@ -81,15 +81,15 @@ class TestHub(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        #result = self.hub_obj.generate_state_change_request('CHECK')
-        #expected = {
-        #    'profile': b'\xc2\x16',
-        #    'cluster': b'\x00\xee',
-        #    'src_endpoint': b'\x00',
-        #    'dest_endpoint': b'\x02',
-        #    'data': b'\x11\x00\x01\x01'
-        #}
-        #self.assertEqual(result, expected)
+        result = self.hub_obj.generate_state_request()
+        expected = {
+            'profile': b'\xc2\x16',
+            'cluster': b'\x00\xee',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'data': b'\x11\x00\x01\x01'
+        }
+        self.assertEqual(result, expected)
 
     def test_generate_mode_change_request(self):
         result = self.hub_obj.generate_mode_change_request('Normal')
