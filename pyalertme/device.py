@@ -122,13 +122,13 @@ class Device(Base):
 
         :return: Message of device type
         """
-        version_params = {
+        params = {
             'Type': self.type,
             'Version': self.version,
             'Manufacturer': self.manu,
             'ManufactureDate': self.manu_date
         }
-        return get_message('version_info_update', version_params)
+        return get_message('version_info_update', params)
 
     def generate_range_update(self):
         """
