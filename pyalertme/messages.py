@@ -8,6 +8,31 @@ HA_PROFILE_ID      = b'\x01\x04'  # HA Device Profile
 LL_PROFILE_ID      = b'\xc0\x5e'  # Light Link Profile
 ALERTME_PROFILE_ID = b'\xc2\x16'  # AlertMe Private Profile
 
+# AlertMe Cluster Commands
+SWITCH_CLUSTER_ID = b'\x00\xee'
+# b'\x01' State Request (SmartPlug)
+# b'\x02' Change State (SmartPlug)
+# b'\x80' Switch Status Update
+
+POWER_CLUSTER_ID = b'\x00\xef'
+# b'\x81' Power Demand Update
+# b'\x82' Power Consumption & Uptime Update
+
+STATUS_CLUSTER_ID = b'\x00\xf0'
+# b'\xfa' Mode Change Request
+# b'\xfb' Status Update
+
+TAMPER_CLUSTER_ID = b'\x00\xf2'
+
+BUTTON_CLUSTER_ID = b'\x00\xf3'
+
+DISCOVERY_CLUSTER_ID = b'\x00\xf6'
+# b'\xfd' RSSI Range Test Update
+# b'\xfe' Received Version Information
+
+SECURITY_CLUSTER_ID = b'\x05\x00'
+
+
 # Zigbee Addressing
 BROADCAST_LONG = b'\x00\x00\x00\x00\x00\x00\xff\xff'
 BROADCAST_SHORT = b'\xff\xfe'
