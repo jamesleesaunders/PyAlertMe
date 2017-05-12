@@ -130,7 +130,7 @@ messages = {
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xf0',
             'profile': ALERTME_PROFILE_ID,
-            'data': b'\x11\x39\xfd'
+            'data': lambda params: generate_missing_link(params)
         }
     },
     'security_init': {
@@ -140,7 +140,7 @@ messages = {
             'cluster': b'\x05\x00',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'data': b'\x11\x80\x00\x00\x05'
+            'data': lambda params: generate_security_init(params)
         }
     }
 }
@@ -508,3 +508,23 @@ def parse_status_update(data):
         logging.error('Unrecognised Device Status %r  %r', status, data)
 
     return ret
+
+def generate_missing_link(params):
+    """
+    Generate Missing Link. Not sure what this is yet?
+
+    :param params: Parameter dictionary (none required?)
+    :return: Message data
+    """
+    data = b'\x11\x39\xfd'
+    return data
+
+def generate_security_init(params):
+    """
+    Generate Security Init
+
+    :param params: Parameter dictionary (none required?)
+    :return: Message data
+    """
+    checksum = b'\x11\x80\x00\x00\x05'
+    return data
