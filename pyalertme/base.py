@@ -181,15 +181,15 @@ class Base(object):
             profile_id = message['profile']
             cluster_id = message['cluster']
 
-            if profile_id == ZDP_PROFILE_ID:
+            if profile_id == PROFILE_ID_ZDP:
                 # Zigbee Device Profile ID
                 self._logger.debug('Received Zigbee Device Profile Packet')
 
-            elif profile_id == ALERTME_PROFILE_ID:
+            elif profile_id == PROFILE_ID_ALERTME:
                 # AlertMe Profile ID
                 self._logger.debug('Received AlertMe Specific Profile Packet')
 
-            elif profile_id == HA_PROFILE_ID:
+            elif profile_id == PROFILE_ID_HA:
                 # HA Profile ID
                 self._logger.debug('Received HA Profile Packet')
 
