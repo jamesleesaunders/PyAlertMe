@@ -265,5 +265,37 @@ class TestMessages(unittest.TestCase):
         expected = b'\x11\x80\x00\x00\x05'
         self.assertEqual(result, expected)
 
+
+
+    def test_generate_active_endpoint_request(self):
+        message = get_message('active_endpoint_request')
+        result = message['data']
+        expected = b'\x00\x00'
+        self.assertEqual(result, expected)
+
+    def test_generate_match_descriptor_request(self):
+        message = get_message('match_descriptor_request')
+        result = message['data']
+        expected = '\x03\xfd\xff\x16\xc2\x00\x01\xf0\x00'
+        self.assertEqual(result, expected)
+
+    def test_generate_match_descriptor_response(self):
+        message = get_message('match_descriptor_response')
+        result = message['data']
+        expected = b'\x00\x00\x00\x00\x01\x02'
+        self.assertEqual(result, expected)
+
+    def test_generate_routing_table_request(self):
+        message = get_message('routing_table_request')
+        result = message['data']
+        expected = b'\x12\x01'
+        self.assertEqual(result, expected)
+
+    def test_permit_join_request(self):
+        message = get_message('permit_join_request')
+        result = message['data']
+        expected = b'\xff\x00'
+        self.assertEqual(result, expected)
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

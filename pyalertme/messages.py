@@ -103,26 +103,6 @@ messages = {
             'data': lambda params: generate_security_init(params)
         }
     },
-    'routing_table_request': {
-        'name': 'Management Routing Table Request',
-        'frame': {
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x00',
-            'cluster': b'\x00\x32',
-            'profile': ZDP_PROFILE_ID,
-            'data': '\x12\x01'
-        }
-    },
-    'permit_join_request': {
-        'name': 'Management Permit Join Request',
-        'frame': {
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x00',
-            'cluster': b'\x00\x36',
-            'profile': ZDP_PROFILE_ID,
-            'data': '\xff\x00'
-        }
-    },
     'active_endpoint_request': {
         'name': 'Active Endpoints Request',
         'frame': {
@@ -133,6 +113,16 @@ messages = {
             'data': b'\x00\x00'
         }
     },
+    'match_descriptor_request': {
+        'name': 'Match Descriptor Request',
+        'frame': {
+            'profile': ZDP_PROFILE_ID,
+            'cluster': b'\x00\x06',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'data': b'\x03\xfd\xff\x16\xc2\x00\x01\xf0\x00'
+        }
+    },
     'match_descriptor_response': {
         'name': 'Match Descriptor Response',
         'frame': {
@@ -141,6 +131,26 @@ messages = {
             'cluster': b'\x80\x06',
             'profile': ZDP_PROFILE_ID,
             'data': b'\x00\x00\x00\x00\x01\x02'
+        }
+    },
+    'routing_table_request': {
+        'name': 'Management Routing Table Request',
+        'frame': {
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'cluster': b'\x00\x32',
+            'profile': ZDP_PROFILE_ID,
+            'data': b'\x12\x01'
+        }
+    },
+    'permit_join_request': {
+        'name': 'Management Permit Join Request',
+        'frame': {
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'cluster': b'\x00\x36',
+            'profile': ZDP_PROFILE_ID,
+            'data': b'\xff\x00'
         }
     }
 }
@@ -586,32 +596,6 @@ def temp_generate_active_endpoints_request(addr_short):
     return message
 
 
-def temp_generate_match_descriptor_response(rf_data):
-    """
-    Generate Match Descriptor Response
-    If a descriptor match is found on the device, this response contains a list of endpoints that
-    support the request criteria.
-
-    Field Name       Size (bytes)   Description
-    Status           1
-    Network Address  2              Indicates the 16-bit address of the responding device.
-    Length           1              The number of endpoints on the remote device that match
-                                    the request criteria.
-    Match List       Variable       List of endpoints on the remote that match the request criteria.
-
-    :param rf_data:
-    """
-    data = rf_data[0:1] + b'\x00\x00\x00\x01\x02'
-    message = {
-        'description': 'Match Descriptor Response',
-        'profile': ZDP_PROFILE_ID,
-        'cluster': b'\x80\x06',
-        'src_endpoint': b'\x00',
-        'dest_endpoint': b'\x00',
-        'data': data
-    }
-    return message
-
 
 def temp_generate_match_descriptor_request():
     """
@@ -638,6 +622,33 @@ def temp_generate_match_descriptor_request():
         'description': 'Match Descriptor Request',
         'profile': ZDP_PROFILE_ID,
         'cluster': b'\x00\x06',
+        'src_endpoint': b'\x00',
+        'dest_endpoint': b'\x00',
+        'data': data
+    }
+    return message
+
+
+def temp_generate_match_descriptor_response(rf_data):
+    """
+    Generate Match Descriptor Response
+    If a descriptor match is found on the device, this response contains a list of endpoints that
+    support the request criteria.
+
+    Field Name       Size (bytes)   Description
+    Status           1
+    Network Address  2              Indicates the 16-bit address of the responding device.
+    Length           1              The number of endpoints on the remote device that match
+                                    the request criteria.
+    Match List       Variable       List of endpoints on the remote that match the request criteria.
+
+    :param rf_data:
+    """
+    data = rf_data[0:1] + b'\x00\x00\x00\x01\x02'
+    message = {
+        'description': 'Match Descriptor Response',
+        'profile': ZDP_PROFILE_ID,
+        'cluster': b'\x80\x06',
         'src_endpoint': b'\x00',
         'dest_endpoint': b'\x00',
         'data': data
