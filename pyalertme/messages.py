@@ -106,11 +106,11 @@ messages = {
     'active_endpoints_request': {
         'name': 'Active Endpoints Request',
         'frame': {
+            'profile': ZDP_PROFILE_ID,
+            'cluster': b'\x00\x05',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x00',
-            'cluster': b'\x00\x05',
-            'profile': ZDP_PROFILE_ID,
-            'data': b'\xaa\x9f\x88'
+            'data': lambda params: generate_active_endpoints_request(params)
         }
     },
     'match_descriptor_request': {
@@ -120,17 +120,17 @@ messages = {
             'cluster': b'\x00\x06',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x00',
-            'data': b'\x03\xfd\xff\x16\xc2\x00\x01\xf0\x00'
+            'data': lambda params: generate_match_descriptor_request(params)
         }
     },
     'match_descriptor_response': {
         'name': 'Match Descriptor Response',
         'frame': {
+            'profile': ZDP_PROFILE_ID,
+            'cluster': b'\x80\x06',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x00',
-            'cluster': b'\x80\x06',
-            'profile': ZDP_PROFILE_ID,
-            'data': b'\x03\x00\x00\x00\x01\x02'
+            'data': lambda params: generate_match_descriptor_response(params)
         }
     },
     'routing_table_request': {
@@ -557,19 +557,7 @@ def generate_security_init(params=None):
     return data
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-def temp_generate_active_endpoints_request(addr_short):
+def generate_active_endpoints_request(params):
     """
     Generate Active Endpoints Request
     The active endpoint request needs the short address of the device
@@ -582,21 +570,14 @@ def temp_generate_active_endpoints_request(addr_short):
     Network Address  2              16-bit address of a device in the network whose
                                     active endpoint list being requested.
 
-    :param addr_short:
+    :param params: addr_short
     """
+    addr_short = params['AddressShort']
     data = b'\xaa' + addr_short[1] + addr_short[0]
-    message = {
-        'description': 'Active Endpoints Request',
-        'profile': ZDP_PROFILE_ID,
-        'cluster': b'\x00\x05',
-        'src_endpoint': b'\x00',
-        'dest_endpoint': b'\x00',
-        'data': data
-    }
-    return message
+    return data
 
 
-def temp_generate_match_descriptor_request():
+def generate_match_descriptor_request(params=None):
     """
     Generate Match Descriptor Request
     Broadcast or unicast transmission used to discover the device(s) that supports
@@ -615,20 +596,14 @@ def temp_generate_match_descriptor_request():
     Output Cluster   2*             List of output cluster IDs to be used for matching.
     List
                       * Number of Input Clusters
+
+    :param params:
     """
     data = b'\x03\xfd\xff\x16\xc2\x00\x01\xf0\x00'
-    message = {
-        'description': 'Match Descriptor Request',
-        'profile': ZDP_PROFILE_ID,
-        'cluster': b'\x00\x06',
-        'src_endpoint': b'\x00',
-        'dest_endpoint': b'\x00',
-        'data': data
-    }
-    return message
+    return data
 
 
-def temp_generate_match_descriptor_response(rf_data):
+def generate_match_descriptor_response(params):
     """
     Generate Match Descriptor Response
     If a descriptor match is found on the device, this response contains a list of endpoints that
@@ -641,15 +616,9 @@ def temp_generate_match_descriptor_response(rf_data):
                                     the request criteria.
     Match List       Variable       List of endpoints on the remote that match the request criteria.
 
-    :param rf_data:
+    :param params: rf_data
     """
+    rf_data = params['rf_data']
     data = rf_data[0:1] + b'\x00\x00\x00\x01\x02'
-    message = {
-        'description': 'Match Descriptor Response',
-        'profile': ZDP_PROFILE_ID,
-        'cluster': b'\x80\x06',
-        'src_endpoint': b'\x00',
-        'dest_endpoint': b'\x00',
-        'data': data
-    }
-    return message
+    return data
+

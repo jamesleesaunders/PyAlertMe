@@ -266,7 +266,8 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_active_endpoints_request(self):
-        message = get_message('active_endpoints_request')
+        source_addr_short = b'\x88\x9f'
+        message = get_message('active_endpoints_request', {'AddressShort': source_addr_short})
         result = message['data']
         expected = b'\xaa\x9f\x88'
         self.assertEqual(result, expected)
@@ -278,7 +279,8 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_match_descriptor_response(self):
-        message = get_message('match_descriptor_response')
+        rf_data = b'\x03\xfd\xff\x16\xc2\x00\x01\xf0\x00'
+        message = get_message('match_descriptor_response', {'rf_data': rf_data})
         result = message['data']
         expected = b'\x03\x00\x00\x00\x01\x02'
         self.assertEqual(result, expected)

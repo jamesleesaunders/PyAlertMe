@@ -398,7 +398,7 @@ class Hub(Base):
 
         :param addr_short:
         """
-        return get_message('active_endpoints_request')
+        return get_message('active_endpoints_request', {'AddressShort': addr_short})
 
     def generate_match_descriptor_response(self, rf_data):
         """
@@ -406,7 +406,7 @@ class Hub(Base):
 
         :param rf_data:
         """
-        return get_message('match_descriptor_response')
+        return get_message('match_descriptor_response', {'rf_data': rf_data})
 
     def generate_state_request(self, state=''):
         """
