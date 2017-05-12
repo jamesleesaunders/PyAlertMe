@@ -509,6 +509,7 @@ def parse_status_update(data):
 
     return ret
 
+
 def generate_missing_link(params):
     """
     Generate Missing Link. Not sure what this is yet?
@@ -518,6 +519,7 @@ def generate_missing_link(params):
     """
     data = b'\x11\x39\xfd'
     return data
+
 
 def generate_security_init(params):
     """
