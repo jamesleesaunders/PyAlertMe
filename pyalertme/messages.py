@@ -13,6 +13,96 @@ BROADCAST_LONG = b'\x00\x00\x00\x00\x00\x00\xff\xff'
 BROADCAST_SHORT = b'\xff\xfe'
 
 messages = {
+    'version_info_request': {
+        'name': 'Version Info Request',
+        'frame': {
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf6',
+            'profile': ALERTME_PROFILE_ID,
+            'data': lambda params: generate_version_info_request(params)
+        }
+    },
+    'version_info_update': {
+        'name': 'Version Info Update',
+        'frame': {
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf6',
+            'profile': ALERTME_PROFILE_ID,
+            'data': lambda params: generate_version_info_update(params)
+        }
+    },
+    'switch_state_request': {
+        'name': 'Switch State Request',
+        'frame': {
+            'profile': ALERTME_PROFILE_ID,
+            'cluster': b'\x00\xee',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'data': lambda params: generate_switch_state_request(params)
+        }
+    },
+    'switch_state_update': {
+        'name': 'Switch State Update',
+        'frame': {
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xee',
+            'profile': ALERTME_PROFILE_ID,
+            'data': lambda params: generate_switch_state_update(params)
+        }
+    },
+    'mode_change_request': {
+       'name': 'Mode Change Request',
+       'frame': {
+           'profile': ALERTME_PROFILE_ID,
+           'cluster': b'\x00\xf0',
+           'src_endpoint': b'\x00',
+           'dest_endpoint': b'\x02',
+           'data': lambda params: generate_mode_change_request(params)
+       }
+    },
+    'range_info_update': {
+        'name': 'Range Info Update',
+        'frame': {
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf6',
+            'profile': ALERTME_PROFILE_ID,
+            'data': lambda params: generate_range_update(params)
+        }
+    },
+    'power_demand_update': {
+        'name': 'Power Demand Update',
+        'frame': {
+            'profile': ALERTME_PROFILE_ID,
+            'cluster': b'\x00\xef',
+            'src_endpoint': b'\x02',
+            'dest_endpoint': b'\x02',
+            'data': lambda params: generate_power_demand_update(params)
+        }
+    },
+    'missing_link': {
+        'name': 'Missing Link',
+        'frame': {
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'cluster': b'\x00\xf0',
+            'profile': ALERTME_PROFILE_ID,
+            'data': lambda params: generate_missing_link(params)
+        }
+    },
+    'security_init': {
+        'name': 'Security Initialization',
+        'frame': {
+            'profile': ALERTME_PROFILE_ID,
+            'cluster': b'\x05\x00',
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'data': lambda params: generate_security_init(params)
+        }
+    },
     'routing_table_request': {
         'name': 'Management Routing Table Request',
         'frame': {
@@ -51,96 +141,6 @@ messages = {
             'cluster': b'\x80\x06',
             'profile': ZDP_PROFILE_ID,
             'data': b'\x00\x00\x00\x00\x01\x02'
-        }
-    },
-    'version_info_request': {
-        'name': 'Version Request',
-        'frame': {
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf6',
-            'profile': ALERTME_PROFILE_ID,
-            'data': b'\x11\x00\xfc'
-        }
-    },
-    'version_info_update': {
-        'name': 'Version Responce',
-        'frame': {
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf6',
-            'profile': ALERTME_PROFILE_ID,
-            'data': lambda params: generate_version_info_update(params)
-        }
-    },
-    'switch_state_request': {
-        'name': 'Switch State Change',
-        'frame': {
-            'profile': ALERTME_PROFILE_ID,
-            'cluster': b'\x00\xee',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'data': lambda params: generate_switch_state_request(params)
-        }
-    },
-    'switch_state_update': {
-        'name': 'Switch State Update',
-        'frame': {
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xee',
-            'profile': ALERTME_PROFILE_ID,
-            'data': lambda params: generate_switch_state_update(params)
-        }
-    },
-    'power_demand_update': {
-        'name': 'Current Power Demand',
-        'frame': {
-            'profile': ALERTME_PROFILE_ID,
-            'cluster': b'\x00\xef',
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
-            'data': lambda params: generate_power_demand_update(params)
-        }
-    },
-    'mode_change_request': {
-       'name': 'Normal Mode',
-       'frame': {
-           'profile': ALERTME_PROFILE_ID,
-           'cluster': b'\x00\xf0',
-           'src_endpoint': b'\x00',
-           'dest_endpoint': b'\x02',
-           'data': lambda params: generate_mode_change_request(params)
-       }
-    },
-    'range_info': {
-        'name': 'Range Info',
-        'frame': {
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf6',
-            'profile': ALERTME_PROFILE_ID,
-            'data': lambda params: generate_range_update(params)
-        }
-    },
-    'missing_link': {
-        'name': 'Missing Link',
-        'frame': {
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf0',
-            'profile': ALERTME_PROFILE_ID,
-            'data': lambda params: generate_missing_link(params)
-        }
-    },
-    'security_init': {
-        'name': 'Security Initialization',
-        'frame': {
-            'profile': ALERTME_PROFILE_ID,
-            'cluster': b'\x05\x00',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'data': lambda params: generate_security_init(params)
         }
     }
 }
@@ -218,9 +218,22 @@ def parse_version_info_update(data):
     return ret
 
 
+def generate_version_info_request(params):
+    """
+    Generate Version Info Request
+    This message is sent from the hub to the smartplug requesting state change.
+
+    :param params: Parameter dictionary (none required)
+    :return: Message data
+    """
+    data = b'\x11\x00\xfc'
+    return data
+
+
 def generate_version_info_update(params):
     """
-    Generate type message
+    Generate Version Info Update
+    This message is sent from the smartplug to the hub advertising current state.
 
     :param params: Parameter dictionary of version info
     :return: Message data

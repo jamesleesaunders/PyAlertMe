@@ -136,7 +136,7 @@ class Device(Base):
 
         :return: Message of range value
         """
-        return get_message('range_info', {'RSSI': self.rssi})
+        return get_message('range_info_update', {'RSSI': self.rssi})
 
     def generate_match_descriptor_request(self):
         """
