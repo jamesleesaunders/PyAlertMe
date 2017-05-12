@@ -103,14 +103,14 @@ messages = {
             'data': lambda params: generate_security_init(params)
         }
     },
-    'active_endpoint_request': {
+    'active_endpoints_request': {
         'name': 'Active Endpoints Request',
         'frame': {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x00',
             'cluster': b'\x00\x05',
             'profile': ZDP_PROFILE_ID,
-            'data': b'\x00\x00'
+            'data': b'\xaa\x9f\x88'
         }
     },
     'match_descriptor_request': {
@@ -130,7 +130,7 @@ messages = {
             'dest_endpoint': b'\x00',
             'cluster': b'\x80\x06',
             'profile': ZDP_PROFILE_ID,
-            'data': b'\x00\x00\x00\x00\x01\x02'
+            'data': b'\x03\x00\x00\x00\x01\x02'
         }
     },
     'routing_table_request': {

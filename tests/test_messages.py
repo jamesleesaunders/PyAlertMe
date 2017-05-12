@@ -268,9 +268,9 @@ class TestMessages(unittest.TestCase):
 
 
     def test_generate_active_endpoint_request(self):
-        message = get_message('active_endpoint_request')
+        message = get_message('active_endpoints_request')
         result = message['data']
-        expected = b'\x00\x00'
+        expected = b'\xaa\x9f\x88'
         self.assertEqual(result, expected)
 
     def test_generate_match_descriptor_request(self):
@@ -282,7 +282,7 @@ class TestMessages(unittest.TestCase):
     def test_generate_match_descriptor_response(self):
         message = get_message('match_descriptor_response')
         result = message['data']
-        expected = b'\x00\x00\x00\x00\x01\x02'
+        expected = b'\x03\x00\x00\x00\x01\x02'
         self.assertEqual(result, expected)
 
     def test_generate_routing_table_request(self):

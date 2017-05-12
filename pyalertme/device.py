@@ -143,5 +143,5 @@ class Device(Base):
         Generate Match Descriptor Request
 
         """
-        return temp_generate_match_descriptor_request()
+        return get_message('match_descriptor_request')
 

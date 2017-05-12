@@ -127,7 +127,6 @@ class TestHub(unittest.TestCase):
         source_addr_short = b'\x88\x9f'
         result = self.hub_obj.generate_active_endpoints_request(source_addr_short)
         expected = {
-            'description': 'Active Endpoints Request',
             'profile': b'\x00\x00',
             'cluster': b'\x00\x05',
             'src_endpoint': b'\x00',
@@ -140,7 +139,6 @@ class TestHub(unittest.TestCase):
         rf_data = b'\x03\xfd\xff\x16\xc2\x00\x01\xf0\x00'
         result = self.hub_obj.generate_match_descriptor_response(rf_data)
         expected = {
-            'description': 'Match Descriptor Response',
             'profile': b'\x00\x00',
             'cluster': b'\x80\x06',
             'src_endpoint': b'\x00',

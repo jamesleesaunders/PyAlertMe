@@ -51,7 +51,6 @@ class TestDevice(unittest.TestCase):
     def test_generate_match_descriptor_request(self):
         result = self.device_obj.generate_match_descriptor_request()
         expected = {
-            'description': 'Match Descriptor Request',
             'profile': b'\x00\x00',
             'cluster': b'\x00\x06',
             'src_endpoint': b'\x00',
