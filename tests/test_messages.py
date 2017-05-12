@@ -118,12 +118,14 @@ class TestMessages(unittest.TestCase):
         expected = b'\x11\x00\x02\x00\x01'
         self.assertEqual(result, expected)
 
-        result = generate_switch_state_request({'State': ''})
         expected = b'\x11\x00\x01\x01'
-        self.assertEqual(result, expected)
+        self.assertEqual(generate_switch_state_request({'State': ''}), expected)
+        self.assertEqual(generate_switch_state_request({}), expected)
+        self.assertEqual(generate_switch_state_request(), expected)
 
-        result = generate_switch_state_request({})
-        expected = b'\x11\x00\x01\x01'
+    def test_generate_version_info_request(self):
+        result = generate_version_info_request()
+        expected = b'\x11\x00\xfc'
         self.assertEqual(result, expected)
 
     def test_parse_version_info_update(self):

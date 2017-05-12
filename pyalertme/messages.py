@@ -2,13 +2,13 @@ import logging
 import struct
 import copy
 
-# ZigBee Profile IDs
+# Zigbee Profile IDs
 ZDP_PROFILE_ID     = b'\x00\x00'  # Zigbee Device Profile
 HA_PROFILE_ID      = b'\x01\x04'  # HA Device Profile
 LL_PROFILE_ID      = b'\xc0\x5e'  # Light Link Profile
 ALERTME_PROFILE_ID = b'\xc2\x16'  # AlertMe Private Profile
 
-# ZigBee Addressing
+# Zigbee Addressing
 BROADCAST_LONG = b'\x00\x00\x00\x00\x00\x00\xff\xff'
 BROADCAST_SHORT = b'\xff\xfe'
 
@@ -182,6 +182,38 @@ def list_messages():
     return actions
 
 
+def generate_version_info_request(params=None):
+    """
+    Generate Version Info Request
+    This message is sent FROM the Hub TO the SmartPlug requesting version information.
+
+    :param params: Parameter dictionary (none required)
+    :return: Message data
+    """
+    data = b'\x11\x00\xfc'
+    return data
+
+
+def generate_version_info_update(params):
+    """
+    Generate Version Info Update
+    This message is sent TO the Hub FROM the SmartPlug advertising version information.
+
+    :param params: Parameter dictionary of version info
+    :return: Message data
+    """
+    checksum = b'\tq'
+    cluster_cmd = b'\xfe'
+    payload = struct.pack('H', params['Version']) \
+              + b'\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0b' \
+              + params['Manufacturer'] \
+              + '\n' + params['Type'] \
+              + '\n' + params['ManufactureDate']
+    data = checksum + cluster_cmd + payload
+
+    return data
+
+
 def parse_version_info_update(data):
     """
     Process message, parse for version information:
@@ -218,33 +250,16 @@ def parse_version_info_update(data):
     return ret
 
 
-def generate_version_info_request(params):
+def generate_range_update(params):
     """
-    Generate Version Info Request
-    This message is sent from the hub to the smartplug requesting state change.
+    Generate range message
 
-    :param params: Parameter dictionary (none required)
+    :param params: Parameter dictionary of RSSI value
     :return: Message data
     """
-    data = b'\x11\x00\xfc'
-    return data
-
-
-def generate_version_info_update(params):
-    """
-    Generate Version Info Update
-    This message is sent from the smartplug to the hub advertising current state.
-
-    :param params: Parameter dictionary of version info
-    :return: Message data
-    """
-    checksum = b'\tq'
-    cluster_cmd = b'\xfe'
-    payload = struct.pack('H', params['Version']) \
-              + b'\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0b' \
-              + params['Manufacturer'] \
-              + '\n' + params['Type'] \
-              + '\n' + params['ManufactureDate']
+    checksum = b'\t+'
+    cluster_cmd = b'\xfd'
+    payload = struct.pack('B 1x', params['RSSI'])
     data = checksum + cluster_cmd + payload
 
     return data
@@ -263,36 +278,6 @@ def parse_range_info_update(data):
     ))
     rssi = values['RSSI']
     return {'RSSI' : rssi}
-
-
-def generate_range_update(params):
-    """
-    Generate range message
-
-    :param params: Parameter dictionary of RSSI value
-    :return: Message data
-    """
-    checksum = b'\t+'
-    cluster_cmd = b'\xfd'
-    payload = struct.pack('B 1x', params['RSSI'])
-    data = checksum + cluster_cmd + payload
-
-    return data
-
-
-def parse_power_demand(data):
-    """
-    Process message, parse for power demand value.
-
-    :param data: Message data
-    :return: Parameter dictionary of power demand value
-    """
-    values = dict(zip(
-        ('cluster_cmd', 'power_demand'),
-        struct.unpack('< 2x s H', data)
-    ))
-
-    return {'PowerDemand': values['power_demand']}
 
 
 def generate_power_demand_update(params):
@@ -333,6 +318,21 @@ def generate_mode_change_request(params):
     return data
 
 
+def parse_power_demand(data):
+    """
+    Process message, parse for power demand value.
+
+    :param data: Message data
+    :return: Parameter dictionary of power demand value
+    """
+    values = dict(zip(
+        ('cluster_cmd', 'power_demand'),
+        struct.unpack('< 2x s H', data)
+    ))
+
+    return {'PowerDemand': values['power_demand']}
+
+
 def parse_power_consumption(data):
     """
     Process message, parse for power consumption value.
@@ -351,10 +351,50 @@ def parse_power_consumption(data):
     return ret
 
 
+def generate_switch_state_request(params=None):
+    """
+    Generate Switch State Change request data.
+    This message is sent FROM the Hub TO the SmartPlug requesting state change.
+
+    :param params: Parameter dictionary of relay state
+    :return: Message data
+    """
+    if params is None:
+        params = {}
+    data = b'\x11\x00\x01\x01'
+    if 'State' in params.keys():
+        if params['State'] == 1:
+            # On
+            data = b'\x11\x00\x02\x01\x01'
+        elif params['State'] == 0:
+            # Off
+            data = b'\x11\x00\x02\x00\x01'
+        elif params['State'] == '':
+            # Check
+            data = b'\x11\x00\x01\x01'
+
+    return data
+
+
+def generate_switch_state_update(params):
+    """
+    Generate Switch State update message data.
+    This message is sent TO the Hub FROM the SmartPlug advertising state change.
+
+    :param params: Parameter dictionary of relay state
+    :return: Message data
+    """
+    checksum = b'\th'
+    cluster_cmd = b'\x80'
+    payload = b'\x07\x01' if params['State'] else b'\x06\x00'
+    data = checksum + cluster_cmd + payload
+    return data
+
+
 def parse_switch_state_request(data):
     """
     Process message, parse for relay state change request.
-    This message is sent from the hub to the smartplug requesting state change.
+    This message is sent FROM the Hub TO the SmartPlug requesting state change.
 
     :param data: Message data
     :return: Parameter dictionary of relay state
@@ -371,7 +411,7 @@ def parse_switch_state_request(data):
 def parse_switch_state_update(data):
     """
     Process message, parse for switch status.
-    This message is sent from the smartplug to the hub advertising current state.
+    This message is sent TO the Hub FROM the SmartPlug advertising state change.
 
     :param data: Message data
     :return: Parameter dictionary of switch status
@@ -381,44 +421,6 @@ def parse_switch_state_update(data):
         return {'State': 1}
     else:
         return {'State': 0}
-
-
-def generate_switch_state_request(params):
-    """
-    Generate Switch State Change request data.
-    This message is sent from the hub to the smartplug requesting state change.
-
-    :param params: Parameter dictionary of relay state
-    :return: Message data
-    """
-    data = b'\x11\x00\x01\x01'
-    if 'State' in params.keys():
-        if params['State'] == 1:
-            # On
-            data = b'\x11\x00\x02\x01\x01'
-        elif params['State'] == 0:
-            # Cff
-            data = b'\x11\x00\x02\x00\x01'
-        elif params['State'] == '':
-            # Check
-            data = b'\x11\x00\x01\x01'
-
-    return data
-
-
-def generate_switch_state_update(params):
-    """
-    Generate Switch State update message data.
-    This message is sent from the smartplug to the hub advertising current state.
-
-    :param params: Parameter dictionary of relay state
-    :return: Message data
-    """
-    checksum = b'\th'
-    cluster_cmd = b'\x80'
-    payload = b'\x07\x01' if params['State'] else b'\x06\x00'
-    data = checksum + cluster_cmd + payload
-    return data
 
 
 def parse_tamper_state(data):
