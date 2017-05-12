@@ -265,9 +265,7 @@ class TestMessages(unittest.TestCase):
         expected = b'\x11\x80\x00\x00\x05'
         self.assertEqual(result, expected)
 
-
-
-    def test_generate_active_endpoint_request(self):
+    def test_generate_active_endpoints_request(self):
         message = get_message('active_endpoints_request')
         result = message['data']
         expected = b'\xaa\x9f\x88'

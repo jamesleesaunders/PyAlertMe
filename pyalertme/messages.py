@@ -596,7 +596,6 @@ def temp_generate_active_endpoints_request(addr_short):
     return message
 
 
-
 def temp_generate_match_descriptor_request():
     """
     Generate Match Descriptor Request
