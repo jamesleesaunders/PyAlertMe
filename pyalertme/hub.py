@@ -67,6 +67,7 @@ class Hub(Base):
     def save_node_attributes(self, node_id, attributes):
         """
         Save Multiple Node Attributes
+
         :param node_id:
         :param attributes:
         :return:
