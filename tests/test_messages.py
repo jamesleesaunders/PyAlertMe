@@ -253,5 +253,15 @@ class TestMessages(unittest.TestCase):
         expected = {'ReedSwitch': 'OPEN', 'TamperSwitch': 'CLOSED'}
         self.assertEqual(result, expected)
 
+    def test_generate_missing_link(self):
+        result = generate_missing_link()
+        expected = b'\x11\x39\xfd'
+        self.assertEqual(result, expected)
+
+    def test_generate_security_init(self):
+        result = generate_security_init()
+        expected = b'\x11\x80\x00\x00\x05'
+        self.assertEqual(result, expected)
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

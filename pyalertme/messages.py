@@ -510,23 +510,23 @@ def parse_status_update(data):
     return ret
 
 
-def generate_missing_link(params):
+def generate_missing_link(params=None):
     """
     Generate Missing Link. Not sure what this is yet?
 
-    :param params: Parameter dictionary (none required?)
+    :param params: Parameter dictionary (none required)
     :return: Message data
     """
     data = b'\x11\x39\xfd'
     return data
 
 
-def generate_security_init(params):
+def generate_security_init(params=None):
     """
-    Generate Security Init
+    Generate Security Init. Keeps security devices joined?
 
-    :param params: Parameter dictionary (none required?)
+    :param params: Parameter dictionary (none required)
     :return: Message data
     """
-    checksum = b'\x11\x80\x00\x00\x05'
+    data = b'\x11\x80\x00\x00\x05'
     return data
