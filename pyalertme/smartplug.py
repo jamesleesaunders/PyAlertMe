@@ -131,4 +131,3 @@ class SmartPlug(Device):
         :return: Message
         """
         return get_message('power_demand_update', {'PowerDemand': self.power_demand})
-

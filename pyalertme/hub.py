@@ -394,57 +394,19 @@ class Hub(Base):
 
     def generate_active_endpoints_request(self, addr_short):
         """
-        Generate Active Endpoints Request
-        The active endpoint request needs the short address of the device
-        in the payload. Remember, it needs to be little endian (backwards)
-        The first byte in the payload is simply a number to identify the message
-        the response will have the same number in it.
-        See: http://ftp1.digi.com/support/images/APP_NOTE_XBee_ZigBee_Device_Profile.pdf
+        Generate Active Endpoints Request.
 
-        Field Name       Size (bytes)   Description
-        Network Address  2              16-bit address of a device in the network whose
-                                        active endpoint list being requested.
-
-        :param node_id:
-        :param source_addr:
+        :param addr_short:
         """
-        data = b'\xaa' + addr_short[1] + addr_short[0]
-        message = {
-            'description': 'Active Endpoints Request',
-            'profile': ZDP_PROFILE_ID,
-            'cluster': b'\x00\x05',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x00',
-            'data': data
-        }
-        return message
+        return temp_generate_active_endpoints_request(addr_short)
 
     def generate_match_descriptor_response(self, rf_data):
         """
-        Generate Match Descriptor Response
-        If a descriptor match is found on the device, this response contains a list of endpoints that
-        support the request criteria.
+        Generate Match Descriptor Response.
 
-        Field Name       Size (bytes)   Description
-        Status           1
-        Network Address  2              Indicates the 16-bit address of the responding device.
-        Length           1              The number of endpoints on the remote device that match
-                                        the request criteria.
-        Match List       Variable       List of endpoints on the remote that match the request criteria.
-
-        :param node_id:
-        :param received_message:
+        :param rf_data:
         """
-        data = rf_data[0:1] + b'\x00\x00\x00\x01\x02'
-        message = {
-            'description': 'Match Descriptor Response',
-            'profile': ZDP_PROFILE_ID,
-            'cluster': b'\x80\x06',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x00',
-            'data': data
-        }
-        return message
+        return temp_generate_match_descriptor_response(rf_data)
 
     def generate_state_request(self, state=''):
         """

@@ -141,30 +141,7 @@ class Device(Base):
     def generate_match_descriptor_request(self):
         """
         Generate Match Descriptor Request
-        Broadcast or unicast transmission used to discover the device(s) that supports
-        a specified profile ID and/or clusters.
 
-        Field Name       Size (bytes)   Description
-        Network Address  2              16-bit address of a device in the network whose
-                                        power descriptor is being requested.
-        Profile ID       2              Profile ID to be matched at the destination.
-        Number of Input  1              The number of input clusters in the In Cluster
-        Clusters                        List for matching. Set to 0 if no clusters supplied.
-        Input Cluster    2*             List of input cluster IDs to be used for matching.
-        List
-        Number of Output 1              The number of output clusters in the Output Cluster
-        Clusters                        List for matching. Set to 0 if no clusters supplied.
-        Output Cluster   2*             List of output cluster IDs to be used for matching.
-        List
-                          * Number of Input Clusters
         """
-        data = b'\x03\xfd\xff\x16\xc2\x00\x01\xf0\x00'
-        message = {
-            'description': 'Match Descriptor Request',
-            'profile': ZDP_PROFILE_ID,
-            'cluster': b'\x00\x06',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x00',
-            'data': data
-        }
-        return message
+        return temp_generate_match_descriptor_request()
+
