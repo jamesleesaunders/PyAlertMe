@@ -3,34 +3,34 @@ import struct
 import copy
 
 # Zigbee Profile IDs
-ZDP_PROFILE_ID     = b'\x00\x00'  # Zigbee Device Profile
-HA_PROFILE_ID      = b'\x01\x04'  # HA Device Profile
-LL_PROFILE_ID      = b'\xc0\x5e'  # Light Link Profile
-ALERTME_PROFILE_ID = b'\xc2\x16'  # AlertMe Private Profile
+PROFILE_ID_ZDP     = b'\x00\x00'  # Zigbee Device Profile
+PROFILE_ID_HA      = b'\x01\x04'  # HA Device Profile
+PROFILE_ID_LL      = b'\xc0\x5e'  # Light Link Profile
+PROFILE_ID_ALERTME = b'\xc2\x16'  # AlertMe Private Profile
 
 # AlertMe Cluster Commands
-SWITCH_CLUSTER_ID = b'\x00\xee'
+CLUSTER_ID_SWITCH = b'\x00\xee'
 # b'\x01' State Request (SmartPlug)
 # b'\x02' Change State (SmartPlug)
 # b'\x80' Switch Status Update
 
-POWER_CLUSTER_ID = b'\x00\xef'
+CLUSTER_ID_POWER = b'\x00\xef'
 # b'\x81' Power Demand Update
 # b'\x82' Power Consumption & Uptime Update
 
-STATUS_CLUSTER_ID = b'\x00\xf0'
+CLUSTER_ID_STATUS = b'\x00\xf0'
 # b'\xfa' Mode Change Request
 # b'\xfb' Status Update
 
-TAMPER_CLUSTER_ID = b'\x00\xf2'
+CLUSTER_ID_TAMPER = b'\x00\xf2'
 
-BUTTON_CLUSTER_ID = b'\x00\xf3'
+CLUSTER_ID_BUTTON = b'\x00\xf3'
 
-DISCOVERY_CLUSTER_ID = b'\x00\xf6'
+CLUSTER_ID_DISCOVERY = b'\x00\xf6'
 # b'\xfd' RSSI Range Test Update
 # b'\xfe' Received Version Information
 
-SECURITY_CLUSTER_ID = b'\x05\x00'
+CLUSTER_ID_SECURITY = b'\x05\x00'
 
 
 # Zigbee Addressing
@@ -44,7 +44,7 @@ messages = {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xf6',
-            'profile': ALERTME_PROFILE_ID,
+            'profile': PROFILE_ID_ALERTME,
             'data': lambda params: generate_version_info_request(params)
         }
     },
@@ -54,14 +54,14 @@ messages = {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xf6',
-            'profile': ALERTME_PROFILE_ID,
+            'profile': PROFILE_ID_ALERTME,
             'data': lambda params: generate_version_info_update(params)
         }
     },
     'switch_state_request': {
         'name': 'Switch State Request',
         'frame': {
-            'profile': ALERTME_PROFILE_ID,
+            'profile': PROFILE_ID_ALERTME,
             'cluster': b'\x00\xee',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
@@ -74,14 +74,14 @@ messages = {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xee',
-            'profile': ALERTME_PROFILE_ID,
+            'profile': PROFILE_ID_ALERTME,
             'data': lambda params: generate_switch_state_update(params)
         }
     },
     'mode_change_request': {
        'name': 'Mode Change Request',
        'frame': {
-           'profile': ALERTME_PROFILE_ID,
+           'profile': PROFILE_ID_ALERTME,
            'cluster': b'\x00\xf0',
            'src_endpoint': b'\x00',
            'dest_endpoint': b'\x02',
@@ -94,14 +94,14 @@ messages = {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xf6',
-            'profile': ALERTME_PROFILE_ID,
+            'profile': PROFILE_ID_ALERTME,
             'data': lambda params: generate_range_update(params)
         }
     },
     'power_demand_update': {
         'name': 'Power Demand Update',
         'frame': {
-            'profile': ALERTME_PROFILE_ID,
+            'profile': PROFILE_ID_ALERTME,
             'cluster': b'\x00\xef',
             'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
@@ -114,14 +114,14 @@ messages = {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xf0',
-            'profile': ALERTME_PROFILE_ID,
+            'profile': PROFILE_ID_ALERTME,
             'data': lambda params: generate_missing_link(params)
         }
     },
     'security_init': {
         'name': 'Security Initialization',
         'frame': {
-            'profile': ALERTME_PROFILE_ID,
+            'profile': PROFILE_ID_ALERTME,
             'cluster': b'\x05\x00',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
@@ -131,7 +131,7 @@ messages = {
     'active_endpoints_request': {
         'name': 'Active Endpoints Request',
         'frame': {
-            'profile': ZDP_PROFILE_ID,
+            'profile': PROFILE_ID_ZDP,
             'cluster': b'\x00\x05',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x00',
@@ -141,7 +141,7 @@ messages = {
     'match_descriptor_request': {
         'name': 'Match Descriptor Request',
         'frame': {
-            'profile': ZDP_PROFILE_ID,
+            'profile': PROFILE_ID_ZDP,
             'cluster': b'\x00\x06',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x00',
@@ -151,7 +151,7 @@ messages = {
     'match_descriptor_response': {
         'name': 'Match Descriptor Response',
         'frame': {
-            'profile': ZDP_PROFILE_ID,
+            'profile': PROFILE_ID_ZDP,
             'cluster': b'\x80\x06',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x00',
@@ -164,7 +164,7 @@ messages = {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x00',
             'cluster': b'\x00\x32',
-            'profile': ZDP_PROFILE_ID,
+            'profile': PROFILE_ID_ZDP,
             'data': b'\x12\x01'
         }
     },
@@ -174,7 +174,7 @@ messages = {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x00',
             'cluster': b'\x00\x36',
-            'profile': ZDP_PROFILE_ID,
+            'profile': PROFILE_ID_ZDP,
             'data': b'\xff\x00'
         }
     }
