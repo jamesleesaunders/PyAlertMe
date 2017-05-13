@@ -43,7 +43,7 @@ messages = {
         'frame': {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf6',
+            'cluster': CLUSTER_ID_DISCOVERY,
             'profile': PROFILE_ID_ALERTME,
             'data': lambda params: generate_version_info_request(params)
         }
@@ -53,7 +53,7 @@ messages = {
         'frame': {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf6',
+            'cluster': CLUSTER_ID_DISCOVERY,
             'profile': PROFILE_ID_ALERTME,
             'data': lambda params: generate_version_info_update(params)
         }
@@ -82,7 +82,7 @@ messages = {
        'name': 'Mode Change Request',
        'frame': {
            'profile': PROFILE_ID_ALERTME,
-           'cluster': b'\x00\xf0',
+           'cluster': CLUSTER_ID_STATUS,
            'src_endpoint': b'\x00',
            'dest_endpoint': b'\x02',
            'data': lambda params: generate_mode_change_request(params)
@@ -93,7 +93,7 @@ messages = {
         'frame': {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf6',
+            'cluster': CLUSTER_ID_DISCOVERY,
             'profile': PROFILE_ID_ALERTME,
             'data': lambda params: generate_range_update(params)
         }
@@ -102,7 +102,7 @@ messages = {
         'name': 'Power Demand Update',
         'frame': {
             'profile': PROFILE_ID_ALERTME,
-            'cluster': b'\x00\xef',
+            'cluster': CLUSTER_ID_POWER,
             'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': lambda params: generate_power_demand_update(params)
@@ -113,7 +113,7 @@ messages = {
         'frame': {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xf0',
+            'cluster': CLUSTER_ID_STATUS,
             'profile': PROFILE_ID_ALERTME,
             'data': lambda params: generate_missing_link(params)
         }
@@ -122,7 +122,7 @@ messages = {
         'name': 'Security Initialization',
         'frame': {
             'profile': PROFILE_ID_ALERTME,
-            'cluster': b'\x05\x00',
+            'cluster': CLUSTER_ID_SECURITY,
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
             'data': lambda params: generate_security_init(params)
