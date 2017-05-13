@@ -52,7 +52,7 @@ class Device(Base):
             if not self.associated:
                 self.send_message(self.generate_match_descriptor_request(), source_addr_long, source_addr_short)
 
-            if profile_id == ZDP_PROFILE_ID:
+            if profile_id == PROFILE_ID_ZDP:
                 # Zigbee Device Profile ID
                 if cluster_id == b'\x00\x32':
                     self._logger.debug('Received Management Routing Table Request')
@@ -63,7 +63,7 @@ class Device(Base):
                 elif cluster_id == b'\x80\x06':
                     self._logger.debug('Received Match Descriptor Response')
 
-            elif profile_id == ALERTME_PROFILE_ID:
+            elif profile_id == PROFILE_ID_ALERTME:
                 # AlertMe Profile ID
 
                 # Python 2 / 3 hack
