@@ -52,7 +52,7 @@ class Sensor(Device):
                 else:
                     cluster_cmd = bytes([message['rf_data'][2]])
 
-                if cluster_id == b'\x05\x00':
+                if cluster_id == CLUSTER_ID_SECURITY:
                     # Security Initialization
                     self._logger.info('Received Security Initialization')
 

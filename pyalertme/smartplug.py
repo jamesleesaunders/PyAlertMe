@@ -63,7 +63,7 @@ class SmartPlug(Device):
                 else:
                     cluster_cmd = bytes([message['rf_data'][2]])
 
-                if cluster_id == b'\x00\xee':
+                if cluster_id == CLUSTER_ID_SWITCH:
                     if cluster_cmd == b'\x01':
                         # State Request
                         # b'\x11\x00\x01\x01'

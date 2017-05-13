@@ -73,7 +73,7 @@ messages = {
         'frame': {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster': CLUSTER_ID_SWITCH',
+            'cluster': CLUSTER_ID_SWITCH,
             'profile': PROFILE_ID_ALERTME,
             'data': lambda params: generate_switch_state_update(params)
         }
