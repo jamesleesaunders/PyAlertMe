@@ -8,15 +8,15 @@ class TestMessages(unittest.TestCase):
     def test_get_message(self):
         # Test message with data lambda
         result = get_message('switch_state_update', {'State': 1})
-        expected = {'profile': b'\xc2\x16', 'cluster': b'\x00\xee', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x00', 'data': b'\th\x80\x07\x01'}
+        expected = {'profile': b'\xc2\x16', 'cluster': b'\x00\xee', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x02', 'data': b'\th\x80\x07\x01'}
         self.assertEqual(result, expected)
         result = get_message('switch_state_update', {'State': 0})
-        expected = {'profile': b'\xc2\x16', 'cluster': b'\x00\xee', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x00', 'data': b'\th\x80\x06\x00'}
+        expected = {'profile': b'\xc2\x16', 'cluster': b'\x00\xee', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x02', 'data': b'\th\x80\x06\x00'}
         self.assertEqual(result, expected)
 
         # Test message without data lambda
         result = get_message('missing_link')
-        expected = {'profile': b'\xc2\x16', 'cluster': b'\x00\xf0', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x00', 'data': b'\x11\x39\xfd'}
+        expected = {'profile': b'\xc2\x16', 'cluster': b'\x00\xf0', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x02', 'data': b'\x11\x39\xfd'}
         self.assertEqual(result, expected)
 
         # Test message that does not exist throws exception

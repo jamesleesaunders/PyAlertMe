@@ -47,17 +47,17 @@ class TestHub(unittest.TestCase):
         message = {
             'source_addr': b'\x88\x9f',
             'source_addr_long': b'\x00\ro\x00\x03\xbb\xb9\xf8',
-            'src_endpoint': b'\x02',
+            'src_endpoint': b'\x00',
             'profile': b'\x00\x00',
             'cluster': b'\x00\x06',
-            'dest_endpoint': b'\x02',
+            'dest_endpoint': b'\x00',
             'rf_data': b'',
             'id': 'rx_explicit',
             'options': b'\x01',
         }
         self.hub_obj.receive_message(message)
         result = self.ser.get_data_written()
-        expected = b'~\x00\x19}1\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x00\x02\x00\xf0\xc2\x16\x00\x00}1\x00\xfa\x00\x01\x06'
+        expected = b'~\x00\x19}1\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x02\x02\x00\xf0\xc2\x16\x00\x00}1\x00\xfa\x00\x01\x04'
         self.assertEqual(result, expected)
 
     def test_generate_state_request(self):
@@ -65,7 +65,7 @@ class TestHub(unittest.TestCase):
         expected = {
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xee',
-            'src_endpoint': b'\x00',
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': b'\x11\x00\x02\x01\x01'
         }
@@ -75,7 +75,7 @@ class TestHub(unittest.TestCase):
         expected = {
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xee',
-            'src_endpoint': b'\x00',
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': b'\x11\x00\x02\x00\x01'
         }
@@ -85,7 +85,7 @@ class TestHub(unittest.TestCase):
         expected = {
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xee',
-            'src_endpoint': b'\x00',
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': b'\x11\x00\x01\x01'
         }
@@ -96,7 +96,7 @@ class TestHub(unittest.TestCase):
         expected = {
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xf0',
-            'src_endpoint': b'\x00',
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': b'\x11\x00\xfa\x00\x01'
         }
@@ -106,7 +106,7 @@ class TestHub(unittest.TestCase):
         expected = {
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xf0',
-            'src_endpoint': b'\x00',
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': b'\x11\x00\xfa\x01\x01'
         }
@@ -117,7 +117,7 @@ class TestHub(unittest.TestCase):
         expected = {
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xf6',
-            'src_endpoint': b'\x00',
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': b'\x11\x00\xfc'
         }
@@ -152,7 +152,7 @@ class TestHub(unittest.TestCase):
         expected = {
             'profile': b'\xc2\x16',
             'cluster': b'\x05\x00',
-            'src_endpoint': b'\x00',
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': b'\x11\x80\x00\x00\x05'
         }
@@ -163,7 +163,7 @@ class TestHub(unittest.TestCase):
         expected = {
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xf0',
-            'src_endpoint': b'\x00',
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': b'\x119\xfd'
         }

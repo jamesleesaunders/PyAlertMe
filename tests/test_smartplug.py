@@ -18,7 +18,7 @@ class TestSmartPlug(unittest.TestCase):
     def test_generate_version_info_update(self):
         result = self.device_obj.generate_version_info_update()
         expected = {
-            'src_endpoint': b'\x00',
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xf6',
             'profile': b'\xc2\x16',
@@ -60,7 +60,7 @@ class TestSmartPlug(unittest.TestCase):
         result = self.device_obj.generate_relay_state_update()
         expected = {
             'profile': b'\xc2\x16',
-            'src_endpoint': b'\x00',
+            'src_endpoint': b'\x02',
             'cluster': b'\x00\xee',
             'data': b'\th\x80\x07\x01',
             'dest_endpoint': '\x02'
@@ -70,7 +70,7 @@ class TestSmartPlug(unittest.TestCase):
         result = self.device_obj.generate_relay_state_update()
         expected = {
             'profile': b'\xc2\x16',
-            'src_endpoint': b'\x00',
+            'src_endpoint': b'\x02',
             'cluster': b'\x00\xee',
             'data': b'\th\x80\x06\x00',
             'dest_endpoint': b'\x02'
@@ -91,7 +91,7 @@ class TestSmartPlug(unittest.TestCase):
         }
         self.device_obj.receive_message(message)
         result = self.ser.get_data_written()
-        expected = b'~\x00\x19}1\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x00\x02\x00\xee\xc2\x16\x00\x00\th\x80\x06\x00\x1d'
+        expected = b'~\x00\x19}1\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x02\x02\x00\xee\xc2\x16\x00\x00\th\x80\x06\x00\x1b'
         self.assertEqual(result, expected)
 
     def test_generate_power_demand_update(self):

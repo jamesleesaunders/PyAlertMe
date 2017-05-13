@@ -22,7 +22,7 @@ class TestDevice(unittest.TestCase):
             'data': b'\t+\xfd\x00\x00',
             'dest_endpoint': b'\x02',
             'profile': b'\xc2\x16',
-            'src_endpoint': b'\x00'
+            'src_endpoint': b'\x02'
         }
         self.assertEqual(result, expected)
 
@@ -33,7 +33,7 @@ class TestDevice(unittest.TestCase):
             'data': b'\t+\xfd\xc5\x00',
             'dest_endpoint': b'\x02',
             'profile': b'\xc2\x16',
-            'src_endpoint': b'\x00'
+            'src_endpoint': b'\x02'
         }
         self.assertEqual(result, expected)
 
@@ -42,7 +42,7 @@ class TestDevice(unittest.TestCase):
         expected = {
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xf6',
-            'src_endpoint': b'\x00',
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': b'\tq\xfe90\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bPyAlertMe\nGeneric Device\n2017-01-01'
         }
