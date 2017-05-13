@@ -6,7 +6,6 @@ import time
 import binascii
 import threading
 
-
 class Sensor(Device):
 
     def __init__(self, callback=None):

@@ -5,7 +5,6 @@ import struct
 import time
 import binascii
 import threading
-import sqlite3
 
 class Hub(Base):
 
