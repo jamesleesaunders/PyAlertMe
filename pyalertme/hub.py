@@ -52,7 +52,7 @@ class Hub(Base):
                 'src_endpoint': b'\x00',
                 'dest_endpoint': b'\x00',
                 'cluster': b'\x00\x32',
-                'profile': ZDP_PROFILE_ID,
+                'profile': PROFILE_ID_ZDP,
                 'data': '\x12\x01'
             }
             self.send_message(message, BROADCAST_LONG, BROADCAST_SHORT)
@@ -186,7 +186,7 @@ class Hub(Base):
                 profile_id = message['profile']
                 cluster_id = message['cluster']
 
-                if profile_id == ZDP_PROFILE_ID:
+                if profile_id == PROFILE_ID_ZDP:
                     # Zigbee Device Profile ID
                     if cluster_id == b'\x00\x00':
                         # Network (16-bit) Address Request.
@@ -256,7 +256,7 @@ class Hub(Base):
                     else:
                         self._logger.error('Unrecognised Cluster ID: %r', cluster_id)
 
-                elif profile_id == ALERTME_PROFILE_ID:
+                elif profile_id == PROFILE_ID_ALERTME:
                     # AlertMe Profile ID
 
                     # Python 2 / 3 hack
