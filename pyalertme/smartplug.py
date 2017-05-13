@@ -6,7 +6,6 @@ import time
 import binascii
 import threading
 
-
 class SmartPlug(Device):
 
     def __init__(self, callback=None):
