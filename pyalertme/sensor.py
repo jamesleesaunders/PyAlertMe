@@ -60,3 +60,33 @@ class Sensor(Device):
 
             else:
                 self._logger.error('Unrecognised Profile ID: %r', profile_id)
+
+
+
+
+
+
+
+
+
+    def generate_button_press_update(self):
+        """
+        Button Press Update
+            To Finish...
+
+        :return: Message
+        """
+        params = {
+            'State': 1,
+            'Counter': 62552
+        }
+        # At the moment this just generates a hard coded message.
+        # Also see parse_button_press().
+        message = {
+            'profile': '\xc2\x16',
+            'cluster': '\x00\xf3',
+            'source_endpoint': '\x02',
+            'dest_endpoint': '\x02',
+            'data': '\t\x00\x01\x00\x01X\xf4\x00\x00'
+        }
+        return message

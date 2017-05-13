@@ -127,7 +127,7 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ALERTME,
             'cluster': CLUSTER_ID_POWER,
-            'src_endpoint': b'\x02',  # <-- Check. Should it be b'\x00'?
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': lambda params: generate_power_demand_update(params)
         }
