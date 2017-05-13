@@ -13,11 +13,18 @@ PROFILE_ID_LL      = b'\xc0\x5e'  # Light Link Profile
 PROFILE_ID_ALERTME = b'\xc2\x16'  # AlertMe Private Profile
 
 # ZDP Clusters
-CLUSTER_ID_ZDP1 = b'\x00\x05' # Active Endpoints Request
-CLUSTER_ID_ZDP2 = b'\x00\x06' # Match Descriptor Request
-CLUSTER_ID_ZDP3 = b'\x80\x06' # Match Descriptor Response
-CLUSTER_ID_ZDP4 = b'\x00\x32' # Management Routing Request
-CLUSTER_ID_ZDP5 = b'\x00\x36' # Permit Join Request
+CLUSTER_ID_ZDP1 = b'\x00\x00'   # Network (16-bit) Address Request
+CLUSTER_ID_ZDP2 = b'\x80\x00'   # Network (16-bit) Address Response
+CLUSTER_ID_ZDP3 = b'\x802'      # Node Descriptor Response.
+CLUSTER_ID_ZDP4 = b'\x00\x04'   # Simple Descriptor Request.
+CLUSTER_ID_ZDP5 = b'\x00\x05'   # Active Endpoints Request
+CLUSTER_ID_ZDP6 = b'\x80\x05'   # Active Endpoints Response.
+CLUSTER_ID_ZDP7 = b'\x00\x06'   # Match Descriptor Request
+CLUSTER_ID_ZDP8 = b'\x80\x06'   # Match Descriptor Response
+CLUSTER_ID_ZDP9 = b'\x00\x13'   # Device Announce Message
+CLUSTER_ID_ZDP10 = b'\x00\x32'  # Management Routing Request
+CLUSTER_ID_ZDP11 = b'\x00\x36'  # Permit Join Request
+CLUSTER_ID_ZDP12 = b'\x80\x38'  # Management Network Update Notify
 
 # AlertMe Clusters
 CLUSTER_ID_SWITCH = b'\x00\xee'
