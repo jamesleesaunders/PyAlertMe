@@ -57,7 +57,7 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ALERTME,
             'cluster': CLUSTER_ID_DISCOVERY,
-            'src_endpoint': b'\x00',
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': lambda params: generate_version_info_request(params)
         }
@@ -67,7 +67,7 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ALERTME,
             'cluster': CLUSTER_ID_DISCOVERY,
-            'src_endpoint': b'\x00',
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': lambda params: generate_version_info_update(params)
         }
@@ -77,7 +77,7 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ALERTME,
             'cluster': CLUSTER_ID_DISCOVERY,
-            'src_endpoint': b'\x00',
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': lambda params: generate_range_update(params)
         }
@@ -87,7 +87,7 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ALERTME,
             'cluster': CLUSTER_ID_SWITCH,
-            'src_endpoint': b'\x00',
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': lambda params: generate_switch_state_request(params)
         }
@@ -97,7 +97,7 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ALERTME,
             'cluster': CLUSTER_ID_SWITCH,
-            'src_endpoint': b'\x00',
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': lambda params: generate_switch_state_update(params)
         }
@@ -107,7 +107,7 @@ messages = {
        'frame': {
            'profile': PROFILE_ID_ALERTME,
            'cluster': CLUSTER_ID_STATUS,
-           'src_endpoint': b'\x00',
+           'src_endpoint': b'\x02',
            'dest_endpoint': b'\x02',
            'data': lambda params: generate_mode_change_request(params)
        }
@@ -117,7 +117,7 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ALERTME,
             'cluster': CLUSTER_ID_STATUS,
-            'src_endpoint': b'\x00',
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': lambda params: generate_missing_link(params)
         }
@@ -137,7 +137,7 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ALERTME,
             'cluster': CLUSTER_ID_SECURITY,
-            'src_endpoint': b'\x00',
+            'src_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
             'data': lambda params: generate_security_init(params)
         }

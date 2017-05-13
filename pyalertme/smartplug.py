@@ -155,8 +155,8 @@ class SmartPlug(Device):
         # At the moment this just generates a hard coded message.
         # The below is just one type of status update, see parse_status_update() for more.
         message = {
-            'profile': '\xc2\x16',
-            'cluster': '\x00\xf0',
+            'profile': PROFILE_ID_ALERTME,
+            'cluster': CLUSTER_ID_STATUS,
             'source_endpoint': '\x02',
             'dest_endpoint': '\x02',
             'data': '\t\r\xfb\x1f<\xf1\x08\x02/\x10D\x02\xcf\xff\x01\x00'
@@ -177,8 +177,8 @@ class SmartPlug(Device):
         # At the moment this just generates a hard coded message.
         # Also see parse_power_consumption().
         message = {
-            'profile': '\xc2\x16',
-            'cluster': '\x00\xef',
+            'profile': PROFILE_ID_ALERTME,
+            'cluster': CLUSTER_ID_POWER,
             'source_endpoint': '\x02',
             'dest_endpoint': '\x02',
             'data': '\tn\x82\x05N\x00\x00\xb7\x81\x00\x00\x01'
