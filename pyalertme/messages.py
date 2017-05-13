@@ -2,13 +2,24 @@ import logging
 import struct
 import copy
 
+# Zigbee Addressing
+BROADCAST_LONG = b'\x00\x00\x00\x00\x00\x00\xff\xff'
+BROADCAST_SHORT = b'\xff\xfe'
+
 # Zigbee Profile IDs
 PROFILE_ID_ZDP     = b'\x00\x00'  # Zigbee Device Profile
 PROFILE_ID_HA      = b'\x01\x04'  # HA Device Profile
 PROFILE_ID_LL      = b'\xc0\x5e'  # Light Link Profile
 PROFILE_ID_ALERTME = b'\xc2\x16'  # AlertMe Private Profile
 
-# AlertMe Cluster Commands
+# ZDP Clusters
+CLUSTER_ID_ZDP1 = b'\x00\x05' # Active Endpoints Request
+CLUSTER_ID_ZDP2 = b'\x00\x06' # Match Descriptor Request
+CLUSTER_ID_ZDP3 = b'\x80\x06' # Match Descriptor Response
+CLUSTER_ID_ZDP4 = b'\x00\x32' # Management Routing Request
+CLUSTER_ID_ZDP5 = b'\x00\x36' # Permit Join Request
+
+# AlertMe Clusters
 CLUSTER_ID_SWITCH = b'\x00\xee'
 # b'\x01' State Request (SmartPlug)
 # b'\x02' Change State (SmartPlug)
@@ -32,10 +43,6 @@ CLUSTER_ID_DISCOVERY = b'\x00\xf6'
 
 CLUSTER_ID_SECURITY = b'\x05\x00'
 
-
-# Zigbee Addressing
-BROADCAST_LONG = b'\x00\x00\x00\x00\x00\x00\xff\xff'
-BROADCAST_SHORT = b'\xff\xfe'
 
 messages = {
     'version_info_request': {
