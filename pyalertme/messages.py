@@ -410,15 +410,17 @@ def generate_switch_state_request(params=None):
     """
     if params is None:
         params = {}
-    data = b'\x11\x00\x01\x01'
-    if 'State' in params.keys():
-        if params['State'] == 1:
+
+    print params
+    # data = b'\x11\x00\x01\x01'
+    if 'State' in params:
+        if int(params['State']) == 1:
             # On
             data = b'\x11\x00\x02\x01\x01'
-        elif params['State'] == 0:
+        elif int(params['State']) == 0:
             # Off
             data = b'\x11\x00\x02\x00\x01'
-        elif params['State'] == '':
+        else:
             # Check
             data = b'\x11\x00\x01\x01'
 

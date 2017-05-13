@@ -69,7 +69,9 @@ while True:
             pp.pprint(list_messages())
             print("Select command:\n")
             action = raw_input("")
-            message = get_message(action)
+            message_id, val = action.split()
+            params = {'State': val}
+            message = get_message(message_id, params)
             addresses = hub_obj.node_id_to_addrs(node_id)
             hub_obj.send_message(message, *addresses)
 
