@@ -55,21 +55,31 @@ messages = {
     'version_info_request': {
         'name': 'Version Info Request',
         'frame': {
+            'profile': PROFILE_ID_ALERTME,
+            'cluster': CLUSTER_ID_DISCOVERY,
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster': CLUSTER_ID_DISCOVERY,
-            'profile': PROFILE_ID_ALERTME,
             'data': lambda params: generate_version_info_request(params)
         }
     },
     'version_info_update': {
         'name': 'Version Info Update',
         'frame': {
+            'profile': PROFILE_ID_ALERTME,
+            'cluster': CLUSTER_ID_DISCOVERY,
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster': CLUSTER_ID_DISCOVERY,
-            'profile': PROFILE_ID_ALERTME,
             'data': lambda params: generate_version_info_update(params)
+        }
+    },
+    'range_info_update': {
+        'name': 'Range Info Update',
+        'frame': {
+            'profile': PROFILE_ID_ALERTME,
+            'cluster': CLUSTER_ID_DISCOVERY,
+            'src_endpoint': b'\x00',
+            'dest_endpoint': b'\x02',
+            'data': lambda params: generate_range_update(params)
         }
     },
     'switch_state_request': {
@@ -85,10 +95,10 @@ messages = {
     'switch_state_update': {
         'name': 'Switch State Update',
         'frame': {
+            'profile': PROFILE_ID_ALERTME,
+            'cluster': CLUSTER_ID_SWITCH,
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster': CLUSTER_ID_SWITCH,
-            'profile': PROFILE_ID_ALERTME,
             'data': lambda params: generate_switch_state_update(params)
         }
     },
@@ -102,14 +112,14 @@ messages = {
            'data': lambda params: generate_mode_change_request(params)
        }
     },
-    'range_info_update': {
-        'name': 'Range Info Update',
+    'missing_link': {
+        'name': 'Missing Link',
         'frame': {
+            'profile': PROFILE_ID_ALERTME,
+            'cluster': CLUSTER_ID_STATUS,
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster': CLUSTER_ID_DISCOVERY,
-            'profile': PROFILE_ID_ALERTME,
-            'data': lambda params: generate_range_update(params)
+            'data': lambda params: generate_missing_link(params)
         }
     },
     'power_demand_update': {
@@ -117,19 +127,9 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ALERTME,
             'cluster': CLUSTER_ID_POWER,
-            'src_endpoint': b'\x02',
+            'src_endpoint': b'\x02',  # <-- Check. Should it be b'\x00'?
             'dest_endpoint': b'\x02',
             'data': lambda params: generate_power_demand_update(params)
-        }
-    },
-    'missing_link': {
-        'name': 'Missing Link',
-        'frame': {
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x02',
-            'cluster': CLUSTER_ID_STATUS,
-            'profile': PROFILE_ID_ALERTME,
-            'data': lambda params: generate_missing_link(params)
         }
     },
     'security_init': {
@@ -175,20 +175,20 @@ messages = {
     'routing_table_request': {
         'name': 'Management Routing Table Request',
         'frame': {
+            'profile': PROFILE_ID_ZDP,
+            'cluster': b'\x00\x32',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x00',
-            'cluster': b'\x00\x32',
-            'profile': PROFILE_ID_ZDP,
             'data': b'\x12\x01'
         }
     },
     'permit_join_request': {
         'name': 'Management Permit Join Request',
         'frame': {
+            'profile': PROFILE_ID_ZDP,
+            'cluster': b'\x00\x36',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x00',
-            'cluster': b'\x00\x36',
-            'profile': PROFILE_ID_ZDP,
             'data': b'\xff\x00'
         }
     }
