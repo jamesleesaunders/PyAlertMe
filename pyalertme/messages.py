@@ -62,7 +62,7 @@ messages = {
         'name': 'Switch State Request',
         'frame': {
             'profile': PROFILE_ID_ALERTME,
-            'cluster': b'\x00\xee',
+            'cluster': CLUSTER_ID_SWITCH,
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
             'data': lambda params: generate_switch_state_request(params)
@@ -73,7 +73,7 @@ messages = {
         'frame': {
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x02',
-            'cluster': b'\x00\xee',
+            'cluster': CLUSTER_ID_SWITCH',
             'profile': PROFILE_ID_ALERTME,
             'data': lambda params: generate_switch_state_update(params)
         }
