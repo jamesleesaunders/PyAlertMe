@@ -203,6 +203,9 @@ def get_message(message_id, params=None):
     :param params: Optional
     :return:
     """
+    if params is None or params == '':
+        params = {}
+
     if message_id in messages.keys():
         # Make a copy of the message
         message = copy.deepcopy(messages[message_id])
@@ -400,7 +403,7 @@ def parse_power_consumption(data):
     return ret
 
 
-def generate_switch_state_request(params=None):
+def generate_switch_state_request(params):
     """
     Generate Switch State Change request data.
     This message is sent FROM the Hub TO the SmartPlug requesting state change.
@@ -408,25 +411,16 @@ def generate_switch_state_request(params=None):
     :param params: Parameter dictionary of relay state
     :return: Message data
     """
-    if params is None:
-        params = {}
-
     # Default to status update request (without state change)
     data = b'\x11\x00\x01\x01'
 
     if 'State' in params:
-        if params['State'] is None or params['State'] == ''
-            # Check
-            data = b'\x11\x00\x01\x01'
-        elif int(params['State']) == 1:
+        if int(params['State']):
             # On
             data = b'\x11\x00\x02\x01\x01'
-        elif int(params['State']) == 0:
+        else int(params['State']) == 0:
             # Off
             data = b'\x11\x00\x02\x00\x01'
-        else:
-            # Check
-            data = b'\x11\x00\x01\x01'
 
     return data
 
