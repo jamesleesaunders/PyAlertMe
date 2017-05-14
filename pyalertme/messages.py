@@ -412,7 +412,7 @@ def generate_switch_state_request(params=None):
         params = {}
 
     data = b'\x11\x00\x01\x01'
-    if 'State' in params and params['State']).isdigit():
+    if 'State' in params AND params['State']).isdigit():
         if int(params['State']) == 1:
             # On
             data = b'\x11\x00\x02\x01\x01'
