@@ -411,9 +411,6 @@ def generate_switch_state_request(params):
     :param params: Parameter dictionary of relay state
     :return: Message data
     """
-    # Default to status update request (without state change)
-    data = b'\x11\x00\x01\x01'
-
     if 'State' in params:
         if params['State']:
             # On
@@ -421,6 +418,9 @@ def generate_switch_state_request(params):
         else:
             # Off
             data = b'\x11\x00\x02\x00\x01'
+    else:
+        # Default to status update request (without state change)
+        data = b'\x11\x00\x01\x01'
 
     return data
 

@@ -81,16 +81,6 @@ class TestHub(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        result = self.hub_obj.generate_state_request()
-        expected = {
-            'profile': b'\xc2\x16',
-            'cluster': b'\x00\xee',
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
-            'data': b'\x11\x00\x01\x01'
-        }
-        self.assertEqual(result, expected)
-
     def test_generate_mode_change_request(self):
         result = self.hub_obj.generate_mode_change_request('Normal')
         expected = {
