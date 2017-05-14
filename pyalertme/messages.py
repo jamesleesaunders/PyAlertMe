@@ -419,7 +419,7 @@ def generate_switch_state_request(params):
             # Off
             data = b'\x11\x00\x02\x00\x01'
     else:
-        # Default to status update request (without state change)
+        # Check Only
         data = b'\x11\x00\x01\x01'
 
     return data

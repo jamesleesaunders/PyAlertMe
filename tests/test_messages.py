@@ -110,14 +110,19 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_switch_state_request(self):
-        result = generate_switch_state_request({'State': 1})
+        # Test On Request
         expected = b'\x11\x00\x02\x01\x01'
-        self.assertEqual(result, expected)
+        self.assertEqual(generate_switch_state_request({'State': 1}), expected)
+        self.assertEqual(generate_switch_state_request({'State': True}), expected)
+        self.assertEqual(generate_switch_state_request({'State': 23}), expected)
 
-        result = generate_switch_state_request({'State': 0})
+        # Test Off Request
         expected = b'\x11\x00\x02\x00\x01'
-        self.assertEqual(result, expected)
+        self.assertEqual(generate_switch_state_request({'State': 0}), expected)
+        self.assertEqual(generate_switch_state_request({'State': False}), expected)
+        self.assertEqual(generate_switch_state_request({'State': None}), expected)
 
+        # Test Check Only
         expected = b'\x11\x00\x01\x01'
         self.assertEqual(generate_switch_state_request({}), expected)
 
