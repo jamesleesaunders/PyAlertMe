@@ -12,7 +12,7 @@ PROFILE_ID_HA      = b'\x01\x04'  # HA Device Profile
 PROFILE_ID_LL      = b'\xc0\x5e'  # Light Link Profile
 PROFILE_ID_ALERTME = b'\xc2\x16'  # AlertMe Private Profile
 
-# ZDP Clusters
+# ZDP Clusters TODO Rename these constants
 CLUSTER_ID_ZDP1 = b'\x00\x00'   # Network (16-bit) Address Request
 CLUSTER_ID_ZDP2 = b'\x80\x00'   # Network (16-bit) Address Response
 CLUSTER_ID_ZDP3 = b'\x802'      # Node Descriptor Response.
@@ -450,9 +450,9 @@ def parse_switch_state_request(data):
     """
     # Parse Switch State Request
     if data == b'\x11\x00\x02\x01\x01':
-        return 1
+        return {'State': 1}
     elif data == b'\x11\x00\x02\x00\x01':
-        return 0
+        return {'State': 0}
     else:
         logging.error('Unknown State Request')
 
@@ -518,12 +518,12 @@ def parse_security_state(data):
     # bit 0 is the magnetic reed switch state
     # bit 3 is the tamper switch state
     state = ord(data[3])
-    if (state & 0x01):
+    if state & 0x01:
         ret['ReedSwitch']  = 'OPEN'
     else:
         ret['ReedSwitch']  = 'CLOSED'
 
-    if (state & 0x04):
+    if state & 0x04:
         ret['TamperSwitch'] = 'CLOSED'
     else:
         ret['TamperSwitch'] = 'OPEN'

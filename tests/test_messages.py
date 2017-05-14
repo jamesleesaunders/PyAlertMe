@@ -67,14 +67,14 @@ class TestMessages(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-    def test_parse_relay_state_request(self):
+    def test_parse_switch_state_request(self):
         result = parse_switch_state_request(b'\x11\x00\x02\x01\x01')
-        self.assertEqual(result, 1)
+        self.assertEqual(result, {'State': 1})
 
         result = parse_switch_state_request(b'\x11\x00\x02\x00\x01')
-        self.assertEqual(result, 0)
+        self.assertEqual(result, {'State': 0})
 
-    def test_parse_switch_state(self):
+    def test_parse_switch_state_update(self):
         result = parse_switch_state_update(b'\th\x80\x07\x01')
         expected = {'State': 1}
         self.assertEqual(result, expected)

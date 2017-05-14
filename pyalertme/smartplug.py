@@ -73,8 +73,8 @@ class SmartPlug(Device):
                         # Change State
                         # b'\x11\x00\x02\x01\x01' On
                         # b'\x11\x00\x02\x00\x01' Off
-                        state = parse_switch_state_request(message['rf_data'])
-                        self.set_relay_state(state)
+                        params = parse_switch_state_request(message['rf_data'])
+                        self.set_relay_state(params['State'])
                         self._logger.debug('Switch State Changed to: %s', self.relay_state)
                         self.send_message(self.generate_relay_state_update(), source_addr_long, source_addr_short)
                         self._callback('Attribute', self.get_node_id(), 'State', 'ON')
