@@ -114,7 +114,15 @@ class TestMessages(unittest.TestCase):
         expected = b'\x11\x00\x02\x01\x01'
         self.assertEqual(result, expected)
 
+        result = generate_switch_state_request({'State': '1'})
+        expected = b'\x11\x00\x02\x01\x01'
+        self.assertEqual(result, expected)
+
         result = generate_switch_state_request({'State': 0})
+        expected = b'\x11\x00\x02\x00\x01'
+        self.assertEqual(result, expected)
+
+        result = generate_switch_state_request({'State': '0'})
         expected = b'\x11\x00\x02\x00\x01'
         self.assertEqual(result, expected)
 
