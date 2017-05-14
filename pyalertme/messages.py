@@ -415,10 +415,10 @@ def generate_switch_state_request(params):
     data = b'\x11\x00\x01\x01'
 
     if 'State' in params:
-        if int(params['State']):
+        if params['State']:
             # On
             data = b'\x11\x00\x02\x01\x01'
-        else int(params['State']) == 0:
+        else:
             # Off
             data = b'\x11\x00\x02\x00\x01'
 
