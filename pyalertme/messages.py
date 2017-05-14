@@ -411,9 +411,14 @@ def generate_switch_state_request(params=None):
     if params is None:
         params = {}
 
+    # Default to status update request (without state change)
     data = b'\x11\x00\x01\x01'
-    if 'State' in params and params['State'].isnumeric():
-        if int(params['State']) == 1:
+
+    if 'State' in params:
+        if params['State'] is None or params['State'] == ''
+            # Check
+            data = b'\x11\x00\x01\x01'
+        elif int(params['State']) == 1:
             # On
             data = b'\x11\x00\x02\x01\x01'
         elif int(params['State']) == 0:
