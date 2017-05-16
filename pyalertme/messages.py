@@ -32,25 +32,25 @@ CLUSTER_ID_MGNT_NETWORK_UPDATE   = b'\x80\x38'   # Management Network Update Not
 
 # AlertMe Clusters
 CLUSTER_ID_SWITCH = b'\x00\xee'
-# b'\x01' State Request (SmartPlug)
-# b'\x02' Change State (SmartPlug)
-# b'\x80' Switch Status Update
+AM_CLUSTERCMD_STATE_REQ = b'\x01'    # State Request (SmartPlug)
+AM_CLUSTERCMD_STATE_CHANGE = b'\x02' # Change State (SmartPlug)
+AM_CLUSTERCMD_STATE_RESP = b'\x80'   # Switch Status Update
 
 CLUSTER_ID_POWER = b'\x00\xef'
-# b'\x81' Power Demand Update
-# b'\x82' Power Consumption & Uptime Update
+AM_CLUSTERCMD_PWR_DEMAND = b'\x81' # Power Demand Update
+AM_CLUSTERCMD_PWR_CONSUMPTION = b'\x82' # Power Consumption & Uptime Update
 
 CLUSTER_ID_STATUS = b'\x00\xf0'
-# b'\xfa' Mode Change Request
-# b'\xfb' Status Update
+AM_CLUSTERCMD_MODE_REQ = b'\xfa' # Mode Change Request
+AM_CLUSTERCMD_STATUS = b'\xfb' # Status Update
 
 CLUSTER_ID_TAMPER = b'\x00\xf2'
 
 CLUSTER_ID_BUTTON = b'\x00\xf3'
 
 CLUSTER_ID_DISCOVERY = b'\x00\xf6'
-# b'\xfd' RSSI Range Test Update
-# b'\xfe' Received Version Information
+AM_CLUSTERCMD_RSSI = b'\xfd' # RSSI Range Test Update
+AM_CLUSTERCMD_VERSION = b'\xfe' # Received Version Information
 
 CLUSTER_ID_SECURITY = b'\x05\x00'
 
