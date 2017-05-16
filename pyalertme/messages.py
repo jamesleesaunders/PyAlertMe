@@ -12,6 +12,10 @@ PROFILE_ID_HA      = b'\x01\x04'  # HA Device Profile
 PROFILE_ID_LL      = b'\xc0\x5e'  # Light Link Profile
 PROFILE_ID_ALERTME = b'\xc2\x16'  # AlertMe Private Profile
 
+# Endpoints
+ENDPOINT_ZDP = b'\x00'
+ENDPOINT_ALERTME = b'\x02'
+
 # ZDP Clusters TODO Rename these constants
 CLUSTER_ID_ZDP1 = b'\x00\x00'   # Network (16-bit) Address Request
 CLUSTER_ID_ZDP2 = b'\x80\x00'   # Network (16-bit) Address Response
@@ -57,8 +61,8 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ALERTME,
             'cluster': CLUSTER_ID_DISCOVERY,
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
+            'src_endpoint': ENDPOINT_ALERTME,
+            'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_version_info_request(params)
         }
     },
@@ -67,8 +71,8 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ALERTME,
             'cluster': CLUSTER_ID_DISCOVERY,
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
+            'src_endpoint': ENDPOINT_ALERTME,
+            'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_version_info_update(params)
         }
     },
@@ -77,8 +81,8 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ALERTME,
             'cluster': CLUSTER_ID_DISCOVERY,
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
+            'src_endpoint': ENDPOINT_ALERTME,
+            'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_range_update(params)
         }
     },
@@ -87,8 +91,8 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ALERTME,
             'cluster': CLUSTER_ID_SWITCH,
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
+            'src_endpoint': ENDPOINT_ALERTME,
+            'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_switch_state_request(params)
         }
     },
@@ -97,8 +101,8 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ALERTME,
             'cluster': CLUSTER_ID_SWITCH,
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
+            'src_endpoint': ENDPOINT_ALERTME,
+            'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_switch_state_update(params)
         }
     },
@@ -107,8 +111,8 @@ messages = {
        'frame': {
            'profile': PROFILE_ID_ALERTME,
            'cluster': CLUSTER_ID_STATUS,
-           'src_endpoint': b'\x02',
-           'dest_endpoint': b'\x02',
+           'src_endpoint': ENDPOINT_ALERTME,
+           'dest_endpoint': ENDPOINT_ALERTME,
            'data': lambda params: generate_mode_change_request(params)
        }
     },
@@ -117,8 +121,8 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ALERTME,
             'cluster': CLUSTER_ID_STATUS,
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
+            'src_endpoint': ENDPOINT_ALERTME,
+            'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_missing_link(params)
         }
     },
@@ -127,8 +131,8 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ALERTME,
             'cluster': CLUSTER_ID_POWER,
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
+            'src_endpoint': ENDPOINT_ALERTME,
+            'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_power_demand_update(params)
         }
     },
@@ -137,8 +141,8 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ALERTME,
             'cluster': CLUSTER_ID_SECURITY,
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
+            'src_endpoint': ENDPOINT_ALERTME,
+            'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_security_init(params)
         }
     },
@@ -147,8 +151,8 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ZDP,
             'cluster': b'\x00\x05',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x00',
+            'src_endpoint': ENDPOINT_ZDP,
+            'dest_endpoint': ENDPOINT_ZDP,
             'data': lambda params: generate_active_endpoints_request(params)
         }
     },
@@ -157,8 +161,8 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ZDP,
             'cluster': b'\x00\x06',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x00',
+            'src_endpoint': ENDPOINT_ZDP,
+            'dest_endpoint': ENDPOINT_ZDP,
             'data': lambda params: generate_match_descriptor_request(params)
         }
     },
@@ -167,8 +171,8 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ZDP,
             'cluster': b'\x80\x06',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x00',
+            'src_endpoint': ENDPOINT_ZDP,
+            'dest_endpoint': ENDPOINT_ZDP,
             'data': lambda params: generate_match_descriptor_response(params)
         }
     },
@@ -177,8 +181,8 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ZDP,
             'cluster': b'\x00\x32',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x00',
+            'src_endpoint': ENDPOINT_ZDP,
+            'dest_endpoint': ENDPOINT_ZDP,
             'data': b'\x12\x01'
         }
     },
@@ -187,8 +191,8 @@ messages = {
         'frame': {
             'profile': PROFILE_ID_ZDP,
             'cluster': b'\x00\x36',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x00',
+            'src_endpoint': ENDPOINT_ZDP,
+            'dest_endpoint': ENDPOINT_ZDP,
             'data': b'\xff\x00'
         }
     }
