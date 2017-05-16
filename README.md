@@ -68,7 +68,7 @@ XBee Modem XB24-ZB, ZIGBEE Coordinator API, Version 21A7 (or better).
 You can also use /scripts/setup_xbee.py to configure the Xbee. 
 
 ### Coordinator (Hub) ###
-ZigBee Stack Profile (ZS): 2
+* ZigBee Stack Profile (ZS): 2
 * Encryption Enable (EE): 1
 * Encryption Options (EO): 1
 * Encryption Key (KY): 5a6967426565416c6c69616e63653039
@@ -82,6 +82,9 @@ ZigBee Stack Profile (ZS): 2
 * Encryption Key (KY): None
 * API Enable (AP): 2
 * API Output Mode (AO): 3
+
+Alternativly use the /scripts/setup-xbee.pl script to sonfigure your XBee
+as above.
 
 ## Credits
 Huge thanks goto Desert Home http://www.desert-home.com/2014/02/raspberry-pi-and-lowes-iris-smart-switch.html
