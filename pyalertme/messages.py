@@ -3,7 +3,7 @@ import struct
 import copy
 
 # Zigbee Addressing
-BROADCAST_LONG = b'\x00\x00\x00\x00\x00\x00\xff\xff'
+BROADCAST_LONG = b'\x00\x00\x00\x00\x00\x00\xff\xff' 
 BROADCAST_SHORT = b'\xff\xfe'
 
 # Zigbee Profile IDs
@@ -12,23 +12,23 @@ PROFILE_ID_HA      = b'\x01\x04'  # HA Device Profile
 PROFILE_ID_LL      = b'\xc0\x5e'  # Light Link Profile
 PROFILE_ID_ALERTME = b'\xc2\x16'  # AlertMe Private Profile
 
-# Endpoints
-ENDPOINT_ZDP = b'\x00'
-ENDPOINT_ALERTME = b'\x02'
+# Zigbee Endpoints
+ENDPOINT_ZDO       = b'\x00'      # ZigBee Device Objects Endpoint
+ENDPOINT_ALERTME   = b'\x02'      # Alertme/Iris Endpoint
 
-# ZDP Clusters TODO Rename these constants
-CLUSTER_ID_ZDP1 = b'\x00\x00'   # Network (16-bit) Address Request
-CLUSTER_ID_ZDP2 = b'\x80\x00'   # Network (16-bit) Address Response
-CLUSTER_ID_ZDP3 = b'\x802'      # Node Descriptor Response.
-CLUSTER_ID_ZDP4 = b'\x00\x04'   # Simple Descriptor Request.
-CLUSTER_ID_ZDP5 = b'\x00\x05'   # Active Endpoints Request
-CLUSTER_ID_ZDP6 = b'\x80\x05'   # Active Endpoints Response.
-CLUSTER_ID_ZDP7 = b'\x00\x06'   # Match Descriptor Request
-CLUSTER_ID_ZDP8 = b'\x80\x06'   # Match Descriptor Response
-CLUSTER_ID_ZDP9 = b'\x00\x13'   # Device Announce Message
-CLUSTER_ID_ZDP10 = b'\x00\x32'  # Management Routing Request
-CLUSTER_ID_ZDP11 = b'\x00\x36'  # Permit Join Request
-CLUSTER_ID_ZDP12 = b'\x80\x38'  # Management Network Update Notify
+# ZDO Clusters
+CLUSTER_ID_NETWORK_ADDRESS_REQ   = b'\x00\x00'   # Network (16-bit) Address Request
+CLUSTER_ID_NETWORK_ADDRESS_RESP  = b'\x80\x00'   # Network (16-bit) Address Response
+CLUSTER_ID_NODE_DESCRIPTOR_RESP  = b'\x802'      # Node Descriptor Response
+CLUSTER_ID_SIMPLE_DESCRIPTOR_REQ = b'\x00\x04'   # Simple Descriptor Request
+CLUSTER_ID_ACTIVE_ENDPOINTS_REQ  = b'\x00\x05'   # Active Endpoints Request
+CLUSTER_ID_ACTIVE_ENDPOINTS_RESP = b'\x80\x05'   # Active Endpoints Response
+CLUSTER_ID_MATCH_DESCRIPTOR_REQ  = b'\x00\x06'   # Match Descriptor Request
+CLUSTER_ID_MATCH_DESCRIPTOR_RESP = b'\x80\x06'   # Match Descriptor Response
+CLUSTER_ID_DEVICE_ANNOUNCE       = b'\x00\x13'   # Device Announce Message
+CLUSTER_ID_MGNT_ROUTING_REQ      = b'\x00\x32'   # Management Routing Request
+CLUSTER_ID_PERMIT_JOIN_REQ       = b'\x00\x36'   # Permit Join Request
+CLUSTER_ID_MGNT_NETWORK_UPDATE   = b'\x80\x38'   # Management Network Update Notify
 
 # AlertMe Clusters
 CLUSTER_ID_SWITCH = b'\x00\xee'
@@ -150,9 +150,9 @@ messages = {
         'name': 'Active Endpoints Request',
         'frame': {
             'profile': PROFILE_ID_ZDP,
-            'cluster': b'\x00\x05',
-            'src_endpoint': ENDPOINT_ZDP,
-            'dest_endpoint': ENDPOINT_ZDP,
+            'cluster': CLUSTER_ID_ACTIVE_ENDPOINTS_REQ,
+            'src_endpoint': ENDPOINT_ZDO,
+            'dest_endpoint': ENDPOINT_ZDO,
             'data': lambda params: generate_active_endpoints_request(params)
         }
     },
@@ -160,9 +160,9 @@ messages = {
         'name': 'Match Descriptor Request',
         'frame': {
             'profile': PROFILE_ID_ZDP,
-            'cluster': b'\x00\x06',
-            'src_endpoint': ENDPOINT_ZDP,
-            'dest_endpoint': ENDPOINT_ZDP,
+            'cluster': CLUSTER_ID_MATCH_DESCRIPTOR_REQ,
+            'src_endpoint': ENDPOINT_ZDO,
+            'dest_endpoint': ENDPOINT_ZDO,
             'data': lambda params: generate_match_descriptor_request(params)
         }
     },
@@ -170,9 +170,9 @@ messages = {
         'name': 'Match Descriptor Response',
         'frame': {
             'profile': PROFILE_ID_ZDP,
-            'cluster': b'\x80\x06',
-            'src_endpoint': ENDPOINT_ZDP,
-            'dest_endpoint': ENDPOINT_ZDP,
+            'cluster': CLUSTER_ID_MATCH_DESCRIPTOR_RESP,
+            'src_endpoint': ENDPOINT_ZDO,
+            'dest_endpoint': ENDPOINT_ZDO,
             'data': lambda params: generate_match_descriptor_response(params)
         }
     },
@@ -180,9 +180,9 @@ messages = {
         'name': 'Management Routing Table Request',
         'frame': {
             'profile': PROFILE_ID_ZDP,
-            'cluster': b'\x00\x32',
-            'src_endpoint': ENDPOINT_ZDP,
-            'dest_endpoint': ENDPOINT_ZDP,
+            'cluster': CLUSTER_ID_MGNT_ROUTING_REQ,
+            'src_endpoint': ENDPOINT_ZDO,
+            'dest_endpoint': ENDPOINT_ZDO,
             'data': b'\x12\x01'
         }
     },
@@ -190,9 +190,9 @@ messages = {
         'name': 'Management Permit Join Request',
         'frame': {
             'profile': PROFILE_ID_ZDP,
-            'cluster': b'\x00\x36',
-            'src_endpoint': ENDPOINT_ZDP,
-            'dest_endpoint': ENDPOINT_ZDP,
+            'cluster': CLUSTER_ID_PERMIT_JOIN_REQ,
+            'src_endpoint': ENDPOINT_ZDO,
+            'dest_endpoint': ENDPOINT_ZDO,
             'data': b'\xff\x00'
         }
     }
@@ -225,7 +225,7 @@ def get_message(message_id, params=None):
     else:
         raise Exception('Message does not exist')
 
-
+        
 def list_messages():
     """
     List messages
