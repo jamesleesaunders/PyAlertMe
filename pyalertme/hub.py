@@ -325,7 +325,7 @@ class Hub(Base):
                         else:
                             self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
-                    elif cluster_id == CLUSTER_ID_SECURITY:
+                    elif cluster_id == CLUSTER_ID_AM_SECURITY:
                         self._logger.debug('Received Security Event')
                         # Security Cluster.
                         # When the device first connects, it comes up in a state that needs initialization, this command

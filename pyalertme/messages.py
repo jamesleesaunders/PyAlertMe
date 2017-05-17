@@ -37,7 +37,7 @@ CLUSTER_ID_AM_STATUS    = b'\x00\xf0'
 CLUSTER_ID_AM_TAMPER    = b'\x00\xf2'
 CLUSTER_ID_AM_BUTTON    = b'\x00\xf3'
 CLUSTER_ID_AM_DISCOVERY = b'\x00\xf6'
-CLUSTER_ID_SECURITY     = b'\x05\x00'
+CLUSTER_ID_AM_SECURITY  = b'\x05\x00'
 
 # AlertMe Cluster Commands
 CLUSTER_CMD_AM_STATE_REQ       = b'\x01'  # State Request (SmartPlug)
@@ -73,7 +73,7 @@ alertme_cluster_cmds = {
         CLUSTER_CMD_AM_RSSI: "RSSI Range Test Update",
         CLUSTER_CMD_AM_VERSION: "Received Version Information"
     },
-    CLUSTER_ID_SECURITY: {}
+    CLUSTER_ID_AM_SECURITY: {}
 }
 
 messages = {
@@ -161,7 +161,7 @@ messages = {
         'name': 'Security Initialization',
         'frame': {
             'profile': PROFILE_ID_ALERTME,
-            'cluster': CLUSTER_ID_SECURITY,
+            'cluster': CLUSTER_ID_AM_SECURITY,
             'src_endpoint': ENDPOINT_ALERTME,
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_security_init(params)
