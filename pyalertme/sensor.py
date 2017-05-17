@@ -84,7 +84,7 @@ class Sensor(Device):
         # Also see parse_button_press().
         message = {
             'profile': PROFILE_ID_ALERTME,
-            'cluster': CLUSTER_ID_BUTTON,
+            'cluster': CLUSTER_ID_AM_BUTTON,
             'source_endpoint': '\x02',
             'dest_endpoint': '\x02',
             'data': '\t\x00\x01\x00\x01X\xf4\x00\x00'

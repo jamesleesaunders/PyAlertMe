@@ -62,7 +62,7 @@ class SmartPlug(Device):
                 else:
                     cluster_cmd = bytes([message['rf_data'][2]])
 
-                if cluster_id == CLUSTER_ID_SWITCH:
+                if cluster_id == CLUSTER_ID_AM_SWITCH:
                     if cluster_cmd == b'\x01':
                         # State Request
                         # b'\x11\x00\x01\x01'
@@ -156,7 +156,7 @@ class SmartPlug(Device):
         # The below is just one type of status update, see parse_status_update() for more.
         message = {
             'profile': PROFILE_ID_ALERTME,
-            'cluster': CLUSTER_ID_STATUS,
+            'cluster': CLUSTER_ID_AM_STATUS,
             'source_endpoint': '\x02',
             'dest_endpoint': '\x02',
             'data': '\t\r\xfb\x1f<\xf1\x08\x02/\x10D\x02\xcf\xff\x01\x00'
@@ -178,7 +178,7 @@ class SmartPlug(Device):
         # Also see parse_power_consumption().
         message = {
             'profile': PROFILE_ID_ALERTME,
-            'cluster': CLUSTER_ID_POWER,
+            'cluster': CLUSTER_ID_AM_POWER,
             'source_endpoint': '\x02',
             'dest_endpoint': '\x02',
             'data': '\tn\x82\x05N\x00\x00\xb7\x81\x00\x00\x01'

@@ -264,7 +264,7 @@ class Hub(Base):
                     else:
                         cluster_cmd = bytes([message['rf_data'][2]])
 
-                    if cluster_id == CLUSTER_ID_SWITCH:
+                    if cluster_id == CLUSTER_ID_AM_SWITCH:
                         if cluster_cmd == b'\x80':
                             self._logger.debug('Received Switch Status Update')
                             attributes = parse_switch_state_update(message['rf_data'])
@@ -273,7 +273,7 @@ class Hub(Base):
                         else:
                             self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
-                    elif cluster_id == CLUSTER_ID_POWER:
+                    elif cluster_id == CLUSTER_ID_AM_POWER:
                         if cluster_cmd == b'\x81':
                             self._logger.debug('Received Power Demand Update')
                             attributes = parse_power_demand(message['rf_data'])
@@ -287,7 +287,7 @@ class Hub(Base):
                         else:
                             self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
-                    elif cluster_id == CLUSTER_ID_STATUS:
+                    elif cluster_id == CLUSTER_ID_AM_STATUS:
                         if cluster_cmd == b'\xfb':
                             self._logger.debug('Received Status Update')
                             attributes = parse_status_update(message['rf_data'])
@@ -301,17 +301,17 @@ class Hub(Base):
                         else:
                             self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
-                    elif cluster_id == CLUSTER_ID_TAMPER:
+                    elif cluster_id == CLUSTER_ID_AM_TAMPER:
                         self._logger.debug('Received Tamper Switch Changed Update')
                         attributes = parse_tamper_state(message['rf_data'])
                         self.save_node_attributes(node_id, attributes)
 
-                    elif cluster_id == CLUSTER_ID_BUTTON:
+                    elif cluster_id == CLUSTER_ID_AM_BUTTON:
                         self._logger.debug('Received Button Press Update')
                         attributes = parse_button_press(message['rf_data'])
                         self.save_node_attributes(node_id, attributes)
 
-                    elif cluster_id == CLUSTER_ID_DISCOVERY:
+                    elif cluster_id == CLUSTER_ID_AM_DISCOVERY:
                         if cluster_cmd == b'\xfd':
                             self._logger.debug('Received RSSI Range Test Update')
                             attributes = parse_range_info_update(message['rf_data'])

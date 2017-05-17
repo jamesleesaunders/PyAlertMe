@@ -17,50 +17,70 @@ ENDPOINT_ZDO       = b'\x00'      # ZigBee Device Objects Endpoint
 ENDPOINT_ALERTME   = b'\x02'      # Alertme/Iris Endpoint
 
 # ZDO Clusters
-CLUSTER_ID_NETWORK_ADDRESS_REQ   = b'\x00\x00'   # Network (16-bit) Address Request
-CLUSTER_ID_NETWORK_ADDRESS_RESP  = b'\x80\x00'   # Network (16-bit) Address Response
-CLUSTER_ID_NODE_DESCRIPTOR_RESP  = b'\x802'      # Node Descriptor Response
-CLUSTER_ID_SIMPLE_DESCRIPTOR_REQ = b'\x00\x04'   # Simple Descriptor Request
-CLUSTER_ID_ACTIVE_ENDPOINTS_REQ  = b'\x00\x05'   # Active Endpoints Request
-CLUSTER_ID_ACTIVE_ENDPOINTS_RESP = b'\x80\x05'   # Active Endpoints Response
-CLUSTER_ID_MATCH_DESCRIPTOR_REQ  = b'\x00\x06'   # Match Descriptor Request
-CLUSTER_ID_MATCH_DESCRIPTOR_RESP = b'\x80\x06'   # Match Descriptor Response
-CLUSTER_ID_DEVICE_ANNOUNCE       = b'\x00\x13'   # Device Announce Message
-CLUSTER_ID_MGNT_ROUTING_REQ      = b'\x00\x32'   # Management Routing Request
-CLUSTER_ID_PERMIT_JOIN_REQ       = b'\x00\x36'   # Permit Join Request
-CLUSTER_ID_MGNT_NETWORK_UPDATE   = b'\x80\x38'   # Management Network Update Notify
+CLUSTER_ID_ZDO_NETWORK_ADDRESS_REQ   = b'\x00\x00'   # Network (16-bit) Address Request
+CLUSTER_ID_ZDO_NETWORK_ADDRESS_RESP  = b'\x80\x00'   # Network (16-bit) Address Response
+CLUSTER_ID_ZDO_NODE_DESCRIPTOR_RESP  = b'\x802'      # Node Descriptor Response
+CLUSTER_ID_ZDO_SIMPLE_DESCRIPTOR_REQ = b'\x00\x04'   # Simple Descriptor Request
+CLUSTER_ID_ZDO_ACTIVE_ENDPOINTS_REQ  = b'\x00\x05'   # Active Endpoints Request
+CLUSTER_ID_ZDO_ACTIVE_ENDPOINTS_RESP = b'\x80\x05'   # Active Endpoints Response
+CLUSTER_ID_ZDO_MATCH_DESCRIPTOR_REQ  = b'\x00\x06'   # Match Descriptor Request
+CLUSTER_ID_ZDO_MATCH_DESCRIPTOR_RESP = b'\x80\x06'   # Match Descriptor Response
+CLUSTER_ID_ZDO_DEVICE_ANNOUNCE       = b'\x00\x13'   # Device Announce Message
+CLUSTER_ID_ZDO_MGNT_ROUTING_REQ      = b'\x00\x32'   # Management Routing Request
+CLUSTER_ID_ZDO_PERMIT_JOIN_REQ       = b'\x00\x36'   # Permit Join Request
+CLUSTER_ID_ZDO_MGNT_NETWORK_UPDATE   = b'\x80\x38'   # Management Network Update Notify
 
 # AlertMe Clusters
-CLUSTER_ID_SWITCH = b'\x00\xee'
-AM_CLUSTERCMD_STATE_REQ = b'\x01'    # State Request (SmartPlug)
-AM_CLUSTERCMD_STATE_CHANGE = b'\x02' # Change State (SmartPlug)
-AM_CLUSTERCMD_STATE_RESP = b'\x80'   # Switch Status Update
+CLUSTER_ID_AM_SWITCH    = b'\x00\xee'
+CLUSTER_ID_AM_POWER     = b'\x00\xef'
+CLUSTER_ID_AM_STATUS    = b'\x00\xf0'
+CLUSTER_ID_AM_TAMPER    = b'\x00\xf2'
+CLUSTER_ID_AM_BUTTON    = b'\x00\xf3'
+CLUSTER_ID_AM_DISCOVERY = b'\x00\xf6'
+CLUSTER_ID_SECURITY     = b'\x05\x00'
 
-CLUSTER_ID_POWER = b'\x00\xef'
-AM_CLUSTERCMD_PWR_DEMAND = b'\x81' # Power Demand Update
-AM_CLUSTERCMD_PWR_CONSUMPTION = b'\x82' # Power Consumption & Uptime Update
+# AlertMe Cluster Commands
+CLUSTER_CMD_AM_STATE_REQ       = b'\x01'    # State Request (SmartPlug)
+CLUSTER_CMD_AM_STATE_CHANGE    = b'\x02' # Change State (SmartPlug)
+CLUSTER_CMD_AM_STATE_RESP      = b'\x80'   # Switch Status Update
+CLUSTER_CMD_AM_PWR_DEMAND      = b'\x81' # Power Demand Update
+CLUSTER_CMD_AM_PWR_CONSUMPTION = b'\x82' # Power Consumption & Uptime Update
+CLUSTER_CMD_AM_MODE_REQ        = b'\xfa' # Mode Change Request
+CLUSTER_CMD_AM_STATUS          = b'\xfb' # Status Update
+CLUSTER_CMD_AM_RSSI            = b'\xfd' # RSSI Range Test Update
+CLUSTER_CMD_AM_VERSION         = b'\xfe' # Received Version Information
 
-CLUSTER_ID_STATUS = b'\x00\xf0'
-AM_CLUSTERCMD_MODE_REQ = b'\xfa' # Mode Change Request
-AM_CLUSTERCMD_STATUS = b'\xfb' # Status Update
-
-CLUSTER_ID_TAMPER = b'\x00\xf2'
-
-CLUSTER_ID_BUTTON = b'\x00\xf3'
-
-CLUSTER_ID_DISCOVERY = b'\x00\xf6'
-AM_CLUSTERCMD_RSSI = b'\xfd' # RSSI Range Test Update
-AM_CLUSTERCMD_VERSION = b'\xfe' # Received Version Information
-
-CLUSTER_ID_SECURITY = b'\x05\x00'
-
+# At the moment I am not sure what/if the following dict will be used?
+# It is here to describe the relationship between Cluster ID and Cmd.
+alertme_cluster_cmds = {
+    CLUSTER_ID_AM_SWITCH: {
+        CLUSTER_CMD_AM_STATE_REQ: "State Request (SmartPlug)",
+        CLUSTER_CMD_AM_STATE_CHANGE: "Change State (SmartPlug)",
+        CLUSTER_CMD_AM_STATE_RESP: "Switch Status Update"
+    },
+    CLUSTER_ID_AM_POWER: {
+        CLUSTER_CMD_AM_PWR_DEMAND: "Power Demand Update",
+        CLUSTER_CMD_AM_PWR_CONSUMPTION: "Power Consumption & Uptime Update"
+    },
+    CLUSTER_ID_AM_STATUS: {
+        CLUSTER_CMD_AM_MODE_REQ: "Mode Change Request",
+        CLUSTER_CMD_AM_STATUS: "Status Update"
+    },
+    CLUSTER_ID_AM_TAMPER: {},
+    CLUSTER_ID_AM_BUTTON: {},
+    CLUSTER_ID_AM_DISCOVERY: {
+        CLUSTER_CMD_AM_RSSI: "RSSI Range Test Update",
+        CLUSTER_CMD_AM_VERSION: "Received Version Information"
+    },
+    CLUSTER_ID_SECURITY: {}
+}
 
 messages = {
     'version_info_request': {
         'name': 'Version Info Request',
         'frame': {
             'profile': PROFILE_ID_ALERTME,
-            'cluster': CLUSTER_ID_DISCOVERY,
+            'cluster': CLUSTER_ID_AM_DISCOVERY,
             'src_endpoint': ENDPOINT_ALERTME,
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_version_info_request(params)
@@ -70,7 +90,7 @@ messages = {
         'name': 'Version Info Update',
         'frame': {
             'profile': PROFILE_ID_ALERTME,
-            'cluster': CLUSTER_ID_DISCOVERY,
+            'cluster': CLUSTER_ID_AM_DISCOVERY,
             'src_endpoint': ENDPOINT_ALERTME,
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_version_info_update(params)
@@ -80,7 +100,7 @@ messages = {
         'name': 'Range Info Update',
         'frame': {
             'profile': PROFILE_ID_ALERTME,
-            'cluster': CLUSTER_ID_DISCOVERY,
+            'cluster': CLUSTER_ID_AM_DISCOVERY,
             'src_endpoint': ENDPOINT_ALERTME,
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_range_update(params)
@@ -90,7 +110,7 @@ messages = {
         'name': 'Switch State Request',
         'frame': {
             'profile': PROFILE_ID_ALERTME,
-            'cluster': CLUSTER_ID_SWITCH,
+            'cluster': CLUSTER_ID_AM_SWITCH,
             'src_endpoint': ENDPOINT_ALERTME,
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_switch_state_request(params)
@@ -100,7 +120,7 @@ messages = {
         'name': 'Switch State Update',
         'frame': {
             'profile': PROFILE_ID_ALERTME,
-            'cluster': CLUSTER_ID_SWITCH,
+            'cluster': CLUSTER_ID_AM_SWITCH,
             'src_endpoint': ENDPOINT_ALERTME,
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_switch_state_update(params)
@@ -110,7 +130,7 @@ messages = {
        'name': 'Mode Change Request',
        'frame': {
            'profile': PROFILE_ID_ALERTME,
-           'cluster': CLUSTER_ID_STATUS,
+           'cluster': CLUSTER_ID_AM_STATUS,
            'src_endpoint': ENDPOINT_ALERTME,
            'dest_endpoint': ENDPOINT_ALERTME,
            'data': lambda params: generate_mode_change_request(params)
@@ -120,7 +140,7 @@ messages = {
         'name': 'Missing Link',
         'frame': {
             'profile': PROFILE_ID_ALERTME,
-            'cluster': CLUSTER_ID_STATUS,
+            'cluster': CLUSTER_ID_AM_STATUS,
             'src_endpoint': ENDPOINT_ALERTME,
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_missing_link(params)
@@ -130,7 +150,7 @@ messages = {
         'name': 'Power Demand Update',
         'frame': {
             'profile': PROFILE_ID_ALERTME,
-            'cluster': CLUSTER_ID_POWER,
+            'cluster': CLUSTER_ID_AM_POWER,
             'src_endpoint': ENDPOINT_ALERTME,
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_power_demand_update(params)
@@ -150,7 +170,7 @@ messages = {
         'name': 'Active Endpoints Request',
         'frame': {
             'profile': PROFILE_ID_ZDP,
-            'cluster': CLUSTER_ID_ACTIVE_ENDPOINTS_REQ,
+            'cluster': CLUSTER_ID_ZDO_ACTIVE_ENDPOINTS_REQ,
             'src_endpoint': ENDPOINT_ZDO,
             'dest_endpoint': ENDPOINT_ZDO,
             'data': lambda params: generate_active_endpoints_request(params)
@@ -160,7 +180,7 @@ messages = {
         'name': 'Match Descriptor Request',
         'frame': {
             'profile': PROFILE_ID_ZDP,
-            'cluster': CLUSTER_ID_MATCH_DESCRIPTOR_REQ,
+            'cluster': CLUSTER_ID_ZDO_MATCH_DESCRIPTOR_REQ,
             'src_endpoint': ENDPOINT_ZDO,
             'dest_endpoint': ENDPOINT_ZDO,
             'data': lambda params: generate_match_descriptor_request(params)
@@ -170,7 +190,7 @@ messages = {
         'name': 'Match Descriptor Response',
         'frame': {
             'profile': PROFILE_ID_ZDP,
-            'cluster': CLUSTER_ID_MATCH_DESCRIPTOR_RESP,
+            'cluster': CLUSTER_ID_ZDO_MATCH_DESCRIPTOR_RESP,
             'src_endpoint': ENDPOINT_ZDO,
             'dest_endpoint': ENDPOINT_ZDO,
             'data': lambda params: generate_match_descriptor_response(params)
@@ -180,7 +200,7 @@ messages = {
         'name': 'Management Routing Table Request',
         'frame': {
             'profile': PROFILE_ID_ZDP,
-            'cluster': CLUSTER_ID_MGNT_ROUTING_REQ,
+            'cluster': CLUSTER_ID_ZDO_MGNT_ROUTING_REQ,
             'src_endpoint': ENDPOINT_ZDO,
             'dest_endpoint': ENDPOINT_ZDO,
             'data': b'\x12\x01'
@@ -190,7 +210,7 @@ messages = {
         'name': 'Management Permit Join Request',
         'frame': {
             'profile': PROFILE_ID_ZDP,
-            'cluster': CLUSTER_ID_PERMIT_JOIN_REQ,
+            'cluster': CLUSTER_ID_ZDO_PERMIT_JOIN_REQ,
             'src_endpoint': ENDPOINT_ZDO,
             'dest_endpoint': ENDPOINT_ZDO,
             'data': b'\xff\x00'
