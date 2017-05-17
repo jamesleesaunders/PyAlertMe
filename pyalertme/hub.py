@@ -187,37 +187,37 @@ class Hub(Base):
 
                 if profile_id == PROFILE_ID_ZDP:
                     # Zigbee Device Profile ID
-                    if cluster_id == b'\x00\x00':
+                    if cluster_id == CLUSTER_ID_ZDO_NETWORK_ADDRESS_REQ:
                         # Network (16-bit) Address Request.
                         self._logger.debug('Received Network (16-bit) Address Request')
 
-                    elif cluster_id == b'\x80\x00':
+                    elif cluster_id == CLUSTER_ID_ZDO_NETWORK_ADDRESS_RESP:
                         # Network (16-bit) Address Response.
                         # Not sure what this is? Only seen on the Hive ActivePlug?
                         # See: http://www.desert-home.com/2015/06/hacking-into-iris-door-sensor-part-4.html
                         # http://ftp1.digi.com/support/images/APP_NOTE_XBee_ZigBee_Device_Profile.pdf
                         self._logger.debug('Received Network (16-bit) Address Response')
 
-                    elif cluster_id == b'\x802':
+                    elif cluster_id == CLUSTER_ID_ZDO_NODE_DESCRIPTOR_RESP:
                         # Node Descriptor Response.
                         self._logger.debug('Received Node Descriptor Response')
                         
-                    elif cluster_id == b'\x00\x04':
+                    elif cluster_id == CLUSTER_ID_ZDO_SIMPLE_DESCRIPTOR_REQ:
                         # Simple Descriptor Request.
                         self._logger.debug('Received Simple Descriptor Request')
                         
-                    elif cluster_id == b'\x00\x05':
+                    elif cluster_id == CLUSTER_ID_ZDO_ACTIVE_ENDPOINTS_REQ:
                         # Active Endpoint Request.
                         self._logger.debug('Received Active Endpoint Request')
 
-                    elif cluster_id == b'\x80\x05':
+                    elif cluster_id == CLUSTER_ID_ZDO_ACTIVE_ENDPOINTS_RESP:
                         # Active Endpoints Response.
                         # This message tells us what the device can do, but it isn't constructed correctly to match what
                         # the switch can do according to the spec. This is another message that gets it's response after
                         # we receive the Match Descriptor below.
                         self._logger.debug('Received Active Endpoint Response')
 
-                    elif cluster_id == b'\x00\x06':
+                    elif cluster_id == CLUSTER_ID_ZDO_MATCH_DESCRIPTOR_REQ:
                         # Match Descriptor Request.
                         self._logger.debug('Received Match Descriptor Request')
                         # This is the point where we finally respond to the switch. A couple of messages are sent
@@ -240,7 +240,7 @@ class Hub(Base):
                         # We are fully associated!
                         self._logger.debug('New Device Fully Associated')
                         
-                    elif cluster_id == b'\x00\x13':
+                    elif cluster_id == CLUSTER_ID_ZDO_DEVICE_ANNOUNCE:
                         # Device Announce Message.
                         self._logger.debug('Received Device Announce Message')
                         # This will tell me the address of the new thing
@@ -248,7 +248,7 @@ class Hub(Base):
                         reply = self.generate_active_endpoints_request(source_addr_short)
                         self.send_message(reply, source_addr_long, source_addr_short)
                         
-                    elif cluster_id == b'\x80\x38':
+                    elif cluster_id == CLUSTER_ID_ZDO_MGNT_NETWORK_UPDATE:
                         # Management Network Update Notify.
                         self._logger.debug('Received Management Network Update Notify')
 
@@ -265,7 +265,7 @@ class Hub(Base):
                         cluster_cmd = bytes([message['rf_data'][2]])
 
                     if cluster_id == CLUSTER_ID_AM_SWITCH:
-                        if cluster_cmd == b'\x80':
+                        if cluster_cmd == CLUSTER_CMD_AM_STATE_RESP:
                             self._logger.debug('Received Switch Status Update')
                             attributes = parse_switch_state_update(message['rf_data'])
                             self.save_node_attributes(node_id, attributes)
@@ -274,12 +274,12 @@ class Hub(Base):
                             self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
                     elif cluster_id == CLUSTER_ID_AM_POWER:
-                        if cluster_cmd == b'\x81':
+                        if cluster_cmd == CLUSTER_CMD_AM_PWR_DEMAND:
                             self._logger.debug('Received Power Demand Update')
                             attributes = parse_power_demand(message['rf_data'])
                             self.save_node_attributes(node_id, attributes)
 
-                        elif cluster_cmd == b'\x82':
+                        elif cluster_cmd == CLUSTER_CMD_AM_PWR_CONSUMPTION:
                             self._logger.debug('Received Power Consumption & Uptime Update')
                             attributes = parse_power_consumption(message['rf_data'])
                             self.save_node_attributes(node_id, attributes)
@@ -288,7 +288,7 @@ class Hub(Base):
                             self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
                     elif cluster_id == CLUSTER_ID_AM_STATUS:
-                        if cluster_cmd == b'\xfb':
+                        if cluster_cmd == CLUSTER_CMD_AM_STATUS:
                             self._logger.debug('Received Status Update')
                             attributes = parse_status_update(message['rf_data'])
                             self.save_node_attributes(node_id, attributes)
@@ -312,12 +312,12 @@ class Hub(Base):
                         self.save_node_attributes(node_id, attributes)
 
                     elif cluster_id == CLUSTER_ID_AM_DISCOVERY:
-                        if cluster_cmd == b'\xfd':
+                        if cluster_cmd == CLUSTER_CMD_AM_RSSI:
                             self._logger.debug('Received RSSI Range Test Update')
                             attributes = parse_range_info_update(message['rf_data'])
                             self.save_node_attributes(node_id, attributes)
 
-                        elif (cluster_cmd == b'\xfe'):
+                        elif cluster_cmd == CLUSTER_CMD_AM_VERSION:
                             self._logger.debug('Received Version Information')
                             properties = parse_version_info_update(message['rf_data'])
                             self.save_node_properties(node_id, properties)

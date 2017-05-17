@@ -54,13 +54,13 @@ class Device(Base):
 
             if profile_id == PROFILE_ID_ZDP:
                 # Zigbee Device Profile ID
-                if cluster_id == b'\x00\x32':
+                if cluster_id == CLUSTER_ID_ZDO_MGNT_ROUTING_REQ:
                     self._logger.debug('Received Management Routing Table Request')
 
-                elif cluster_id == b'\x00\x05':
+                elif cluster_id == CLUSTER_ID_ZDO_ACTIVE_ENDPOINTS_REQ:
                     self._logger.debug('Received Active Endpoint Request')
 
-                elif cluster_id == b'\x80\x06':
+                elif cluster_id == CLUSTER_ID_ZDO_MATCH_DESCRIPTOR_RESP:
                     self._logger.debug('Received Match Descriptor Response')
 
             elif profile_id == PROFILE_ID_ALERTME:
@@ -72,13 +72,13 @@ class Device(Base):
                 else:
                     cluster_cmd = bytes([message['rf_data'][2]])
 
-                if cluster_id == b'\x00\xf6':
+                if cluster_id == CLUSTER_ID_AM_DISCOVERY:
                     # b'\x11\x00\xfc\x00\x01'
                     self._logger.debug('Received Version Request')
                     self.send_message(self.generate_version_info_update(), source_addr_long, source_addr_short)
 
-                elif cluster_id == b'\x00\xf0':
-                    if cluster_cmd == b'\xfa':
+                elif cluster_id == CLUSTER_ID_AM_STATUS:
+                    if cluster_cmd == CLUSTER_CMD_AM_MODE_REQ:
                         self._logger.debug('Received Mode Change Request')
                         # Take note of hub address
                         self.hub_addr_long = source_addr_long

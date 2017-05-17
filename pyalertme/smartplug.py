@@ -63,13 +63,13 @@ class SmartPlug(Device):
                     cluster_cmd = bytes([message['rf_data'][2]])
 
                 if cluster_id == CLUSTER_ID_AM_SWITCH:
-                    if cluster_cmd == b'\x01':
+                    if cluster_cmd == CLUSTER_CMD_AM_STATE_REQ:
                         # State Request
                         # b'\x11\x00\x01\x01'
                         self._logger.debug('Switch State is: %s', self.relay_state)
                         self.send_message(self.generate_relay_state_update(), source_addr_long, source_addr_short)
 
-                    elif cluster_cmd == b'\x02':
+                    elif cluster_cmd == CLUSTER_CMD_AM_STATE_CHANGE:
                         # Change State
                         # b'\x11\x00\x02\x01\x01' On
                         # b'\x11\x00\x02\x00\x01' Off
