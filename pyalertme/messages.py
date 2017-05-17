@@ -40,18 +40,19 @@ CLUSTER_ID_AM_DISCOVERY = b'\x00\xf6'
 CLUSTER_ID_SECURITY     = b'\x05\x00'
 
 # AlertMe Cluster Commands
-CLUSTER_CMD_AM_STATE_REQ       = b'\x01'    # State Request (SmartPlug)
-CLUSTER_CMD_AM_STATE_CHANGE    = b'\x02' # Change State (SmartPlug)
-CLUSTER_CMD_AM_STATE_RESP      = b'\x80'   # Switch Status Update
-CLUSTER_CMD_AM_PWR_DEMAND      = b'\x81' # Power Demand Update
-CLUSTER_CMD_AM_PWR_CONSUMPTION = b'\x82' # Power Consumption & Uptime Update
-CLUSTER_CMD_AM_MODE_REQ        = b'\xfa' # Mode Change Request
-CLUSTER_CMD_AM_STATUS          = b'\xfb' # Status Update
-CLUSTER_CMD_AM_RSSI            = b'\xfd' # RSSI Range Test Update
-CLUSTER_CMD_AM_VERSION         = b'\xfe' # Received Version Information
+CLUSTER_CMD_AM_STATE_REQ       = b'\x01'  # State Request (SmartPlug)
+CLUSTER_CMD_AM_STATE_CHANGE    = b'\x02'  # Change State (SmartPlug)
+CLUSTER_CMD_AM_STATE_RESP      = b'\x80'  # Switch Status Update
+CLUSTER_CMD_AM_PWR_DEMAND      = b'\x81'  # Power Demand Update
+CLUSTER_CMD_AM_PWR_CONSUMPTION = b'\x82'  # Power Consumption & Uptime Update
+CLUSTER_CMD_AM_MODE_REQ        = b'\xfa'  # Mode Change Request
+CLUSTER_CMD_AM_STATUS          = b'\xfb'  # Status Update
+CLUSTER_CMD_AM_RSSI            = b'\xfd'  # RSSI Range Test Update
+CLUSTER_CMD_AM_VERSION         = b'\xfe'  # Received Version Information
 
 # At the moment I am not sure what/if the following dict will be used?
 # It is here to describe the relationship between Cluster ID and Cmd.
+# One day this dict may be used by the process_message() function and link with the parse_xxxxx() functions?
 alertme_cluster_cmds = {
     CLUSTER_ID_AM_SWITCH: {
         CLUSTER_CMD_AM_STATE_REQ: "State Request (SmartPlug)",
@@ -279,7 +280,7 @@ def generate_version_info_update(params):
     :return: Message data
     """
     checksum = b'\tq'
-    cluster_cmd = b'\xfe'
+    cluster_cmd = CLUSTER_CMD_AM_VERSION
     payload = struct.pack('H', params['Version']) \
               + b'\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0b' \
               + params['Manufacturer'] \
@@ -334,7 +335,7 @@ def generate_range_update(params):
     :return: Message data
     """
     checksum = b'\t+'
-    cluster_cmd = b'\xfd'
+    cluster_cmd = CLUSTER_CMD_AM_RSSI
     payload = struct.pack('B 1x', params['RSSI'])
     data = checksum + cluster_cmd + payload
 
@@ -364,7 +365,7 @@ def generate_power_demand_update(params):
     :return: Message data
     """
     checksum = b'\tj'
-    cluster_cmd = b'\x81'
+    cluster_cmd = CLUSTER_CMD_AM_PWR_DEMAND
     payload = struct.pack('H', params['PowerDemand'])
     data = checksum + cluster_cmd + payload
     return data
@@ -458,7 +459,7 @@ def generate_switch_state_update(params):
     :return: Message data
     """
     checksum = b'\th'
-    cluster_cmd = b'\x80'
+    cluster_cmd = CLUSTER_CMD_AM_STATE_RESP
     payload = b'\x07\x01' if params['State'] else b'\x06\x00'
     data = checksum + cluster_cmd + payload
     return data
