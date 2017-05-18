@@ -236,7 +236,7 @@ def get_message(message_id, params=None):
         message = copy.deepcopy(messages[message_id])
         data = message['frame']['data']
 
-        # If data is a lambda then call it and replace with return value
+        # If 'data' is a lambda, then call it and replace with the return value
         if callable(data):
             message['frame']['data'] = data(params)
 
@@ -379,19 +379,23 @@ def generate_mode_change_request(params):
     :param params: Parameter dictionary of requested mode
     :return: Message data
     """
+    checksum = b'\x11\x00'
+    cluster_cmd = CLUSTER_CMD_AM_MODE_REQ
+    payload = b'\x00\x01' # Default normal if no mode
+
     mode = params['Mode']
-    data = b''
     if mode == 'Normal':
-        data = b'\x11\x00\xfa\x00\x01'
+        payload = b'\x00\x01'
     elif mode == 'RangeTest':
-        data = b'\x11\x00\xfa\x01\x01'
+        payload = b'\x01\x01'
     elif mode == 'Locked':
-        data = b'\x11\x00\xfa\x02\x01'
+        payload = b'\x02\x01'
     elif mode == 'Silent':
-        data = b'\x11\x00\xfa\x03\x01'
+        payload = b'\x03\x01'
     else:
         logging.error('Invalid mode request %s', mode)
 
+    data = checksum + cluster_cmd + payload
     return data
 
 

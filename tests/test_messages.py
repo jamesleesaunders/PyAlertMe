@@ -300,5 +300,19 @@ class TestMessages(unittest.TestCase):
         expected = b'\xff\x00'
         self.assertEqual(result, expected)
 
+    def test_temp_message_breakdown(self):
+        # Just a quick test to see how cluster cmd is broken down - remove when done
+        message1 = b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00'
+        cluster_cmd1 = message1[2]
+        self.assertEqual(cluster_cmd1, b'\xfb')
+
+        message2 = b'\x11\x00\x02\x01\x01'
+        cluster_cmd2 = message2[2]
+        self.assertEqual(cluster_cmd2, b'\x02')
+
+        message3 = b'\tj\x81\x00\x00'
+        cluster_cmd3 = message3[2]
+        self.assertEqual(cluster_cmd3, b'\x81')
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
