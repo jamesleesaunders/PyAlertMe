@@ -46,14 +46,7 @@ class Hub(Base):
         i = 1
         while time.time() < timeout:
             self._logger.debug('Sending Discovery Request #%s', i)
-            message = {
-                'description': 'Management Routing Table Request',
-                'src_endpoint': b'\x00',
-                'dest_endpoint': b'\x00',
-                'cluster': b'\x00\x32',
-                'profile': PROFILE_ID_ZDP,
-                'data': '\x12\x01'
-            }
+            message = get_message('permit_join_request')
             self.send_message(message, BROADCAST_LONG, BROADCAST_SHORT)
             i += 1
             time.sleep(2.00)
@@ -136,8 +129,8 @@ class Hub(Base):
         :return: Node ID
         """
         # If this address is me, don't add to nodes list and don't generate node_id,
-        # also if we dont know what our own address is yet.
-        if self.addr_long == addr_long or self.addr_long == None:
+        # also if we don't know what our own address is yet.
+        if self.addr_long == addr_long or self.addr_long is None:
             return None
 
         # See if we already know about this device.
@@ -148,6 +141,7 @@ class Hub(Base):
             # If not generate new node_id and add to list of known devices.
             node_id = Base.pretty_mac(addr_long)
             self.nodes[node_id] = {'AddressLong': addr_long, 'Attributes': {}}
+
         return node_id
 
     def node_id_to_addrs(self, node_id):
@@ -294,9 +288,9 @@ class Hub(Base):
                             self.save_node_attributes(node_id, attributes)
 
                             # This may be the missing link to this thing?
-                            self._logger.debug('Sending Missing Link')
-                            reply = self.generate_missing_link()
-                            self.send_message(reply, source_addr_long, source_addr_short)
+                            # self._logger.debug('Sending Missing Link')
+                            # reply = self.generate_missing_link()
+                            # self.send_message(reply, source_addr_long, source_addr_short)
 
                         else:
                             self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
@@ -317,7 +311,7 @@ class Hub(Base):
                             attributes = parse_range_info_update(message['rf_data'])
                             self.save_node_attributes(node_id, attributes)
 
-                        elif cluster_cmd == CLUSTER_CMD_AM_VERSION:
+                        elif cluster_cmd == CLUSTER_CMD_AM_VERSION_RESP:
                             self._logger.debug('Received Version Information')
                             properties = parse_version_info_update(message['rf_data'])
                             self.save_node_properties(node_id, properties)

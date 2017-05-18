@@ -73,9 +73,13 @@ class Device(Base):
                     cluster_cmd = bytes([message['rf_data'][2]])
 
                 if cluster_id == CLUSTER_ID_AM_DISCOVERY:
-                    # b'\x11\x00\xfc\x00\x01'
-                    self._logger.debug('Received Version Request')
-                    self.send_message(self.generate_version_info_update(), source_addr_long, source_addr_short)
+                    if cluster_cmd == CLUSTER_CMD_AM_VERSION_REQ:
+                        # b'\x11\x00\xfc\x00\x01'
+                        self._logger.debug('Received Version Request')
+                        self.send_message(self.generate_version_info_update(), source_addr_long, source_addr_short)
+
+                    else:
+                        self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
                 elif cluster_id == CLUSTER_ID_AM_STATUS:
                     if cluster_cmd == CLUSTER_CMD_AM_MODE_REQ:
@@ -112,6 +116,9 @@ class Device(Base):
                             # b'\x11\x00\xfa\x03\x01'
                             self._logger.debug('Silent Mode')
                             self.mode = 'SILENT'
+
+                    else:
+                        self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
             else:
                 self._logger.error('Unrecognised Profile ID: %r', profile_id)

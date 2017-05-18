@@ -40,6 +40,7 @@ CLUSTER_ID_AM_DISCOVERY = b'\x00\xf6'
 CLUSTER_ID_AM_SECURITY  = b'\x05\x00'
 
 # AlertMe Cluster Commands
+CLUSTER_CMD_AM_SECURITY_INIT   = b'\x00'  # Security Init
 CLUSTER_CMD_AM_STATE_REQ       = b'\x01'  # State Request (SmartPlug)
 CLUSTER_CMD_AM_STATE_CHANGE    = b'\x02'  # Change State (SmartPlug)
 CLUSTER_CMD_AM_STATE_RESP      = b'\x80'  # Switch Status Update
@@ -47,8 +48,9 @@ CLUSTER_CMD_AM_PWR_DEMAND      = b'\x81'  # Power Demand Update
 CLUSTER_CMD_AM_PWR_CONSUMPTION = b'\x82'  # Power Consumption & Uptime Update
 CLUSTER_CMD_AM_MODE_REQ        = b'\xfa'  # Mode Change Request
 CLUSTER_CMD_AM_STATUS          = b'\xfb'  # Status Update
+CLUSTER_CMD_AM_VERSION_REQ     = b'\xfc'  # Version Information Request
 CLUSTER_CMD_AM_RSSI            = b'\xfd'  # RSSI Range Test Update
-CLUSTER_CMD_AM_VERSION         = b'\xfe'  # Received Version Information
+CLUSTER_CMD_AM_VERSION_RESP    = b'\xfe'  # Version Information Response
 
 # At the moment I am not sure what/if the following dict will be used?
 # It is here to describe the relationship between Cluster ID and Cmd.
@@ -71,9 +73,12 @@ alertme_cluster_cmds = {
     CLUSTER_ID_AM_BUTTON: {},
     CLUSTER_ID_AM_DISCOVERY: {
         CLUSTER_CMD_AM_RSSI: "RSSI Range Test Update",
-        CLUSTER_CMD_AM_VERSION: "Received Version Information"
+        CLUSTER_CMD_AM_VERSION_REQ: "Version Information Request",
+        CLUSTER_CMD_AM_VERSION_RESP: "Version Information Response"
     },
-    CLUSTER_ID_AM_SECURITY: {}
+    CLUSTER_ID_AM_SECURITY: {
+        CLUSTER_CMD_AM_SECURITY_INIT: "Security Init"
+    }
 }
 
 messages = {
@@ -267,7 +272,11 @@ def generate_version_info_request(params=None):
     :param params: Parameter dictionary (none required)
     :return: Message data
     """
-    data = b'\x11\x00\xfc'
+    checksum = b'\x11\x00'
+    cluster_cmd = CLUSTER_CMD_AM_VERSION_REQ
+    payload = b''  # No data required in request
+
+    data = checksum + cluster_cmd + payload
     return data
 
 
@@ -280,14 +289,14 @@ def generate_version_info_update(params):
     :return: Message data
     """
     checksum = b'\tq'
-    cluster_cmd = CLUSTER_CMD_AM_VERSION
+    cluster_cmd = CLUSTER_CMD_AM_VERSION_RESP
     payload = struct.pack('H', params['Version']) \
               + b'\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0b' \
               + params['Manufacturer'] \
               + '\n' + params['Type'] \
               + '\n' + params['ManufactureDate']
-    data = checksum + cluster_cmd + payload
 
+    data = checksum + cluster_cmd + payload
     return data
 
 
@@ -337,8 +346,26 @@ def generate_range_update(params):
     checksum = b'\t+'
     cluster_cmd = CLUSTER_CMD_AM_RSSI
     payload = struct.pack('B 1x', params['RSSI'])
-    data = checksum + cluster_cmd + payload
 
+    data = checksum + cluster_cmd + payload
+    return data
+
+
+def generate_missing_link(params=None):
+    """
+    Generate Missing Link. Not sure what this is yet? .. is it RSSI request??
+    Same as above? Do we really need this?
+    See http://www.desert-home.com/2015/06/hacking-into-iris-door-sensor-part-4.html?m=1
+    "This may be the missing link to this thing"
+
+    :param params: Parameter dictionary (none required)
+    :return: Message data
+    """
+    checksum = b'\x11\x39'
+    cluster_cmd = CLUSTER_CMD_AM_RSSI
+    payload = b''  # No data required in request
+
+    data = checksum + cluster_cmd + payload
     return data
 
 
@@ -367,6 +394,7 @@ def generate_power_demand_update(params):
     checksum = b'\tj'
     cluster_cmd = CLUSTER_CMD_AM_PWR_DEMAND
     payload = struct.pack('H', params['PowerDemand'])
+
     data = checksum + cluster_cmd + payload
     return data
 
@@ -440,17 +468,20 @@ def generate_switch_state_request(params):
     :param params: Parameter dictionary of relay state
     :return: Message data
     """
+    checksum = b'\x11\x00'
+
     if 'State' in params:
+        cluster_cmd = CLUSTER_CMD_AM_STATE_CHANGE
         if params['State']:
-            # On
-            data = b'\x11\x00\x02\x01\x01'
+            payload = b'\x01\x01'  # On
         else:
-            # Off
-            data = b'\x11\x00\x02\x00\x01'
+            payload = b'\x00\x01'  # Off
     else:
         # Check Only
-        data = b'\x11\x00\x01\x01'
+        cluster_cmd = CLUSTER_CMD_AM_STATE_REQ
+        payload = b'\x01'
 
+    data = checksum + cluster_cmd + payload
     return data
 
 
@@ -465,6 +496,7 @@ def generate_switch_state_update(params):
     checksum = b'\th'
     cluster_cmd = CLUSTER_CMD_AM_STATE_RESP
     payload = b'\x07\x01' if params['State'] else b'\x06\x00'
+
     data = checksum + cluster_cmd + payload
     return data
 
@@ -535,6 +567,21 @@ def parse_button_press(data):
     return ret
 
 
+def generate_security_init(params=None):
+    """
+    Generate Security Init. Keeps security devices joined?
+
+    :param params: Parameter dictionary (none required)
+    :return: Message data
+    """
+    checksum = b'\x11\x80'
+    cluster_cmd = CLUSTER_CMD_AM_SECURITY_INIT
+    payload = b'\x00\x05'
+
+    data = checksum + cluster_cmd + payload
+    return data
+
+
 def parse_security_state(data):
     """
     Process message, parse for security state
@@ -603,28 +650,6 @@ def parse_status_update(data):
     return ret
 
 
-def generate_missing_link(params=None):
-    """
-    Generate Missing Link. Not sure what this is yet?
-
-    :param params: Parameter dictionary (none required)
-    :return: Message data
-    """
-    data = b'\x11\x39\xfd'
-    return data
-
-
-def generate_security_init(params=None):
-    """
-    Generate Security Init. Keeps security devices joined?
-
-    :param params: Parameter dictionary (none required)
-    :return: Message data
-    """
-    data = b'\x11\x80\x00\x00\x05'
-    return data
-
-
 def generate_active_endpoints_request(params):
     """
     Generate Active Endpoints Request
@@ -642,6 +667,7 @@ def generate_active_endpoints_request(params):
     """
     addr_short = params['AddressShort']
     data = b'\xaa' + addr_short[1] + addr_short[0]
+
     return data
 
 
@@ -668,6 +694,7 @@ def generate_match_descriptor_request(params=None):
     :param params:
     """
     data = b'\x03\xfd\xff\x16\xc2\x00\x01\xf0\x00'
+
     return data
 
 
@@ -688,5 +715,6 @@ def generate_match_descriptor_response(params):
     """
     rf_data = params['rf_data']
     data = rf_data[0:1] + b'\x00\x00\x00\x01\x02'
+
     return data
 
