@@ -55,6 +55,7 @@ class TestHub(unittest.TestCase):
             'id': 'rx_explicit',
             'options': b'\x01',
         }
+        self.hub_obj.set_addr_short(b'\x00\x00')
         self.hub_obj.receive_message(message)
         result = self.ser.get_data_written()
         expected = b'~\x00\x19}1\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x02\x02\x00\xf0\xc2\x16\x00\x00}1\x00\xfa\x00\x01\x04'
@@ -126,8 +127,9 @@ class TestHub(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_match_descriptor_response(self):
-        rf_data = b'\x03\xfd\xff\x16\xc2\x00\x01\xf0\x00'
-        result = self.hub_obj.generate_match_descriptor_response(rf_data)
+        sequence = b'\x03'
+        self.hub_obj.set_addr_short(b'\x00\x00')
+        result = self.hub_obj.generate_match_descriptor_response(sequence)
         expected = {
             'profile': b'\x00\x00',
             'cluster': b'\x80\x06',

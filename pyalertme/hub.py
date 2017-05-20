@@ -219,7 +219,8 @@ class Hub(Base):
                         # regard this controller as valid.
 
                         # First send the Match Descriptor Response
-                        reply = self.generate_match_descriptor_response(message['rf_data'])
+                        sequence = message['rf_data'][0:1]
+                        reply = self.generate_match_descriptor_response(sequence)
                         self.send_message(reply, source_addr_long, source_addr_short)
 
                         # The next messages are directed at the hardware code (rather than the network code).
@@ -393,13 +394,13 @@ class Hub(Base):
         """
         return get_message('active_endpoints_request', {'AddressShort': addr_short})
 
-    def generate_match_descriptor_response(self, rf_data):
+    def generate_match_descriptor_response(self, sequence):
         """
         Generate Match Descriptor Response.
 
         :param rf_data:
         """
-        return get_message('match_descriptor_response', {'rf_data': rf_data})
+        return get_message('match_descriptor_response', {'Sequence': sequence, 'AddrShort': self.addr_short, 'Endpoints': b'\x02'})
 
     def generate_state_request(self, state=''):
         """

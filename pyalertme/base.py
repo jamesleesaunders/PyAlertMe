@@ -147,6 +147,16 @@ class Base(object):
         self._logger.debug('Received Message: %s', message)
         self.process_message(message)
 
+    def set_addr_short(self, addr_short):
+        """
+        Set Short Address
+
+        :param addr_short: Long Address
+        :return:
+        """
+        self._logger.debug('Setting Short Address: %s', addr_short)
+        self.addr_short = addr_short
+
     def set_addr_long(self, addr_long):
         """
         Set Long Address
@@ -167,7 +177,7 @@ class Base(object):
         # AT Packets
         if message['id'] == 'at_response':
             if message['command'] == 'MY':
-                self.addr_short = message['parameter']
+                self.set_addr_short(message['parameter'])
             if message['command'] == 'SH':
                 self._addr_long_list[0] = message['parameter']
             if message['command'] == 'SL':

@@ -16,6 +16,11 @@ PROFILE_ID_ALERTME = b'\xc2\x16'  # AlertMe Private Profile
 ENDPOINT_ZDO       = b'\x00'      # ZigBee Device Objects Endpoint
 ENDPOINT_ALERTME   = b'\x02'      # Alertme/Iris Endpoint
 
+# ZDP Status
+ZDP_STATUS_OK         = b'\x00'
+ZDP_STATUS_INVALID    = b'\x80'
+ZDP_STATUS_NOT_FOUND  = b'\x81'
+
 # ZDO Clusters
 CLUSTER_ID_ZDO_NETWORK_ADDRESS_REQ   = b'\x00\x00'   # Network (16-bit) Address Request
 CLUSTER_ID_ZDO_NETWORK_ADDRESS_RESP  = b'\x80\x00'   # Network (16-bit) Address Response
@@ -693,8 +698,29 @@ def generate_match_descriptor_request(params=None):
 
     :param params:
     """
-    data = b'\x03\xfd\xff\x16\xc2\x00\x01\xf0\x00'
 
+    example = {
+        'profile': '\x00\x00',
+        'source_addr': '\xf9\xab',
+        'dest_endpoint': '\x00',
+        'rf_data': '\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00',
+        'source_endpoint': '\x00',
+        'options': '\x02',
+        'source_addr_long': '\x00\ro\x00\x03\xbb\xb9\xf8',
+        'cluster': '\x00\x06',
+        'id': 'rx_explicit'
+    }
+
+    sequence = b'\x01'
+    net_addr = b'\xfd\xff'
+    profile_id = b'\x16\xc2'   # PROFILE_ID_ALERTME = b'\xc2\x16'
+    num_of_input = b'\x00'
+    inp_clus_list = b''
+    num_of_output = b'\x01'
+    out_clust_list = b'\xf0\x00'    # CLUSTER_ID_AM_STATUS    = b'\x00\xf0'
+    # out_clust_list = struct.pack('<2b', *struct.unpack('>2b', CLUSTER_ID_AM_STATUS))
+
+    data = b'\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00'
     return data
 
 
@@ -703,6 +729,7 @@ def generate_match_descriptor_response(params):
     Generate Match Descriptor Response
     If a descriptor match is found on the device, this response contains a list of endpoints that
     support the request criteria.
+    Example: '\x04\x00\x00\x00\x01\x02'
 
     Field Name       Size (bytes)   Description
     Status           1
@@ -713,8 +740,12 @@ def generate_match_descriptor_response(params):
 
     :param params: rf_data
     """
-    rf_data = params['rf_data']
-    data = rf_data[0:1] + b'\x00\x00\x00\x01\x02'
+    sequence   = params['Sequence']                                 # b'\x04'
+    status     = ZDP_STATUS_OK                                      # b'\x00'
+    net_addr   = params['AddrShort'][1] + params['AddrShort'][0]    # b'\x00\x00'
+    length     = struct.pack('b', len(params['Endpoints']))         # b'\x01'
+    match_list = params['Endpoints']                                # b'\x02'
 
+    data = sequence + status + net_addr + length + match_list
     return data
 

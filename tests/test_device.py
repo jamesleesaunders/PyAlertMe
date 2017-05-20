@@ -55,7 +55,7 @@ class TestDevice(unittest.TestCase):
             'cluster': b'\x00\x06',
             'src_endpoint': b'\x00',
             'dest_endpoint': b'\x00',
-            'data': b'\x03\xfd\xff\x16\xc2\x00\x01\xf0\x00'
+            'data': b'\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00'
         }
         self.assertEqual(result, expected)
 
