@@ -283,7 +283,7 @@ class TestMessages(unittest.TestCase):
 
     def test_generate_match_descriptor_response(self):
         rf_data = b'\x03\xfd\xff\x16\xc2\x00\x01\xf0\x00'
-        message = get_message('match_descriptor_response', {'Sequence': b'\x03', 'AddrShort': b'\xE1\x00', 'Endpoints': b'\x00\x02'})
+        message = get_message('match_descriptor_response', {'Sequence': b'\x03', 'AddressShort': b'\xE1\x00', 'Endpoints': b'\x00\x02'})
         result = message['data']
         expected = b'\x03\x00\x00\xE1\x02\x00\x02'
         self.assertEqual(result, expected)

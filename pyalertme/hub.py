@@ -400,7 +400,7 @@ class Hub(Base):
 
         :param rf_data:
         """
-        return get_message('match_descriptor_response', {'Sequence': sequence, 'AddrShort': self.addr_short, 'Endpoints': b'\x02'})
+        return get_message('match_descriptor_response', {'Sequence': sequence, 'AddressShort': self.addr_short, 'Endpoints': ENDPOINT_ALERTME})
 
     def generate_state_request(self, state=''):
         """

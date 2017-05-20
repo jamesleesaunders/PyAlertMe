@@ -670,9 +670,10 @@ def generate_active_endpoints_request(params):
 
     :param params: addr_short
     """
-    addr_short = params['AddressShort']
-    data = b'\xaa' + addr_short[1] + addr_short[0]
+    sequence = b'\xaa'
+    net_addr = params['AddressShort'][1] + params['AddressShort'][0]
 
+    data = sequence + net_addr
     return data
 
 
