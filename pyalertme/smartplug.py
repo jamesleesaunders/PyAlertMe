@@ -1,6 +1,6 @@
 import logging
 from pyalertme import *
-from pyalertme.messages import *
+from pyalertme.zigbee import *
 import struct
 import time
 import binascii

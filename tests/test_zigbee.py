@@ -1,6 +1,6 @@
 import sys
 sys.path.insert(0, '../')
-from pyalertme.messages import *
+from pyalertme.zigbee import *
 import unittest
 
 class TestMessages(unittest.TestCase):

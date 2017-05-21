@@ -741,11 +741,11 @@ def generate_match_descriptor_response(params):
 
     :param params: rf_data
     """
-    sequence   = params['Sequence']                                 # b'\x04'
-    status     = ZDP_STATUS_OK                                      # b'\x00'
-    net_addr   = params['AddrShort'][1] + params['AddrShort'][0]    # b'\x00\x00'
-    length     = struct.pack('b', len(params['Endpoints']))         # b'\x01'
-    match_list = params['Endpoints']                                # b'\x02'
+    sequence   = params['Sequence']                                     # b'\x04'
+    status     = ZDP_STATUS_OK                                          # b'\x00'
+    net_addr   = params['AddressShort'][1] + params['AddressShort'][0]  # b'\x00\x00'
+    length     = struct.pack('b', len(params['Endpoints']))             # b'\x01'
+    match_list = params['Endpoints']                                    # b'\x02'
 
     data = sequence + status + net_addr + length + match_list
     return data
