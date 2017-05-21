@@ -270,7 +270,7 @@ class TestMessages(unittest.TestCase):
 
     def test_generate_active_endpoints_request(self):
         params = {
-            'Sequence':  b'\xaa',
+            'Sequence':  170,
             'AddressShort': b'\x88\x9f'
         }
         message = get_message('active_endpoints_request', params)
@@ -280,7 +280,7 @@ class TestMessages(unittest.TestCase):
 
     def test_generate_match_descriptor_request(self):
         params = {
-            'Sequence': b'\x01',
+            'Sequence': 1,
             'AddressShort': b'\xff\xfd',
             'ProfileId': PROFILE_ID_ALERTME,
             'InClusterList': b'',
@@ -293,7 +293,7 @@ class TestMessages(unittest.TestCase):
 
     def test_generate_match_descriptor_response(self):
         params = {
-            'Sequence': b'\x03',
+            'Sequence': 3,
             'AddressShort': b'\xe1\x00',
             'EndpointList': b'\x00\x02'
         }

@@ -393,7 +393,7 @@ class Hub(Base):
         :param addr_short:
         """
         params = {
-            'Sequence':  b'\xaa',
+            'Sequence':  170,
             'AddressShort': addr_short
         }
         return get_message('active_endpoints_request', params)
@@ -405,7 +405,7 @@ class Hub(Base):
         :param rf_data:
         """
         params = {
-            'Sequence': sequence,
+            'Sequence': 3, # sequence,
             'AddressShort': self.addr_short,
             'EndpointList': ENDPOINT_ALERTME
         }

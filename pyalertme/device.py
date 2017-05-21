@@ -152,7 +152,7 @@ class Device(Base):
 
         """
         params = {
-            'Sequence': b'\x01',
+            'Sequence': 1,
             'AddressShort': BROADCAST_SHORT,
             'ProfileId': PROFILE_ID_ALERTME,
             'InClusterList': b'',

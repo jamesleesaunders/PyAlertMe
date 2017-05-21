@@ -671,7 +671,7 @@ def generate_active_endpoints_request(params):
 
     :param params:
     """
-    sequence = params['Sequence']                                     # b'\xaa'
+    sequence = struct.pack('B', params['Sequence'])                   # b'\xaa'
     net_addr = params['AddressShort'][1] + params['AddressShort'][0]  # b'\x9f\x88'
 
     data = sequence + net_addr
@@ -698,12 +698,12 @@ def generate_match_descriptor_request(params=None):
 
     :param params:
     """
-    sequence = params['Sequence']                                                    # b'\x01'
+    sequence = struct.pack('B', params['Sequence'])                                  # b'\x01'
     net_addr = params['AddressShort'][1] + params['AddressShort'][0]                 # b'\xfd\xff'
     profile_id = params['ProfileId'][1] + params['ProfileId'][0]                     # b'\x16\xc2'  PROFILE_ID_ALERTME (reversed)
-    num_input_clusters = struct.pack('b', len(params['InClusterList']) / 2)          # b'\x00'
+    num_input_clusters = struct.pack('B', len(params['InClusterList']) / 2)          # b'\x00'
     input_cluster_list = params['InClusterList']                                     # b''
-    num_output_clusters = struct.pack('b', len(params['OutClusterList']) / 2)        # b'\x01'
+    num_output_clusters = struct.pack('B', len(params['OutClusterList']) / 2)        # b'\x01'
     output_cluster_list = params['OutClusterList'][1] + params['OutClusterList'][0]  # b'\xf0\x00'  CLUSTER_ID_AM_STATUS (reversed)
 
     data = sequence + net_addr + profile_id + num_input_clusters + input_cluster_list + num_output_clusters + output_cluster_list
@@ -727,10 +727,10 @@ def generate_match_descriptor_response(params):
 
     :param params:
     """
-    sequence   = params['Sequence']                                     # b'\x04'
+    sequence   = struct.pack('B', params['Sequence'])                   # b'\x04'
     status     = ZDP_STATUS_OK                                          # b'\x00'
     net_addr   = params['AddressShort'][1] + params['AddressShort'][0]  # b'\x00\x00'
-    length     = struct.pack('b', len(params['EndpointList']))          # b'\x01'
+    length     = struct.pack('B', len(params['EndpointList']))          # b'\x01'
     match_list = params['EndpointList']                                 # b'\x02'
 
     data = sequence + status + net_addr + length + match_list

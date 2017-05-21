@@ -39,6 +39,9 @@ class Base(object):
         self.associated = False
         self.started = False
 
+        # ZDO Sequence
+        self.zdo_sequence = 1
+
     def start(self, serial):
         """
         Start Device
