@@ -143,6 +143,7 @@ class Device(Base):
 
         :return: Message of range value
         """
+
         return get_message('range_info_update', {'RSSI': self.rssi})
 
     def generate_match_descriptor_request(self):
@@ -150,5 +151,12 @@ class Device(Base):
         Generate Match Descriptor Request
 
         """
-        return get_message('match_descriptor_request')
+        params = {
+            'Sequence': b'\x01',
+            'AddressShort': BROADCAST_SHORT,
+            'ProfileId': PROFILE_ID_ALERTME,
+            'InClusterList': b'',
+            'OutClusterList': CLUSTER_ID_AM_STATUS
+        }
+        return get_message('match_descriptor_request', params)
 

@@ -392,7 +392,11 @@ class Hub(Base):
 
         :param addr_short:
         """
-        return get_message('active_endpoints_request', {'AddressShort': addr_short})
+        params = {
+            'Sequence':  b'\xaa',
+            'AddressShort': addr_short
+        }
+        return get_message('active_endpoints_request', params)
 
     def generate_match_descriptor_response(self, sequence):
         """
@@ -400,7 +404,12 @@ class Hub(Base):
 
         :param rf_data:
         """
-        return get_message('match_descriptor_response', {'Sequence': sequence, 'AddressShort': self.addr_short, 'Endpoints': ENDPOINT_ALERTME})
+        params = {
+            'Sequence': sequence,
+            'AddressShort': self.addr_short,
+            'EndpointList': ENDPOINT_ALERTME
+        }
+        return get_message('match_descriptor_response', params)
 
     def generate_state_request(self, state=''):
         """

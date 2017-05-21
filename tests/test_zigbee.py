@@ -269,23 +269,37 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_active_endpoints_request(self):
-        source_addr_short = b'\x88\x9f'
-        message = get_message('active_endpoints_request', {'AddressShort': source_addr_short})
+        params = {
+            'Sequence':  b'\xaa',
+            'AddressShort': b'\x88\x9f'
+        }
+        message = get_message('active_endpoints_request', params)
         result = message['data']
         expected = b'\xaa\x9f\x88'
         self.assertEqual(result, expected)
 
     def test_generate_match_descriptor_request(self):
-        message = get_message('match_descriptor_request')
+        params = {
+            'Sequence': b'\x01',
+            'AddressShort': b'\xff\xfd',
+            'ProfileId': PROFILE_ID_ALERTME,
+            'InClusterList': b'',
+            'OutClusterList': b'\x00\xf0'
+        }
+        message = get_message('match_descriptor_request', params)
         result = message['data']
         expected = '\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00'
         self.assertEqual(result, expected)
 
     def test_generate_match_descriptor_response(self):
-        rf_data = b'\x03\xfd\xff\x16\xc2\x00\x01\xf0\x00'
-        message = get_message('match_descriptor_response', {'Sequence': b'\x03', 'AddressShort': b'\xE1\x00', 'Endpoints': b'\x00\x02'})
+        params = {
+            'Sequence': b'\x03',
+            'AddressShort': b'\xe1\x00',
+            'EndpointList': b'\x00\x02'
+        }
+        message = get_message('match_descriptor_response', params)
         result = message['data']
-        expected = b'\x03\x00\x00\xE1\x02\x00\x02'
+        expected = b'\x03\x00\x00\xe1\x02\x00\x02'
         self.assertEqual(result, expected)
 
     def test_generate_routing_table_request(self):
@@ -299,20 +313,6 @@ class TestMessages(unittest.TestCase):
         result = message['data']
         expected = b'\xff\x00'
         self.assertEqual(result, expected)
-
-    def test_temp_message_breakdown(self):
-        # Just a quick test to see how cluster cmd is broken down - remove when done
-        message1 = b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00'
-        cluster_cmd1 = message1[2]
-        self.assertEqual(cluster_cmd1, b'\xfb')
-
-        message2 = b'\x11\x00\x02\x01\x01'
-        cluster_cmd2 = message2[2]
-        self.assertEqual(cluster_cmd2, b'\x02')
-
-        message3 = b'\tj\x81\x00\x00'
-        cluster_cmd3 = message3[2]
-        self.assertEqual(cluster_cmd3, b'\x81')
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

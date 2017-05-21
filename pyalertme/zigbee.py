@@ -4,7 +4,7 @@ import copy
 
 # Zigbee Addressing
 BROADCAST_LONG = b'\x00\x00\x00\x00\x00\x00\xff\xff' 
-BROADCAST_SHORT = b'\xff\xfe'
+BROADCAST_SHORT = b'\xff\xfd'
 
 # Zigbee Profile IDs
 PROFILE_ID_ZDP     = b'\x00\x00'  # Zigbee Device Profile
@@ -662,16 +662,17 @@ def generate_active_endpoints_request(params):
     in the payload. Remember, it needs to be little endian (backwards)
     The first byte in the payload is simply a number to identify the message
     the response will have the same number in it.
-    See: http://ftp1.digi.com/support/images/APP_NOTE_XBee_ZigBee_Device_Profile.pdf
+    Example: '\xaa\x9f\x88'
 
-    Field Name       Size (bytes)   Description
-    Network Address  2              16-bit address of a device in the network whose
-                                    active endpoint list being requested.
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Sequence                   1          Frame Sequence
+    Network Address            2          16-bit address of a device in the network whose active endpoint list being requested.
 
-    :param params: addr_short
+    :param params:
     """
-    sequence = b'\xaa'
-    net_addr = params['AddressShort'][1] + params['AddressShort'][0]
+    sequence = params['Sequence']                                     # b'\xaa'
+    net_addr = params['AddressShort'][1] + params['AddressShort'][0]  # b'\x9f\x88'
 
     data = sequence + net_addr
     return data
@@ -682,46 +683,30 @@ def generate_match_descriptor_request(params=None):
     Generate Match Descriptor Request
     Broadcast or unicast transmission used to discover the device(s) that supports
     a specified profile ID and/or clusters.
+    Example: '\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00'
 
-    Field Name       Size (bytes)   Description
-    Network Address  2              16-bit address of a device in the network whose
-                                    power descriptor is being requested.
-    Profile ID       2              Profile ID to be matched at the destination.
-    Number of Input  1              The number of input clusters in the In Cluster
-    Clusters                        List for matching. Set to 0 if no clusters supplied.
-    Input Cluster    2*             List of input cluster IDs to be used for matching.
-    List
-    Number of Output 1              The number of output clusters in the Output Cluster
-    Clusters                        List for matching. Set to 0 if no clusters supplied.
-    Output Cluster   2*             List of output cluster IDs to be used for matching.
-    List
-                      * Number of Input Clusters
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Sequence                   1          Frame Sequence
+    Network Address            2          16-bit address of a device in the network whose power descriptor is being requested.
+    Profile ID                 2          Profile ID to be matched at the destination.
+    Number of Input Clusters   1          The number of input clusters in the In Cluster List for matching. Set to 0 if no clusters supplied.
+    Input Cluster List         2*         List of input cluster IDs to be used for matching.
+    Number of Output Clusters  1          The number of output clusters in the Output Cluster List for matching. Set to 0 if no clusters supplied.
+    Output Cluster List        2*         List of output cluster IDs to be used for matching.
+                                          * Number of Input Clusters
 
     :param params:
     """
+    sequence = params['Sequence']                                                    # b'\x01'
+    net_addr = params['AddressShort'][1] + params['AddressShort'][0]                 # b'\xfd\xff'
+    profile_id = params['ProfileId'][1] + params['ProfileId'][0]                     # b'\x16\xc2'  PROFILE_ID_ALERTME (reversed)
+    num_input_clusters = struct.pack('b', len(params['InClusterList']) / 2)          # b'\x00'
+    input_cluster_list = params['InClusterList']                                     # b''
+    num_output_clusters = struct.pack('b', len(params['OutClusterList']) / 2)        # b'\x01'
+    output_cluster_list = params['OutClusterList'][1] + params['OutClusterList'][0]  # b'\xf0\x00'  CLUSTER_ID_AM_STATUS (reversed)
 
-    example = {
-        'profile': '\x00\x00',
-        'source_addr': '\xf9\xab',
-        'dest_endpoint': '\x00',
-        'rf_data': '\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00',
-        'source_endpoint': '\x00',
-        'options': '\x02',
-        'source_addr_long': '\x00\ro\x00\x03\xbb\xb9\xf8',
-        'cluster': '\x00\x06',
-        'id': 'rx_explicit'
-    }
-
-    sequence = b'\x01'
-    net_addr = b'\xfd\xff'
-    profile_id = b'\x16\xc2'   # PROFILE_ID_ALERTME = b'\xc2\x16'
-    num_of_input = b'\x00'
-    inp_clus_list = b''
-    num_of_output = b'\x01'
-    out_clust_list = b'\xf0\x00'    # CLUSTER_ID_AM_STATUS    = b'\x00\xf0'
-    # out_clust_list = struct.pack('<2b', *struct.unpack('>2b', CLUSTER_ID_AM_STATUS))
-
-    data = b'\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00'
+    data = sequence + net_addr + profile_id + num_input_clusters + input_cluster_list + num_output_clusters + output_cluster_list
     return data
 
 
@@ -732,20 +717,21 @@ def generate_match_descriptor_response(params):
     support the request criteria.
     Example: '\x04\x00\x00\x00\x01\x02'
 
-    Field Name       Size (bytes)   Description
-    Status           1
-    Network Address  2              Indicates the 16-bit address of the responding device.
-    Length           1              The number of endpoints on the remote device that match
-                                    the request criteria.
-    Match List       Variable       List of endpoints on the remote that match the request criteria.
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Sequence                   1          Frame Sequence
+    Status                     1          Response Status
+    Network Address            2          Indicates the 16-bit address of the responding device.
+    Length                     1          The number of endpoints on the remote device that match the request criteria.
+    Match List                 Variable   List of endpoints on the remote that match the request criteria.
 
-    :param params: rf_data
+    :param params:
     """
     sequence   = params['Sequence']                                     # b'\x04'
     status     = ZDP_STATUS_OK                                          # b'\x00'
     net_addr   = params['AddressShort'][1] + params['AddressShort'][0]  # b'\x00\x00'
-    length     = struct.pack('b', len(params['Endpoints']))             # b'\x01'
-    match_list = params['Endpoints']                                    # b'\x02'
+    length     = struct.pack('b', len(params['EndpointList']))          # b'\x01'
+    match_list = params['EndpointList']                                 # b'\x02'
 
     data = sequence + status + net_addr + length + match_list
     return data
