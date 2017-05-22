@@ -15,8 +15,8 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(result, expected)
 
         # Test message without data lambda
-        result = get_message('missing_link')
-        expected = {'profile': b'\xc2\x16', 'cluster': b'\x00\xf0', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x02', 'data': b'\x11\x39\xfd'}
+        result = get_message('permit_join_request')
+        expected = {'profile': b'\x00\x00', 'cluster': b'\x00\x36', 'dest_endpoint': b'\x00', 'src_endpoint': b'\x00', 'data': b'\xff\x00'}
         self.assertEqual(result, expected)
 
         # Test message that does not exist throws exception
@@ -256,16 +256,6 @@ class TestMessages(unittest.TestCase):
     def test_parse_security_state(self):
         result = parse_security_state(b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00')
         expected = {'ReedSwitch': 'OPEN', 'TamperSwitch': 'CLOSED'}
-        self.assertEqual(result, expected)
-
-    def test_generate_missing_link(self):
-        result = generate_missing_link()
-        expected = b'\x11\x39\xfd'
-        self.assertEqual(result, expected)
-
-    def test_generate_security_init(self):
-        result = generate_security_init()
-        expected = b'\x11\x80\x00\x00\x05'
         self.assertEqual(result, expected)
 
     def test_generate_active_endpoints_request(self):

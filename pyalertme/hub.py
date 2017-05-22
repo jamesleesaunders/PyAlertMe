@@ -288,11 +288,6 @@ class Hub(Base):
                             attributes = parse_status_update(message['rf_data'])
                             self.save_node_attributes(node_id, attributes)
 
-                            # This may be the missing link to this thing?
-                            # self._logger.debug('Sending Missing Link')
-                            # reply = self.generate_missing_link()
-                            # self.send_message(reply, source_addr_long, source_addr_short)
-
                         else:
                             self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
@@ -445,11 +440,3 @@ class Hub(Base):
         :return: Message
         """
         return get_message('security_init')
-
-    def generate_missing_link(self):
-        """
-        Generate 'Missing Link'
-
-        :return: Message
-        """
-        return get_message('missing_link')

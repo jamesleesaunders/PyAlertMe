@@ -2,19 +2,19 @@ import logging
 import struct
 import copy
 
-# Zigbee Addressing
+# ZigBee Addressing
 BROADCAST_LONG = b'\x00\x00\x00\x00\x00\x00\xff\xff' 
 BROADCAST_SHORT = b'\xff\xfd'
 
-# Zigbee Profile IDs
-PROFILE_ID_ZDP     = b'\x00\x00'  # Zigbee Device Profile
+# ZigBee Profile IDs
+PROFILE_ID_ZDP     = b'\x00\x00'  # ZigBee Device Profile
 PROFILE_ID_HA      = b'\x01\x04'  # HA Device Profile
 PROFILE_ID_LL      = b'\xc0\x5e'  # Light Link Profile
 PROFILE_ID_ALERTME = b'\xc2\x16'  # AlertMe Private Profile
 
-# Zigbee Endpoints
+# ZigBee Endpoints
 ENDPOINT_ZDO       = b'\x00'      # ZigBee Device Objects Endpoint
-ENDPOINT_ALERTME   = b'\x02'      # Alertme/Iris Endpoint
+ENDPOINT_ALERTME   = b'\x02'      # AlertMe / Iris Endpoint
 
 # ZDP Status
 ZDP_STATUS_OK         = b'\x00'
@@ -147,16 +147,6 @@ messages = {
            'data': lambda params: generate_mode_change_request(params)
        }
     },
-    'missing_link': {
-        'name': 'Missing Link',
-        'frame': {
-            'profile': PROFILE_ID_ALERTME,
-            'cluster': CLUSTER_ID_AM_STATUS,
-            'src_endpoint': ENDPOINT_ALERTME,
-            'dest_endpoint': ENDPOINT_ALERTME,
-            'data': lambda params: generate_missing_link(params)
-        }
-    },
     'power_demand_update': {
         'name': 'Power Demand Update',
         'frame': {
@@ -274,6 +264,11 @@ def generate_version_info_request(params=None):
     Generate Version Info Request
     This message is sent FROM the Hub TO the SmartPlug requesting version information.
 
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   2          Unknown Preamble TBC
+    Cluster Command            1          Cluster Command - Version Information Request (b'\xfc')
+
     :param params: Parameter dictionary (none required)
     :return: Message data
     """
@@ -289,6 +284,14 @@ def generate_version_info_update(params):
     """
     Generate Version Info Update
     This message is sent TO the Hub FROM the SmartPlug advertising version information.
+
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   2          Unknown Preamble TBC
+    Cluster Command            1          Cluster Command - Version Information Response (b'\xfe')
+    Unknown                    17         Unknown Values TBC. There may be more interesting stuff in here?
+    HW Version                 2          Hardware Version
+    Type Info                  Variable   Type Information (b'AlertMe.com\tSmartPlug\n2013-09-26')
 
     :param params: Parameter dictionary of version info
     :return: Message data
@@ -309,6 +312,14 @@ def parse_version_info_update(data):
     """
     Process message, parse for version information:
     Type, Version, Manufacturer and Manufacturer Date
+
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   2          Unknown Preamble TBC
+    Cluster Command            1          Cluster Command - Version Information Response (b'\xfe')
+    Unknown                    17         Unknown Content TBC There may be more interesting stuff in here?
+    HW Version                 2          Hardware Version
+    Type Info                  Variable   Type Information (b'AlertMe.com\tSmartPlug\n2013-09-26')
 
     :param data: Message data
     :return: Parameter dictionary of version info
@@ -345,6 +356,13 @@ def generate_range_update(params):
     """
     Generate range message
 
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   2          Unknown Preamble TBC
+    Cluster Command            1          Cluster Command - RSSI Range Test Update (b'\xfd')
+    RSSI Value                 1          RSSI Range Test Value
+    Xxxxxxxxxx                 1          N/K
+
     :param params: Parameter dictionary of RSSI value
     :return: Message data
     """
@@ -355,28 +373,16 @@ def generate_range_update(params):
     data = checksum + cluster_cmd + payload
     return data
 
-
-def generate_missing_link(params=None):
-    """
-    Generate Missing Link. Not sure what this is yet? .. is it RSSI request??
-    Same as above? Do we really need this?
-    See http://www.desert-home.com/2015/06/hacking-into-iris-door-sensor-part-4.html?m=1
-    "This may be the missing link to this thing"
-
-    :param params: Parameter dictionary (none required)
-    :return: Message data
-    """
-    checksum = b'\x11\x39'
-    cluster_cmd = CLUSTER_CMD_AM_RSSI
-    payload = b''  # No data required in request
-
-    data = checksum + cluster_cmd + payload
-    return data
-
-
 def parse_range_info_update(data):
     """
     Process message, parse for RSSI range test value
+
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   2          Unknown Preamble TBC
+    Cluster Command            1          Cluster Command - RSSI Range Test Update (b'\xfd')
+    RSSI Value                 1          RSSI Range Test Value
+    Xxxxxxxxxx                 1          N/K
 
     :param data: Message data
     :return: Parameter dictionary of RSSI value
@@ -393,6 +399,12 @@ def generate_power_demand_update(params):
     """
     Generate Power Demand Update message data
 
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   2          Unknown Preamble TBC
+    Cluster Command            1          Cluster Command - Power Demand Update (b'\x81')
+    Power Value                2          Power Demand Value (kWh ?)
+
     :param params: Parameter dictionary of power demand value
     :return: Message data
     """
@@ -404,10 +416,63 @@ def generate_power_demand_update(params):
     return data
 
 
+def parse_power_demand(data):
+    """
+    Process message, parse for power demand value.
+
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   2          Unknown Preamble TBC
+    Cluster Command            1          Cluster Command - Power Demand Update (b'\x81')
+    Power Value                2          Power Demand Value (kWh ?)
+
+    :param data: Message data
+    :return: Parameter dictionary of power demand value
+    """
+    values = dict(zip(
+        ('cluster_cmd', 'power_demand'),
+        struct.unpack('< 2x s H', data)
+    ))
+
+    return {'PowerDemand': values['power_demand']}
+
+
+def parse_power_consumption(data):
+    """
+    Process message, parse for power consumption value.
+
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   2          Unknown Preamble TBC
+    Cluster Command            1          Cluster Command - Power Consumption & Uptime Update (b'\x82')
+    Power Value                4          Power Consumption Value (kWh ?)
+    Up Time                    4          Up Time Value (seconds)
+    Xxxxxxxxxx                 1          N/K
+
+    :param data: Message data
+    :return: Parameter dictionary of usage stats
+    """
+    ret = {}
+    values = dict(zip(
+        ('cluster_cmd', 'powerConsumption', 'upTime'),
+        struct.unpack('< 2x s I I 1x', data)
+    ))
+    ret['PowerConsumption'] = values['powerConsumption']
+    ret['UpTime'] = values['upTime']
+
+    return ret
+
+
 def generate_mode_change_request(params):
     """
     Generate Mode Change Request
     Available Modes: 'Normal', 'RangeTest', 'Locked', 'Silent'
+
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   2          Unknown Preamble TBC
+    Cluster Command            1          Cluster Command - Mode Change Request (b'\xfa')
+    Mode                       2          Requested Mode (1: Normal, 257: Range Test, 513: Locked, 769: Silent)
 
     :param params: Parameter dictionary of requested mode
     :return: Message data
@@ -432,43 +497,17 @@ def generate_mode_change_request(params):
     return data
 
 
-def parse_power_demand(data):
-    """
-    Process message, parse for power demand value.
-
-    :param data: Message data
-    :return: Parameter dictionary of power demand value
-    """
-    values = dict(zip(
-        ('cluster_cmd', 'power_demand'),
-        struct.unpack('< 2x s H', data)
-    ))
-
-    return {'PowerDemand': values['power_demand']}
-
-
-def parse_power_consumption(data):
-    """
-    Process message, parse for power consumption value.
-
-    :param data: Message data
-    :return: Parameter dictionary of usage stats
-    """
-    ret = {}
-    values = dict(zip(
-        ('cluster_cmd', 'powerConsumption', 'upTime'),
-        struct.unpack('< 2x s I I 1x', data)
-    ))
-    ret['PowerConsumption'] = values['powerConsumption']
-    ret['UpTime'] = values['upTime']
-
-    return ret
-
-
 def generate_switch_state_request(params):
     """
     Generate Switch State Change request data.
     This message is sent FROM the Hub TO the SmartPlug requesting state change.
+
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   2          Unknown Preamble TBC
+    Cluster Command            1          Cluster Command - Change State (SmartPlug) (b'\x01' / b'\x02')
+    Requested State            2*         b'\x01' = Check Only, b'\x01\x01' = On, b'\x00\x01' = Off
+                                          * Size = 1 if check only
 
     :param params: Parameter dictionary of relay state
     :return: Message data
@@ -490,26 +529,16 @@ def generate_switch_state_request(params):
     return data
 
 
-def generate_switch_state_update(params):
-    """
-    Generate Switch State update message data.
-    This message is sent TO the Hub FROM the SmartPlug advertising state change.
-
-    :param params: Parameter dictionary of relay state
-    :return: Message data
-    """
-    checksum = b'\th'
-    cluster_cmd = CLUSTER_CMD_AM_STATE_RESP
-    payload = b'\x07\x01' if params['State'] else b'\x06\x00'
-
-    data = checksum + cluster_cmd + payload
-    return data
-
-
 def parse_switch_state_request(data):
     """
     Process message, parse for relay state change request.
     This message is sent FROM the Hub TO the SmartPlug requesting state change.
+
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   2          Unknown Preamble TBC
+    Cluster Command            1          Cluster Command - Change State (SmartPlug) (b'\x02')
+    Requested State            2          b'\x01\x01' = On, b'\x00\x01' = Off
 
     :param data: Message data
     :return: Parameter dictionary of relay state
@@ -523,40 +552,82 @@ def parse_switch_state_request(data):
         logging.error('Unknown State Request')
 
 
+def generate_switch_state_update(params):
+    """
+    Generate Switch State update message data.
+    This message is sent TO the Hub FROM the SmartPlug advertising state change.
+
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   2          Unknown Preamble TBC
+    Cluster Command            1          Cluster Command - Switch Status Update (b'\x80')
+    State                      2          b'\x07\x01' = On, b'\x06\x00' = Off
+
+    :param params: Parameter dictionary of relay state
+    :return: Message data
+    """
+    checksum = b'\th'
+    cluster_cmd = CLUSTER_CMD_AM_STATE_RESP
+    payload = b'\x07\x01' if params['State'] else b'\x06\x00'
+
+    data = checksum + cluster_cmd + payload
+    return data
+
+
 def parse_switch_state_update(data):
     """
     Process message, parse for switch status.
     This message is sent TO the Hub FROM the SmartPlug advertising state change.
 
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   2          Unknown Preamble TBC
+    Cluster Command            1          Cluster Command - Switch Status Update (b'\x80')
+    Relay State                2          b'\x07\x01' = On, b'\x06\x00' = Off
+
     :param data: Message data
     :return: Parameter dictionary of switch status
     """
-    values = struct.unpack('< 2x b b b', data)
+    values = struct.unpack('< 2x b b b', data)  # TODO Check - this does not match above
     if values[2] & 0x01:
         return {'State': 1}
     else:
         return {'State': 0}
 
 
-def parse_tamper_state(data):
+def generate_security_init(params=None):
     """
-    Process message, parse for Tamper Switch State Change
+    Generate Security Init. Keeps security devices joined?
 
-    :param data: Message data
-    :return: Parameter dictionary of tamper status
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   2          Unknown Preamble TBC
+    Cluster Command            1          Cluster Command - Security Init (b'\x00')
+    Unknown Value              2          Unknown Value (b'\x00\x05')
+
+    :param params: Parameter dictionary (none required)
+    :return: Message data
     """
-    ret = {}
-    if ord(data[3]) == 0x02:
-        ret['TamperSwitch'] = 'OPEN'
-    else:
-        ret['TamperSwitch'] = 'CLOSED'
+    checksum = b'\x11\x80'
+    cluster_cmd = CLUSTER_CMD_AM_SECURITY_INIT
+    payload = b'\x00\x05'
 
-    return ret
+    data = checksum + cluster_cmd + payload
+    return data
 
 
 def parse_button_press(data):
     """
     Process message, parse for button press status
+
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   1          Unknown Preamble TBC
+    Cluster Command            1          ??? \x00
+    Button State               2          TODO: Gets complicated?!
+
+    b'\t\x00\x00\x00\x02\xbf\xc3\x00\x00' {'Counter': 50111, 'State': 0}
+    b'\t\x00\x01\x00\x01\x12\xca\x00\x00' {'Counter': 51730, 'State': 1}
 
     :param data: Message data
     :return: Parameter dictionary of button status
@@ -572,24 +643,42 @@ def parse_button_press(data):
     return ret
 
 
-def generate_security_init(params=None):
+def parse_tamper_state(data):
     """
-    Generate Security Init. Keeps security devices joined?
+    Process message, parse for Tamper Switch State Change
 
-    :param params: Parameter dictionary (none required)
-    :return: Message data
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   1          Unknown Preamble TBC
+    Cluster Command            1          ??? \x00
+    Tamper State               2          TODO: Gets complicated?!
+
+    b'\t\x00\x00\x02\xe8\xa6\x00\x00'  {'TamperSwitch': 'OPEN'}
+    b'\t\x00\x01\x01+\xab\x00\x00'     {'TamperSwitch': 'CLOSED'}
+
+    :param data: Message data
+    :return: Parameter dictionary of tamper status
     """
-    checksum = b'\x11\x80'
-    cluster_cmd = CLUSTER_CMD_AM_SECURITY_INIT
-    payload = b'\x00\x05'
+    ret = {}
+    if ord(data[3]) == 0x02:
+        ret['TamperSwitch'] = 'OPEN'
+    else:
+        ret['TamperSwitch'] = 'CLOSED'
 
-    data = checksum + cluster_cmd + payload
-    return data
+    return ret
 
 
 def parse_security_state(data):
     """
     Process message, parse for security state
+
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   2          Unknown Preamble TBC
+    Cluster Command            1          Cluster Command - Status Update (b'\xfb')
+    Button State               2          TODO: Gets complicated?!
+
+    b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00'  {'ReedSwitch': 'OPEN', 'TamperSwitch': 'CLOSED'}   SAME AS parse_status_update!!
 
     :param data: Message data
     :return: Parameter dictionary of security state
@@ -615,6 +704,8 @@ def parse_security_state(data):
 def parse_status_update(data):
     """
     Process message, parse for status update
+
+    b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00' {'TempFahrenheit': 87.008, 'Counter': 13019}
 
     :param data: Message data
     :return: Parameter dictionary of state
@@ -670,6 +761,7 @@ def generate_active_endpoints_request(params):
     Network Address            2          16-bit address of a device in the network whose active endpoint list being requested.
 
     :param params:
+    :return: Message data
     """
     sequence = struct.pack('B', params['Sequence'])                   # b'\xaa'
     net_addr = params['AddressShort'][1] + params['AddressShort'][0]  # b'\x9f\x88'
@@ -678,7 +770,7 @@ def generate_active_endpoints_request(params):
     return data
 
 
-def generate_match_descriptor_request(params=None):
+def generate_match_descriptor_request(params):
     """
     Generate Match Descriptor Request
     Broadcast or unicast transmission used to discover the device(s) that supports
@@ -697,6 +789,7 @@ def generate_match_descriptor_request(params=None):
                                           * Number of Input Clusters
 
     :param params:
+    :return: Message data
     """
     sequence = struct.pack('B', params['Sequence'])                                  # b'\x01'
     net_addr = params['AddressShort'][1] + params['AddressShort'][0]                 # b'\xfd\xff'
@@ -726,6 +819,7 @@ def generate_match_descriptor_response(params):
     Match List                 Variable   List of endpoints on the remote that match the request criteria.
 
     :param params:
+    :return: Message data
     """
     sequence   = struct.pack('B', params['Sequence'])                   # b'\x04'
     status     = ZDP_STATUS_OK                                          # b'\x00'

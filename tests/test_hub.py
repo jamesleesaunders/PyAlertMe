@@ -7,15 +7,22 @@ from mock_serial import Serial
 class TestHub(unittest.TestCase):
 
     def setUp(self):
-        self.ser = Serial()
+        self.ser1 = Serial()
         self.hub_obj = Hub()
-        self.hub_obj.start(self.ser)
-        self.hub_obj.set_addr_long(b'\x00\x1E\x5E\x09\x02\x14\xC5\xAB')
+        self.hub_obj.start(self.ser1)
+        self.hub_obj.set_addr_long(b'\x00\x1e\x5e\x09\x02\x14\xc5\xab')
+        self.hub_obj.set_addr_short(b'\x88\xd2')
+
+        self.ser2 = Serial()
+        self.device_obj = Device()
+        self.device_obj.start(self.ser2)
 
     def tearDown(self):
         self.hub_obj.halt()
+        self.device_obj.halt()
 
     def test_receive_message(self):
+        # First, lets manually construct a Version message and send it into the Hub.
         message = {
             'cluster': b'\x00\xf6',
             'dest_endpoint': b'\x02',
@@ -35,15 +42,44 @@ class TestHub(unittest.TestCase):
                 'Manufacturer': 'AlertMe.com',
                 'Type': 'SmartPlug',
                 'Version': 20045,
-                'AddressLong': '\x00\ro\x00\x03\xbb\xb9\xf8',
-                'AddressShort': '\x88\x9f',
+                'AddressLong': b'\x00\ro\x00\x03\xbb\xb9\xf8',
+                'AddressShort': b'\x88\x9f',
                 'Attributes': {}
             }
         }
-
         self.assertEqual(result, expected)
 
-    def test_endpoint_request(self):
+        # Next, lets get the Device class to generate a Version message and send it into the Hub.
+        message = self.device_obj.generate_version_info_update()
+        message['id'] = 'rx_explicit'
+        message['source_addr'] = b'\x88\xfd'
+        message['source_addr_long'] = b'\x00\x0d\x6f\x00\x00\x00\xff\xff'
+        message['rf_data'] = message['data']
+        self.hub_obj.receive_message(message)
+        result = self.hub_obj.get_nodes()
+        expected = {
+            '00:0d:6f:00:03:bb:b9:f8': {
+                'ManufactureDate': '2013-09-26',
+                'Manufacturer': 'AlertMe.com',
+                'Type': 'SmartPlug',
+                'Version': 20045,
+                'AddressLong': b'\x00\ro\x00\x03\xbb\xb9\xf8',
+                'AddressShort': b'\x88\x9f',
+                'Attributes': {}
+            },
+            '00:0d:6f:00:00:00:ff:ff': {
+                'ManufactureDate': '2017-01-01',
+                'Manufacturer': 'PyAlertMe',
+                'Type': 'Generic Device',
+                'Version': 12345,
+                'AddressLong': b'\x00\x0d\x6f\x00\x00\x00\xff\xff',
+                'AddressShort': b'\x88\xfd',
+                'Attributes': {}
+            }
+        }
+        self.assertEqual(result, expected)
+
+    def test_mock_serial(self):
         message = {
             'source_addr': b'\x88\x9f',
             'source_addr_long': b'\x00\ro\x00\x03\xbb\xb9\xf8',
@@ -55,9 +91,8 @@ class TestHub(unittest.TestCase):
             'id': 'rx_explicit',
             'options': b'\x01',
         }
-        self.hub_obj.set_addr_short(b'\x00\x00')
         self.hub_obj.receive_message(message)
-        result = self.ser.get_data_written()
+        result = self.ser1.get_data_written()
         expected = b'~\x00\x19}1\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x02\x02\x00\xf0\xc2\x16\x00\x00}1\x00\xfa\x00\x01\x04'
         self.assertEqual(result, expected)
 
@@ -149,34 +184,6 @@ class TestHub(unittest.TestCase):
             'data': b'\x11\x80\x00\x00\x05'
         }
         self.assertEqual(result, expected)
-
-    def test_generate_missing_link(self):
-        result = self.hub_obj.generate_missing_link()
-        expected = {
-            'profile': b'\xc2\x16',
-            'cluster': b'\x00\xf0',
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
-            'data': b'\x119\xfd'
-        }
-        self.assertEqual(result, expected)
-
-
-#def test_parse_version_info(self):
-#    ser2 = Serial()
-#    device_obj = Device()
-#    device_obj.start(ser2)
-#
-#    message = device_obj.generate_version_info_request()
-#    result = Hub.parse_version_info(message['data'])
-#    expected = {
-#        'Version': 12345,
-#        'Manufacturer': 'PyAlertMe',
-#        'Type': 'Generic Device',
-#        'ManufactureDate': '2017-01-01'
-#    }
-#    self.assertEqual(result, expected)
-#    device_obj.halt()
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
