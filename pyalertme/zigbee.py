@@ -48,6 +48,8 @@ CLUSTER_ID_AM_SECURITY  = b'\x05\x00'
 CLUSTER_CMD_AM_SECURITY_INIT   = b'\x00'  # Security Init
 CLUSTER_CMD_AM_STATE_REQ       = b'\x01'  # State Request (SmartPlug)
 CLUSTER_CMD_AM_STATE_CHANGE    = b'\x02'  # Change State (SmartPlug)
+
+
 CLUSTER_CMD_AM_STATE_RESP      = b'\x80'  # Switch Status Update
 CLUSTER_CMD_AM_PWR_DEMAND      = b'\x81'  # Power Demand Update
 CLUSTER_CMD_AM_PWR_CONSUMPTION = b'\x82'  # Power Consumption & Uptime Update
@@ -589,6 +591,7 @@ def parse_switch_state_update(data):
     :return: Parameter dictionary of switch status
     """
     values = struct.unpack('< 2x b b b', data)  # TODO Check - this does not match above
+
     if values[2] & 0x01:
         return {'State': 1}
     else:
@@ -622,9 +625,12 @@ def parse_button_press(data):
 
     Field Name                 Size       Description
     ----------                 ----       -----------
-    Preamble                   1          Unknown Preamble TBC
-    Cluster Command            1          ??? \x00
-    Button State               2          TODO: Gets complicated?!
+    Preamble                   1          Unknown Preamble TBC b'\t'
+    Cluster Command            1          ??? 'b\x00'
+    Button State               2          Button State b'\x01\x00' = On, b'\x00\x00' = Off
+    ???                        1          ??? b'\x02'
+    Counter                    2          Counter Seconds b'\xbf\xc3'
+    ???                        2          ??? b'\x00\x00'
 
     b'\t\x00\x00\x00\x02\xbf\xc3\x00\x00' {'Counter': 50111, 'State': 0}
     b'\t\x00\x01\x00\x01\x12\xca\x00\x00' {'Counter': 51730, 'State': 1}
@@ -649,9 +655,12 @@ def parse_tamper_state(data):
 
     Field Name                 Size       Description
     ----------                 ----       -----------
-    Preamble                   1          Unknown Preamble TBC
-    Cluster Command            1          ??? \x00
-    Tamper State               2          TODO: Gets complicated?!
+    Preamble                   1          Unknown Preamble TBC b'\t'
+    Cluster Command            1          ??? b'\x00'
+    ???                        1          ??? b'\x00'
+    Tamper State               1          Tamper State b'\x02' = Open, b'\x01' = Closed
+    Counter                    2          ??? b'\xe8\xa6'
+    ???                        2          ??? b'\x00\x00'
 
     b'\t\x00\x00\x02\xe8\xa6\x00\x00'  {'TamperSwitch': 'OPEN'}
     b'\t\x00\x01\x01+\xab\x00\x00'     {'TamperSwitch': 'CLOSED'}
@@ -704,6 +713,16 @@ def parse_security_state(data):
 def parse_status_update(data):
     """
     Process message, parse for status update
+
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   1          Unknown Preamble TBC b'\t'
+    ?                          1          ??? b'\x89' ??
+    Cluster Command            1          Cluster Command - Status Update (b'\xfb')
+    Type                       1          b'\x1b' Clamp, b'\x1c' Switch, b'\x1d' Key Fob, b'\x1e', b'\x1f' Door
+    Counter                    4          Counter '\xdb2\x00\x00'
+    TempFahrenheit             2          TempFahrenheit '\xf0\x0b'
+    Unknown                    6          b'na\xd3\xff\x03\x00'
 
     b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00' {'TempFahrenheit': 87.008, 'Counter': 13019}
 
