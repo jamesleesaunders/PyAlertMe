@@ -1,2 +1,2 @@
-pyserial
-xbee
+pyserial==3.3
+xbee==2.2.5
