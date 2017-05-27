@@ -1,2 +1,2 @@
-pyserial
+pyserial==3.3
 xbee
