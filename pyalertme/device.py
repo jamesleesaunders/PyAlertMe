@@ -65,12 +65,7 @@ class Device(Base):
 
             elif profile_id == PROFILE_ID_ALERTME:
                 # AlertMe Profile ID
-
-                # Python 2 / 3 hack
-                if hasattr(bytes(), 'encode'):
-                    cluster_cmd = message['rf_data'][2]
-                else:
-                    cluster_cmd = bytes([message['rf_data'][2]])
+                cluster_cmd = message['rf_data'][2:3]
 
                 if cluster_id == CLUSTER_ID_AM_DISCOVERY:
                     if cluster_cmd == CLUSTER_CMD_AM_VERSION_REQ:

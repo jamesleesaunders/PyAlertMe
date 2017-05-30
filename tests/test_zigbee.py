@@ -278,7 +278,7 @@ class TestMessages(unittest.TestCase):
         }
         message = get_message('match_descriptor_request', params)
         result = message['data']
-        expected = '\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00'
+        expected = b'\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00'
         self.assertEqual(result, expected)
 
     def test_generate_match_descriptor_response(self):

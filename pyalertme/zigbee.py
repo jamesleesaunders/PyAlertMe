@@ -716,8 +716,7 @@ def parse_status_update(data):
 
     Field Name                 Size       Description
     ----------                 ----       -----------
-    Preamble                   1          Unknown Preamble TBC b'\t'
-    ?                          1          ??? b'\x89' ??
+    Preamble                   2          Unknown Preamble TBC b'\t\x89'
     Cluster Command            1          Cluster Command - Status Update (b'\xfb')
     Type                       1          b'\x1b' Clamp, b'\x1c' Switch, b'\x1d' Key Fob, b'\x1e', b'\x1f' Door
     Counter                    4          Counter '\xdb2\x00\x00'
@@ -730,23 +729,23 @@ def parse_status_update(data):
     :return: Parameter dictionary of state
     """
     ret = {}
-    status = data[3]
-    if status == b'\x1b':
+    type = data[3]
+    if type == b'\x1b':
         # Power Clamp
         # Unknown
         pass
 
-    elif status == b'\x1c':
+    elif type == b'\x1c':
         # Power Switch
         # Unknown
         pass
 
-    elif status == b'\x1d':
+    elif type == b'\x1d':
         # Key Fob
         ret['TempFahrenheit'] = float(struct.unpack("<h", data[8:10])[0]) / 100.0 * 1.8 + 32
         ret['Counter'] = struct.unpack('<I', data[4:8])[0]
 
-    elif status == b'\x1e' or status == b'\x1f':
+    elif type == b'\x1e' or type == b'\x1f':
         # Door Sensor
         ret['TempFahrenheit'] = float(struct.unpack("<h", data[8:10])[0]) / 100.0 * 1.8 + 32
         if ord(data[-1]) & 0x01 == 1:
@@ -760,7 +759,7 @@ def parse_status_update(data):
             ret['TamperSwitch'] = 'CLOSED'
 
     else:
-        logging.error('Unrecognised Device Status %r  %r', status, data)
+        logging.error('Unrecognised Device Status %r  %r', type, data)
 
     return ret
 

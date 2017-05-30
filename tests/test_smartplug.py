@@ -63,7 +63,7 @@ class TestSmartPlug(unittest.TestCase):
             'src_endpoint': b'\x02',
             'cluster': b'\x00\xee',
             'data': b'\th\x80\x07\x01',
-            'dest_endpoint': '\x02'
+            'dest_endpoint': b'\x02'
         }
         self.assertEqual(result, expected)
         self.device_obj.relay_state = 0
