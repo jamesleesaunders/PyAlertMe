@@ -149,6 +149,16 @@ messages = {
            'data': lambda params: generate_mode_change_request(params)
        }
     },
+    'status_update': {
+        'name': 'Status Update',
+        'frame': {
+            'profile': PROFILE_ID_ALERTME,
+            'cluster': CLUSTER_ID_AM_STATUS,
+            'src_endpoint': ENDPOINT_ALERTME,
+            'dest_endpoint': ENDPOINT_ALERTME,
+            'data': lambda params: generate_status_update(params)
+        }
+    },
     'power_demand_update': {
         'name': 'Power Demand Update',
         'frame': {
@@ -157,6 +167,16 @@ messages = {
             'src_endpoint': ENDPOINT_ALERTME,
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_power_demand_update(params)
+        }
+    },
+    'power_consumption_update': {
+        'name': 'Power Consumption Update',
+        'frame': {
+            'profile': PROFILE_ID_ALERTME,
+            'cluster': CLUSTER_ID_AM_POWER,
+            'src_endpoint': ENDPOINT_ALERTME,
+            'dest_endpoint': ENDPOINT_ALERTME,
+            'data': lambda params: generate_power_consumption_update(params)
         }
     },
     'security_init': {
@@ -405,7 +425,7 @@ def generate_power_demand_update(params):
     ----------                 ----       -----------
     Preamble                   2          Unknown Preamble TBC
     Cluster Command            1          Cluster Command - Power Demand Update (b'\x81')
-    Power Value                2          Power Demand Value (kWh ?)
+    Power Value                2          Power Demand Value (kW)
 
     :param params: Parameter dictionary of power demand value
     :return: Message data
@@ -418,6 +438,31 @@ def generate_power_demand_update(params):
     return data
 
 
+def generate_power_consumption_update(params):
+    """
+    Power Consumption & Uptime Update
+
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   2          Unknown Preamble TBC
+    Cluster Command            1          Cluster Command - Power Consumption & Uptime Update (b'\x82')
+    Power Value                4          Power Consumption Value (kWh)
+    Up Time                    4          Up Time Value (seconds)
+    Xxxxxxxxxx                 1          N/K
+
+    :return: Message
+    """
+    params = {
+        'PowerConsumption': 19973,
+        'UpTime': 33207
+    }
+    # At the moment this just generates a hard coded message.
+    # Also see parse_power_consumption().
+    data = b'\tn\x82\x05N\x00\x00\xb7\x81\x00\x00\x01'
+
+    return data
+
+
 def parse_power_demand(data):
     """
     Process message, parse for power demand value.
@@ -426,7 +471,7 @@ def parse_power_demand(data):
     ----------                 ----       -----------
     Preamble                   2          Unknown Preamble TBC
     Cluster Command            1          Cluster Command - Power Demand Update (b'\x81')
-    Power Value                2          Power Demand Value (kWh ?)
+    Power Value                2          Power Demand Value (kW)
 
     :param data: Message data
     :return: Parameter dictionary of power demand value
@@ -447,7 +492,7 @@ def parse_power_consumption(data):
     ----------                 ----       -----------
     Preamble                   2          Unknown Preamble TBC
     Cluster Command            1          Cluster Command - Power Consumption & Uptime Update (b'\x82')
-    Power Value                4          Power Consumption Value (kWh ?)
+    Power Value                4          Power Consumption Value (kWh)
     Up Time                    4          Up Time Value (seconds)
     Xxxxxxxxxx                 1          N/K
 
@@ -762,6 +807,25 @@ def parse_status_update(data):
         logging.error('Unrecognised Device Status %r  %r', type, data)
 
     return ret
+
+
+def generate_status_update(params):
+    """
+    Generate Status Update
+        To Finish...
+
+    :return: Message
+    """
+    params = {
+        'ReedSwitch': 'CLOSED',
+        'TempFahrenheit': 106.574,
+        'TamperSwitch': 'OPEN'
+    }
+    # At the moment this just generates a hard coded message.
+    # The below is just one type of status update, see parse_status_update() for more.
+    data = b'\t\r\xfb\x1f<\xf1\x08\x02/\x10D\x02\xcf\xff\x01\x00'
+
+    return data
 
 
 def generate_active_endpoints_request(params):

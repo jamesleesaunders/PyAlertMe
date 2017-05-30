@@ -59,6 +59,16 @@ class TestMessages(unittest.TestCase):
         expected = b'\tj\x81\x16\x00'
         self.assertEqual(result, expected)
 
+    def test_generate_power_consumption_update(self):
+        params = {
+            'PowerConsumption': 19973,
+            'UpTime': 33207
+        }
+        message = get_message('power_consumption_update', params)
+        result = message['data']
+        expected = b'\tn\x82\x05N\x00\x00\xb7\x81\x00\x00\x01'
+        self.assertEqual(result, expected)
+
     def test_parse_power_consumption(self):
         result = parse_power_consumption(b'\t\x00\x82Z\xbb\x04\x00\xdf\x86\x04\x00\x00')
         expected = {
@@ -279,6 +289,17 @@ class TestMessages(unittest.TestCase):
         message = get_message('match_descriptor_request', params)
         result = message['data']
         expected = b'\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00'
+        self.assertEqual(result, expected)
+
+    def test_status_update(self):
+        params = {
+            'ReedSwitch': 'CLOSED',
+            'TempFahrenheit': 106.574,
+            'TamperSwitch': 'OPEN'
+        }
+        message = get_message('status_update', params)
+        result = message['data']
+        expected = b'\t\r\xfb\x1f<\xf1\x08\x02/\x10D\x02\xcf\xff\x01\x00'
         self.assertEqual(result, expected)
 
     def test_generate_match_descriptor_response(self):
