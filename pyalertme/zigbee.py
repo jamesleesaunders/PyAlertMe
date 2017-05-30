@@ -769,6 +769,7 @@ def parse_status_update(data):
     Unknown                    6          b'na\xd3\xff\x03\x00'
 
     b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00' {'TempFahrenheit': 87.008, 'Counter': 13019}
+    b'\t\r\xfb\x1f<\xf1\x08\x02/\x10D\x02\xcf\xff\x01\x00' {'ReedSwitch': 'CLOSED', 'TempFahrenheit': 106.574, 'TamperSwitch': 'OPEN'}
 
     :param data: Message data
     :return: Parameter dictionary of state
@@ -812,7 +813,15 @@ def parse_status_update(data):
 def generate_status_update(params):
     """
     Generate Status Update
-        To Finish...
+
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   2          Unknown Preamble TBC b'\t\r'
+    Cluster Command            1          Cluster Command - Status Update (b'\xfb')
+    Type                       1          b'\x1b' Clamp, b'\x1c' Switch, b'\x1d' Key Fob, b'\x1e', b'\x1f' Door
+    Counter                    4          Counter
+    TempFahrenheit             2          TempFahrenheit
+    Unknown                    6
 
     :return: Message
     """
