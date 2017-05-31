@@ -49,7 +49,6 @@ CLUSTER_CMD_AM_SECURITY_INIT   = b'\x00'  # Security Init
 CLUSTER_CMD_AM_STATE_REQ       = b'\x01'  # State Request (SmartPlug)
 CLUSTER_CMD_AM_STATE_CHANGE    = b'\x02'  # Change State (SmartPlug)
 
-
 CLUSTER_CMD_AM_STATE_RESP      = b'\x80'  # Switch Status Update
 CLUSTER_CMD_AM_PWR_DEMAND      = b'\x81'  # Power Demand Update
 CLUSTER_CMD_AM_PWR_CONSUMPTION = b'\x82'  # Power Consumption & Uptime Update
@@ -728,12 +727,12 @@ def parse_security_state(data):
 
     Field Name                 Size       Description
     ----------                 ----       -----------
-    Preamble                   2          Unknown Preamble TBC
-    Cluster Command            1          Cluster Command - Status Update (b'\xfb')
-    Button State               2          TODO: Gets complicated?!
+    Preamble                   1          Unknown Preamble TBC
+    Cluster Command            1          ??? b'\x00'
+    Button State               ?          TODO: Gets complicated?!
 
-    b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00'  {'ReedSwitch': 'OPEN', 'TamperSwitch': 'CLOSED'}
-    TODO: Is this the SAME AS parse_status_update!?!
+    b'\t\x00\x01\r\x009\x10'  {'ReedSwitch': 'OPEN', 'TamperSwitch': 'CLOSED'}
+    TODO: Is this the SAME AS parse_tamper_state!?!
 
     :param data: Message data
     :return: Parameter dictionary of security state
@@ -770,7 +769,7 @@ def parse_status_update(data):
     Unknown                    6          b'na\xd3\xff\x03\x00'
 
     b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00' {'Temperature': 87.008, 'Counter': 13019}
-    b'\t\r\xfb\x1f<\xf1\x08\x02/\x10D\x02\xcf\xff\x01\x00' {'ReedSwitch': 'CLOSED', 'Temperature': 106.574, 'TamperSwitch': 'OPEN'}
+    b'\t\r\xfb\x1f<\xf1\x08\x02/\x10D\x02\xcf\xff\x01\x00'   {'Temperature': 106.574, 'ReedSwitch': 'CLOSED', 'TamperSwitch': 'OPEN'}
 
     :param data: Message data
     :return: Parameter dictionary of state
