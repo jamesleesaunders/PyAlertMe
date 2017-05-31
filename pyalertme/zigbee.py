@@ -731,7 +731,7 @@ def parse_security_state(data):
     Cluster Command            1          ??? b'\x00'
     Button State               ?          TODO: Gets complicated?!
 
-    b'\t\x00\x01\r\x009\x10'  {'ReedSwitch': 'OPEN', 'TamperSwitch': 'CLOSED'}
+    b'\t\x00\x01\r\x009\x10'  {'ReedSwitch': 'OPEN', 'TamperSwitch': 'OPEN'}
     TODO: Is this the SAME AS parse_tamper_state!?!
 
     :param data: Message data
@@ -748,9 +748,9 @@ def parse_security_state(data):
         ret['ReedSwitch']  = 'CLOSED'
 
     if state & 0x04:
-        ret['TamperSwitch'] = 'CLOSED'
-    else:
         ret['TamperSwitch'] = 'OPEN'
+    else:
+        ret['TamperSwitch'] = 'CLOSED'
 
     return ret
 

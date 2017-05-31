@@ -265,7 +265,7 @@ class TestMessages(unittest.TestCase):
 
     def test_parse_security_state(self):
         result = parse_security_state(b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00')
-        expected = {'ReedSwitch': 'OPEN', 'TamperSwitch': 'CLOSED'}
+        expected = {'ReedSwitch': 'OPEN', 'TamperSwitch': 'OPEN'}
         self.assertEqual(result, expected)
 
     def test_generate_active_endpoints_request(self):
