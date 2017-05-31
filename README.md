@@ -6,7 +6,7 @@
 PyAlertMe is a set of classes which, when used in conjunction with a Digi XBee (Zigbee) module, can be used to simulate an AlertMe (Lowes Iris, British Gas Hive, Safe and Secure) Hub, SmartPlug or Sensor.
 
 ## Use ##
-### Hub ###
+#### Hub ####
 ```python
 # Setup Serial
 XBEE_PORT = '/dev/tty.usbserial-DN018OI6'
@@ -50,7 +50,7 @@ The hub supports the following devices:
 * Beacon
 * Lamp
 
-### SmartPlug ###
+#### SmartPlug ####
 ```python
 # Setup Serial
 XBEE_PORT = '/dev/tty.usbserial-DN018OI6'
@@ -58,7 +58,7 @@ XBEE_BAUD = 9600
 ser = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
 # Create SmartPlug Object
-device_obj = Hub()
+device_obj = SmartPlug()
 device_obj.start(ser)
 ```
 
