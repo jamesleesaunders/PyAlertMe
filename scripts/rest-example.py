@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding: utf-8
 
-# Filename:    rest.py
+# Filename:    rest-example.py
 # Description: Communicate with Hive/AlertMe devices via a XBee
 # Author:      James Saunders [james@saunders-family.net]
 # Copyright:   Copyright (C) 2017 James Saunders

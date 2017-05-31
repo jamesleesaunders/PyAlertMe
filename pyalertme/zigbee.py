@@ -732,7 +732,8 @@ def parse_security_state(data):
     Cluster Command            1          Cluster Command - Status Update (b'\xfb')
     Button State               2          TODO: Gets complicated?!
 
-    b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00'  {'ReedSwitch': 'OPEN', 'TamperSwitch': 'CLOSED'}   SAME AS parse_status_update!!
+    b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00'  {'ReedSwitch': 'OPEN', 'TamperSwitch': 'CLOSED'}
+    TODO: Is this the SAME AS parse_status_update!?!
 
     :param data: Message data
     :return: Parameter dictionary of security state
@@ -768,8 +769,8 @@ def parse_status_update(data):
     TempFahrenheit             2          TempFahrenheit '\xf0\x0b'
     Unknown                    6          b'na\xd3\xff\x03\x00'
 
-    b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00' {'TempFahrenheit': 87.008, 'Counter': 13019}
-    b'\t\r\xfb\x1f<\xf1\x08\x02/\x10D\x02\xcf\xff\x01\x00' {'ReedSwitch': 'CLOSED', 'TempFahrenheit': 106.574, 'TamperSwitch': 'OPEN'}
+    b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00' {'Temperature': 87.008, 'Counter': 13019}
+    b'\t\r\xfb\x1f<\xf1\x08\x02/\x10D\x02\xcf\xff\x01\x00' {'ReedSwitch': 'CLOSED', 'Temperature': 106.574, 'TamperSwitch': 'OPEN'}
 
     :param data: Message data
     :return: Parameter dictionary of state
@@ -788,12 +789,12 @@ def parse_status_update(data):
 
     elif type == b'\x1d':
         # Key Fob
-        ret['TempFahrenheit'] = float(struct.unpack("<h", data[8:10])[0]) / 100.0 * 1.8 + 32
+        ret['Temperature'] = float(struct.unpack("<h", data[8:10])[0]) / 100.0 * 1.8 + 32
         ret['Counter'] = struct.unpack('<I', data[4:8])[0]
 
     elif type == b'\x1e' or type == b'\x1f':
         # Door Sensor
-        ret['TempFahrenheit'] = float(struct.unpack("<h", data[8:10])[0]) / 100.0 * 1.8 + 32
+        ret['Temperature'] = float(struct.unpack("<h", data[8:10])[0]) / 100.0 * 1.8 + 32
         if ord(data[-1]) & 0x01 == 1:
             ret['ReedSwitch']  = 'OPEN'
         else:

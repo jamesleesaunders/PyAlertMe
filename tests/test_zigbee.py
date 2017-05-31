@@ -256,7 +256,7 @@ class TestMessages(unittest.TestCase):
 
     def test_parse_status_update(self):
         result = parse_status_update(b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00')
-        expected = {'TempFahrenheit': 87.008, 'Counter': 13019}
+        expected = {'Temperature': 87.008, 'Counter': 13019}
         self.assertEqual(result, expected)
 
         result = parse_status_update(b'\t\x00\xfb\x1b\x97H\x00\x00H\x0c\x9c\x01\xd4\xff\x00\x00')
@@ -294,7 +294,7 @@ class TestMessages(unittest.TestCase):
     def test_status_update(self):
         params = {
             'ReedSwitch': 'CLOSED',
-            'TempFahrenheit': 106.574,
+            'Temperature': 106.574,
             'TamperSwitch': 'OPEN'
         }
         message = get_message('status_update', params)

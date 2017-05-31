@@ -62,12 +62,12 @@ device_obj = Hub()
 device_obj.start(ser)
 ```
 
-## XBee Setup
+## XBee Setup ##
 Configure XBee as follows:
 XBee Modem XB24-ZB, ZIGBEE Coordinator API, Version 21A7 (or better).
-You can also use /scripts/setup_xbee.py to configure the Xbee. 
+Alternatively use you can use ```/scripts/setup-xbee.py``` to configure the Xbee. 
 
-### Coordinator (Hub) ###
+#### Coordinator (Hub) ####
 * ZigBee Stack Profile (ZS): 2
 * Encryption Enable (EE): 1
 * Encryption Options (EO): 1
@@ -75,7 +75,7 @@ You can also use /scripts/setup_xbee.py to configure the Xbee.
 * API Enable (AP): 2
 * API Output Mode (AO): 3
 
-### Router (Device) ###
+#### Router (Device) ####
 * ZigBee Stack Profile (ZS): 2
 * Encryption Enable (EE): 1
 * Encryption Options (EO): 0
@@ -83,8 +83,9 @@ You can also use /scripts/setup_xbee.py to configure the Xbee.
 * API Enable (AP): 2
 * API Output Mode (AO): 3
 
-Alternativly use the /scripts/setup-xbee.pl script to sonfigure your XBee
-as above.
+## Example Use ##
+See ```/examples/hub-example.py``` For example Hub.
+See ```/examples/smartplug-example.py``` for example SmartPlug.
 
-## Credits
+## Credits ##
 Huge thanks goto Desert Home http://www.desert-home.com/2014/02/raspberry-pi-and-lowes-iris-smart-switch.html
