@@ -189,14 +189,14 @@ class Base(object):
             if self._addr_long_list[0] and self._addr_long_list[1]:
                 self.set_addr_long(b''.join(self._addr_long_list))
 
-        # Zigbee Explicit Packets
+        # ZigBee Explicit Packets
         if message['id'] == 'rx_explicit':
             profile_id = message['profile']
             cluster_id = message['cluster']
 
             if profile_id == PROFILE_ID_ZDP:
-                # Zigbee Device Profile ID
-                self._logger.debug('Received Zigbee Device Profile Packet')
+                # ZigBee Device Profile ID
+                self._logger.debug('Received ZigBee Device Profile Packet')
 
             elif profile_id == PROFILE_ID_ALERTME:
                 # AlertMe Profile ID

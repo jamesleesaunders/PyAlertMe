@@ -45,10 +45,9 @@ CLUSTER_ID_AM_DISCOVERY = b'\x00\xf6'
 CLUSTER_ID_AM_SECURITY  = b'\x05\x00'
 
 # AlertMe Cluster Commands
-CLUSTER_CMD_AM_SECURITY_INIT   = b'\x00'  # Security Init
+CLUSTER_CMD_AM_SECURITY        = b'\x00'  # Security Event (Sensors)
 CLUSTER_CMD_AM_STATE_REQ       = b'\x01'  # State Request (SmartPlug)
 CLUSTER_CMD_AM_STATE_CHANGE    = b'\x02'  # Change State (SmartPlug)
-
 CLUSTER_CMD_AM_STATE_RESP      = b'\x80'  # Switch Status Update
 CLUSTER_CMD_AM_PWR_DEMAND      = b'\x81'  # Power Demand Update
 CLUSTER_CMD_AM_PWR_CONSUMPTION = b'\x82'  # Power Consumption & Uptime Update
@@ -83,7 +82,7 @@ alertme_cluster_cmds = {
         CLUSTER_CMD_AM_VERSION_RESP: "Version Information Response"
     },
     CLUSTER_ID_AM_SECURITY: {
-        CLUSTER_CMD_AM_SECURITY_INIT: "Security Init"
+        CLUSTER_CMD_AM_SECURITY: "Security Command"
     }
 }
 
@@ -176,6 +175,16 @@ messages = {
             'src_endpoint': ENDPOINT_ALERTME,
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_power_consumption_update(params)
+        }
+    },
+    'button_press': {
+        'name': 'Button Press',
+        'frame': {
+            'profile': PROFILE_ID_ALERTME,
+            'cluster': CLUSTER_ID_AM_BUTTON,
+            'src_endpoint': ENDPOINT_ALERTME,
+            'dest_endpoint': ENDPOINT_ALERTME,
+            'data': lambda params: generate_button_press(params)
         }
     },
     'security_init': {
@@ -293,11 +302,11 @@ def generate_version_info_request(params=None):
     :param params: Parameter dictionary (none required)
     :return: Message data
     """
-    checksum = b'\x11\x00'
+    preamble = b'\x11\x00'
     cluster_cmd = CLUSTER_CMD_AM_VERSION_REQ
     payload = b''  # No data required in request
 
-    data = checksum + cluster_cmd + payload
+    data = preamble + cluster_cmd + payload
     return data
 
 
@@ -317,7 +326,7 @@ def generate_version_info_update(params):
     :param params: Parameter dictionary of version info
     :return: Message data
     """
-    checksum = b'\tq'
+    preamble = b'\tq'
     cluster_cmd = CLUSTER_CMD_AM_VERSION_RESP
     payload = struct.pack('H', params['Version']) \
               + b'\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0b' \
@@ -325,7 +334,7 @@ def generate_version_info_update(params):
               + '\n' + params['Type'] \
               + '\n' + params['ManufactureDate']
 
-    data = checksum + cluster_cmd + payload
+    data = preamble + cluster_cmd + payload
     return data
 
 
@@ -382,16 +391,16 @@ def generate_range_update(params):
     Preamble                   2          Unknown Preamble TBC
     Cluster Command            1          Cluster Command - RSSI Range Test Update (b'\xfd')
     RSSI Value                 1          RSSI Range Test Value
-    Xxxxxxxxxx                 1          N/K
+    Unknown                    1          ???
 
     :param params: Parameter dictionary of RSSI value
     :return: Message data
     """
-    checksum = b'\t+'
+    preamble = b'\t+'
     cluster_cmd = CLUSTER_CMD_AM_RSSI
     payload = struct.pack('B 1x', params['RSSI'])
 
-    data = checksum + cluster_cmd + payload
+    data = preamble + cluster_cmd + payload
     return data
 
 def parse_range_info_update(data):
@@ -403,7 +412,7 @@ def parse_range_info_update(data):
     Preamble                   2          Unknown Preamble TBC
     Cluster Command            1          Cluster Command - RSSI Range Test Update (b'\xfd')
     RSSI Value                 1          RSSI Range Test Value
-    Xxxxxxxxxx                 1          N/K
+    Unknown                    1          ???
 
     :param data: Message data
     :return: Parameter dictionary of RSSI value
@@ -429,11 +438,11 @@ def generate_power_demand_update(params):
     :param params: Parameter dictionary of power demand value
     :return: Message data
     """
-    checksum = b'\tj'
+    preamble = b'\tj'
     cluster_cmd = CLUSTER_CMD_AM_PWR_DEMAND
     payload = struct.pack('H', params['PowerDemand'])
 
-    data = checksum + cluster_cmd + payload
+    data = preamble + cluster_cmd + payload
     return data
 
 
@@ -447,7 +456,7 @@ def generate_power_consumption_update(params):
     Cluster Command            1          Cluster Command - Power Consumption & Uptime Update (b'\x82')
     Power Value                4          Power Consumption Value (kWh)
     Up Time                    4          Up Time Value (seconds)
-    Xxxxxxxxxx                 1          N/K
+    Unknown                    1          ???
 
     :return: Message
     """
@@ -493,7 +502,7 @@ def parse_power_consumption(data):
     Cluster Command            1          Cluster Command - Power Consumption & Uptime Update (b'\x82')
     Power Value                4          Power Consumption Value (kWh)
     Up Time                    4          Up Time Value (seconds)
-    Xxxxxxxxxx                 1          N/K
+    Unknown                    1          ???
 
     :param data: Message data
     :return: Parameter dictionary of usage stats
@@ -523,7 +532,7 @@ def generate_mode_change_request(params):
     :param params: Parameter dictionary of requested mode
     :return: Message data
     """
-    checksum = b'\x11\x00'
+    preamble = b'\x11\x00'
     cluster_cmd = CLUSTER_CMD_AM_MODE_REQ
     payload = b'\x00\x01' # Default normal if no mode
 
@@ -539,7 +548,7 @@ def generate_mode_change_request(params):
     else:
         logging.error('Invalid mode request %s', mode)
 
-    data = checksum + cluster_cmd + payload
+    data = preamble + cluster_cmd + payload
     return data
 
 
@@ -558,7 +567,7 @@ def generate_switch_state_request(params):
     :param params: Parameter dictionary of relay state
     :return: Message data
     """
-    checksum = b'\x11\x00'
+    preamble = b'\x11\x00'
 
     if 'State' in params:
         cluster_cmd = CLUSTER_CMD_AM_STATE_CHANGE
@@ -571,7 +580,7 @@ def generate_switch_state_request(params):
         cluster_cmd = CLUSTER_CMD_AM_STATE_REQ
         payload = b'\x01'
 
-    data = checksum + cluster_cmd + payload
+    data = preamble + cluster_cmd + payload
     return data
 
 
@@ -612,11 +621,11 @@ def generate_switch_state_update(params):
     :param params: Parameter dictionary of relay state
     :return: Message data
     """
-    checksum = b'\th'
+    preamble = b'\th'
     cluster_cmd = CLUSTER_CMD_AM_STATE_RESP
     payload = b'\x07\x01' if params['State'] else b'\x06\x00'
 
-    data = checksum + cluster_cmd + payload
+    data = preamble + cluster_cmd + payload
     return data
 
 
@@ -634,7 +643,7 @@ def parse_switch_state_update(data):
     :param data: Message data
     :return: Parameter dictionary of switch status
     """
-    values = struct.unpack('< 2x b b b', data)  # TODO Check - this does not match above
+    values = struct.unpack('< 2x b b b', data)
 
     if values[2] & 0x01:
         return {'State': 1}
@@ -642,39 +651,44 @@ def parse_switch_state_update(data):
         return {'State': 0}
 
 
-def generate_security_init(params=None):
+def generate_button_press(self):
     """
-    Generate Security Init. Keeps security devices joined?
+    Button Press Update
 
     Field Name                 Size       Description
     ----------                 ----       -----------
-    Preamble                   2          Unknown Preamble TBC
-    Cluster Command            1          Cluster Command - Security Init (b'\x00')
-    Unknown Value              2          Unknown Value (b'\x00\x05')
+    Preamble                   1          Unknown Preamble TBC b'\t'
+    Cluster Command            1          Cluster Command - Security Event (b'\x00')
+    Button State               2          Button State b'\x01\x00' = On, b'\x00\x00' = Off
+    Unknown                    1          ??? b'\x01'
+    Counter                    2          Counter Seconds b'X\xf4'
+    Unknown                    2          ??? b'\x00\x00'
 
-    :param params: Parameter dictionary (none required)
-    :return: Message data
+    :return: Message
     """
-    checksum = b'\x11\x80'
-    cluster_cmd = CLUSTER_CMD_AM_SECURITY_INIT
-    payload = b'\x00\x05'
+    params = {
+        'State': 1,
+        'Counter': 62552
+    }
+    # At the moment this just generates a hard coded message.
+    # Also see parse_button_press().
+    data = b'\t\x00\x01\x00\x01X\xf4\x00\x00'
 
-    data = checksum + cluster_cmd + payload
     return data
 
 
 def parse_button_press(data):
     """
-    Process message, parse for button press status
+    Process message, parse for button press status.
 
     Field Name                 Size       Description
     ----------                 ----       -----------
     Preamble                   1          Unknown Preamble TBC b'\t'
-    Cluster Command            1          ??? 'b\x00'
+    Cluster Command            1          Cluster Command - Security Event (b'\x00')
     Button State               2          Button State b'\x01\x00' = On, b'\x00\x00' = Off
-    ???                        1          ??? b'\x02'
+    Unknown                    1          ??? b'\x02'
     Counter                    2          Counter Seconds b'\xbf\xc3'
-    ???                        2          ??? b'\x00\x00'
+    Unknown                    2          ??? b'\x00\x00'
 
     b'\t\x00\x00\x00\x02\xbf\xc3\x00\x00' {'Counter': 50111, 'State': 0}
     b'\t\x00\x01\x00\x01\x12\xca\x00\x00' {'Counter': 51730, 'State': 1}
@@ -683,9 +697,9 @@ def parse_button_press(data):
     :return: Parameter dictionary of button status
     """
     ret = {}
-    if data[2] == b'\x00':
+    if ord(data[2]) == 0x00:
         ret['State'] = 0
-    elif data[2] == b'\x01':
+    elif ord(data[2]) == 0x01:
         ret['State'] = 1
 
     ret['Counter'] = struct.unpack('<H', data[5:7])[0]
@@ -700,11 +714,11 @@ def parse_tamper_state(data):
     Field Name                 Size       Description
     ----------                 ----       -----------
     Preamble                   1          Unknown Preamble TBC b'\t'
-    Cluster Command            1          ??? b'\x00'
-    ???                        1          ??? b'\x00'
+    Cluster Command            1          Cluster Command - Security Event (b'\x00')
+    Unknown                    1          ???
     Tamper State               1          Tamper State b'\x02' = Open, b'\x01' = Closed
     Counter                    2          ??? b'\xe8\xa6'
-    ???                        2          ??? b'\x00\x00'
+    Unknown                    2          ??? b'\x00\x00'
 
     b'\t\x00\x00\x02\xe8\xa6\x00\x00'  {'TamperSwitch': 'OPEN'}
     b'\t\x00\x01\x01+\xab\x00\x00'     {'TamperSwitch': 'CLOSED'}
@@ -723,24 +737,29 @@ def parse_tamper_state(data):
 
 def parse_security_state(data):
     """
-    Process message, parse for security state
+    Process message, parse for security state.
+    TODO: Is this the SAME AS parse_tamper_state!?!
 
     Field Name                 Size       Description
     ----------                 ----       -----------
     Preamble                   1          Unknown Preamble TBC
-    Cluster Command            1          ??? b'\x00'
-    Button State               ?          TODO: Gets complicated?!
+    Cluster Command            1          Cluster Command - Security Event (b'\x00')
+    Unknown                    1          ???
+    Button State               1          Security States Bitfield
+    Unknown                    2          ??? '\x00\x00'
 
-    b'\t\x00\x01\r\x009\x10'  {'ReedSwitch': 'OPEN', 'TamperSwitch': 'OPEN'}
-    TODO: Is this the SAME AS parse_tamper_state!?!
+    b'\t\x00\x00\x00\x00\x00'  {'ReedSwitch': 'CLOSED', 'TamperSwitch': 'CLOSED'}
+    b'\t\x00\x00\x01\x00\x00'  {'ReedSwitch': 'OPEN', 'TamperSwitch': 'CLOSED'}
+    b'\t\x00\x00\x04\x00\x00'  {'ReedSwitch': 'CLOSED', 'TamperSwitch': 'OPEN'}
+    b'\t\x00\x00\x05\x00\x00'  {'ReedSwitch': 'OPEN', 'TamperSwitch': 'OPEN'}
 
     :param data: Message data
     :return: Parameter dictionary of security state
     """
     ret = {}
-    # The switch state is in byte [3] and is a bitfield
-    # bit 0 is the magnetic reed switch state
-    # bit 3 is the tamper switch state
+    # The security states are in byte [3] and is a bitfield:
+    #    bit 0 is the magnetic reed switch state
+    #    bit 3 is the tamper switch state
     state = ord(data[3])
     if state & 0x01:
         ret['ReedSwitch']  = 'OPEN'
@@ -755,6 +774,27 @@ def parse_security_state(data):
     return ret
 
 
+def generate_security_init(params=None):
+    """
+    Generate Security Initialisation. Keeps security devices joined?
+
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   2          Unknown Preamble TBC
+    Cluster Command            1          Cluster Command - Security Event (b'\x00')
+    Unknown Value              2          Unknown Value (b'\x00\x05')
+
+    :param params: Parameter dictionary (none required)
+    :return: Message data
+    """
+    preamble = b'\x11\x80'
+    cluster_cmd = CLUSTER_CMD_AM_SECURITY
+    payload = b'\x00\x05'
+
+    data = preamble + cluster_cmd + payload
+    return data
+
+
 def parse_status_update(data):
     """
     Process message, parse for status update
@@ -765,8 +805,8 @@ def parse_status_update(data):
     Cluster Command            1          Cluster Command - Status Update (b'\xfb')
     Type                       1          b'\x1b' Clamp, b'\x1c' Switch, b'\x1d' Key Fob, b'\x1e', b'\x1f' Door
     Counter                    4          Counter '\xdb2\x00\x00'
-    TempFahrenheit             2          TempFahrenheit '\xf0\x0b'
-    Unknown                    6          b'na\xd3\xff\x03\x00'
+    TempFahrenheit             2          Temperature (Fahrenheit) '\xf0\x0b'
+    Unknown                    6          ??? b'na\xd3\xff\x03\x00'
 
     b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00' {'Temperature': 87.008, 'Counter': 13019}
     b'\t\r\xfb\x1f<\xf1\x08\x02/\x10D\x02\xcf\xff\x01\x00'   {'Temperature': 106.574, 'ReedSwitch': 'CLOSED', 'TamperSwitch': 'OPEN'}
@@ -820,14 +860,14 @@ def generate_status_update(params):
     Cluster Command            1          Cluster Command - Status Update (b'\xfb')
     Type                       1          b'\x1b' Clamp, b'\x1c' Switch, b'\x1d' Key Fob, b'\x1e', b'\x1f' Door
     Counter                    4          Counter
-    TempFahrenheit             2          TempFahrenheit
-    Unknown                    6
+    TempFahrenheit             2          Temperature (Fahrenheit)
+    Unknown                    6          ???
 
     :return: Message
     """
     params = {
         'ReedSwitch': 'CLOSED',
-        'TempFahrenheit': 106.574,
+        'Temperature': 106.574,
         'TamperSwitch': 'OPEN'
     }
     # At the moment this just generates a hard coded message.

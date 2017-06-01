@@ -46,7 +46,7 @@ class SmartPlug(Device):
         """
         super(SmartPlug, self).process_message(message)
 
-        # Zigbee Explicit Packets
+        # ZigBee Explicit Packets
         if message['id'] == 'rx_explicit':
             profile_id = message['profile']
             cluster_id = message['cluster']

@@ -42,7 +42,7 @@ class Device(Base):
         """
         super(Device, self).process_message(message)
 
-        # Zigbee Explicit Packets
+        # ZigBee Explicit Packets
         if message['id'] == 'rx_explicit':
             profile_id = message['profile']
             cluster_id = message['cluster']
@@ -53,7 +53,7 @@ class Device(Base):
                 self.send_message(self.generate_match_descriptor_request(), source_addr_long, source_addr_short)
 
             if profile_id == PROFILE_ID_ZDP:
-                # Zigbee Device Profile ID
+                # ZigBee Device Profile ID
                 if cluster_id == CLUSTER_ID_ZDO_MGNT_ROUTING_REQ:
                     self._logger.debug('Received Management Routing Table Request')
 

@@ -166,7 +166,7 @@ class Hub(Base):
         """
         super(Hub, self).process_message(message)
 
-        # Zigbee Explicit Packets
+        # ZigBee Explicit Packets
         if message['id'] == 'rx_explicit':
             source_addr_long = message['source_addr_long']
             source_addr_short = message['source_addr']
@@ -180,7 +180,7 @@ class Hub(Base):
                 cluster_id = message['cluster']
 
                 if profile_id == PROFILE_ID_ZDP:
-                    # Zigbee Device Profile ID
+                    # ZigBee Device Profile ID
                     if cluster_id == CLUSTER_ID_ZDO_NETWORK_ADDRESS_REQ:
                         # Network (16-bit) Address Request.
                         self._logger.debug('Received Network (16-bit) Address Request')

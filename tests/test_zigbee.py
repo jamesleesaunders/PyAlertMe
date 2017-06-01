@@ -245,6 +245,12 @@ class TestMessages(unittest.TestCase):
         expected = b'\t+\xfd\xc5\x00'
         self.assertEqual(result, expected)
 
+    def test_generate_button_press(self):
+        params = {'State': 1, 'Counter': 62552}
+        result = generate_button_press(params)
+        expected = b'\t\x00\x01\x00\x01X\xf4\x00\x00'
+        self.assertEqual(result, expected)
+
     def test_parse_button_press(self):
         result = parse_button_press(b'\t\x00\x00\x00\x02\xbf\xc3\x00\x00')
         expected = {'Counter': 50111, 'State': 0}
@@ -264,8 +270,20 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_parse_security_state(self):
-        result = parse_security_state(b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00')
+        result = parse_security_state('\t\x00\x00\x05\x00\x00')
         expected = {'ReedSwitch': 'OPEN', 'TamperSwitch': 'OPEN'}
+        self.assertEqual(result, expected)
+
+        result = parse_security_state(b'\t\x00\x00\x01\x00\x00')
+        expected = {'ReedSwitch': 'OPEN', 'TamperSwitch': 'CLOSED'}
+        self.assertEqual(result, expected)
+
+        result = parse_security_state(b'\t\x00\x00\x00\x00\x00')
+        expected = {'ReedSwitch': 'CLOSED', 'TamperSwitch': 'CLOSED'}
+        self.assertEqual(result, expected)
+
+        result = parse_security_state(b'\t\x00\x00\x04\x00\x00')
+        expected = {'ReedSwitch': 'CLOSED', 'TamperSwitch': 'OPEN'}
         self.assertEqual(result, expected)
 
     def test_generate_active_endpoints_request(self):
