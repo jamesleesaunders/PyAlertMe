@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/jamesleesaunders/PyAlertMe.svg?branch=master)](https://travis-ci.org/jamesleesaunders/PyAlertMe)
 [![codecov](https://codecov.io/gh/jamesleesaunders/PyAlertMe/branch/master/graph/badge.svg)](https://codecov.io/gh/jamesleesaunders/PyAlertMe)
 
-PyAlertMe is a set of classes which, when used in conjunction with a Digi XBee (Zigbee) module, can be used to simulate an AlertMe (Lowes Iris, British Gas Hive, Safe and Secure) Hub, SmartPlug or Sensor.
+PyAlertMe is a set of classes which, when used in conjunction with a Digi XBee (Zigbee) module, can be used to simulate an AlertMe (Lowes Iris, Hive, British Gas Safe and Secure) Hub, SmartPlug or Sensor.
 
 ## Use ##
 #### Hub ####
@@ -39,6 +39,10 @@ Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: PowerDemand	Value: 31]
 Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: RSSI	Value: 194]
 Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: RSSI	Value: 196]
 ```
+There are two types of updates:
+* 'Property Updates' - These are properties of the device (e.g Type, Manufacturer, Version).
+* 'Attribute Updates' - These are variable attributes of the device (e.g State, Power, Temperature, RSSI).
+
 The hub supports the following devices:
 * SmartPlug
 * Power Clamp
@@ -88,4 +92,4 @@ See [examples/hub-example.py](examples/hub-example.py) for example Hub.
 See [examples/smartplug-example.py](examples/smartplug-example.py) for example SmartPlug.
 
 ## Credits ##
-Huge thanks goto Desert Home http://www.desert-home.com/2014/02/raspberry-pi-and-lowes-iris-smart-switch.html
+Huge thanks to Desert Home http://www.desert-home.com/2014/02/raspberry-pi-and-lowes-iris-smart-switch.html from which this project originates from.
