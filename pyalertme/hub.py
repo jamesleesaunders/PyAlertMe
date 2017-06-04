@@ -274,6 +274,11 @@ class Hub(Base):
                             attributes = parse_power_consumption(message['rf_data'])
                             self.save_node_attributes(node_id, attributes)
 
+                        elif cluster_cmd == CLUSTER_CMD_AM_PWR_UNKNOWN:
+                            self._logger.debug('Unknown Power Update')
+                            attributes = parse_power_unknown(message['rf_data'])
+                            self.save_node_attributes(node_id, attributes)
+
                         else:
                             self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 

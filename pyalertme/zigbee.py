@@ -51,13 +51,14 @@ CLUSTER_CMD_AM_STATE_CHANGE    = b'\x02'  # Change State (SmartPlug)
 CLUSTER_CMD_AM_STATE_RESP      = b'\x80'  # Switch Status Update
 CLUSTER_CMD_AM_PWR_DEMAND      = b'\x81'  # Power Demand Update
 CLUSTER_CMD_AM_PWR_CONSUMPTION = b'\x82'  # Power Consumption & Uptime Update
+CLUSTER_CMD_AM_PWR_UNKNOWN     = b'\x86'  # Unknown British Gas Power Meter Update
 CLUSTER_CMD_AM_MODE_REQ        = b'\xfa'  # Mode Change Request
 CLUSTER_CMD_AM_STATUS          = b'\xfb'  # Status Update
 CLUSTER_CMD_AM_VERSION_REQ     = b'\xfc'  # Version Information Request
 CLUSTER_CMD_AM_RSSI            = b'\xfd'  # RSSI Range Test Update
 CLUSTER_CMD_AM_VERSION_RESP    = b'\xfe'  # Version Information Response
 
-# At the moment I am not sure what/if the following dict will be used?
+# At the moment I am not sure what/if the following dictionary will be used?
 # It is here to describe the relationship between Cluster ID and Cmd.
 # One day this dict may be used by the process_message() function and link with the parse_xxxxx() functions?
 alertme_cluster_cmds = {
@@ -68,7 +69,8 @@ alertme_cluster_cmds = {
     },
     CLUSTER_ID_AM_POWER: {
         CLUSTER_CMD_AM_PWR_DEMAND: "Power Demand Update",
-        CLUSTER_CMD_AM_PWR_CONSUMPTION: "Power Consumption & Uptime Update"
+        CLUSTER_CMD_AM_PWR_CONSUMPTION: "Power Consumption & Uptime Update",
+        CLUSTER_CMD_AM_PWR_UNKNOWN: "Unknown British Gas Power Meter Update"
     },
     CLUSTER_ID_AM_STATUS: {
         CLUSTER_CMD_AM_MODE_REQ: "Mode Change Request",
@@ -490,6 +492,23 @@ def parse_power_demand(data):
     ))
 
     return {'PowerDemand': values['power_demand']}
+
+
+def parse_power_unknown(data):
+    """
+    Parse unknown power message seen from British Gas (AlertMe) power monitor.
+    Could this be the same or merged with parse_power_demand() or parse_power_consumption() ?
+
+    # b'\t\x00\x86\x00\x00\x00\x00\x00\x00/\x00\x00\x00\x00'
+    # b'\t\x00\x86\x91\x012"\x00\x00M\x00\x00\x00\x00'
+    # b'\t\x00\x86F\x01{\xc9\x02\x007\x02\x00\x00\x00'
+
+    :param data: Message data
+    :return: Parameter dictionary of power demand value
+    """
+
+    value = struct.unpack('<H', data[3:5])[0] # ??? TODO Work out what this message contains?
+    return {'PowerUnknown': value}
 
 
 def parse_power_consumption(data):
