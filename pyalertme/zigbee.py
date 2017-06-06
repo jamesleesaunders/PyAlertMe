@@ -483,6 +483,11 @@ def parse_power_demand(data):
     Cluster Command            1          Cluster Command - Power Demand Update (b'\x81')
     Power Value                2          Power Demand Value (kW)
 
+    Example:
+        b'\tj\x81\x00\x00'  {'PowerDemand': 0}
+        b'\tj\x81%\x00'     {'PowerDemand': 37}
+        b'\tj\x81\x16\x00'  {'PowerDemand': 22}
+
     :param data: Message data
     :return: Parameter dictionary of power demand value
     """
@@ -499,16 +504,23 @@ def parse_power_unknown(data):
     Parse unknown power message seen from British Gas (AlertMe) power monitor.
     Could this be the same or merged with parse_power_demand() or parse_power_consumption() ?
 
-    # b'\t\x00\x86\x00\x00\x00\x00\x00\x00/\x00\x00\x00\x00'
-    # b'\t\x00\x86\x91\x012"\x00\x00M\x00\x00\x00\x00'
-    # b'\t\x00\x86F\x01{\xc9\x02\x007\x02\x00\x00\x00'
+    Field Name                 Size       Description
+    ----------                 ----       -----------
+    Preamble                   2          Unknown Preamble TBC              (b'\t\x00')
+    Cluster Command            1          Cluster Command - Unknown Power   (b'\x86')
+    Unknown                    11         ?? TODO Work out what power values this message contains!
+
+    Example:
+        b'\t\x00\x86\x00\x00\x00\x00\x00\x00/\x00\x00\x00\x00'  = 0
+        b'\t\x00\x86\x91\x012"\x00\x00M\x00\x00\x00\x00'        = ?
+        b'\t\x00\x86F\x01{\xc9\x02\x007\x02\x00\x00\x00'        = ?
 
     :param data: Message data
     :return: Parameter dictionary of power demand value
     """
 
-    value = struct.unpack('<H', data[3:5])[0] # ??? TODO Work out what this message contains?
-    return {'PowerUnknown': value}
+    value = struct.unpack('<H', data[3:5])[0]  # TBC
+    return {'PowerDemand': value}
 
 
 def parse_power_consumption(data):
@@ -676,12 +688,12 @@ def generate_button_press(self):
 
     Field Name                 Size       Description
     ----------                 ----       -----------
-    Preamble                   1          Unknown Preamble TBC b'\t'
-    Cluster Command            1          Cluster Command - Security Event (b'\x00')
+    Preamble                   1          Unknown Preamble TBC              (b'\t')
+    Cluster Command            1          Cluster Command - Security Event  (b'\x00')
     Button State               2          Button State b'\x01\x00' = On, b'\x00\x00' = Off
-    Unknown                    1          ??? b'\x01'
-    Counter                    2          Counter Seconds b'X\xf4'
-    Unknown                    2          ??? b'\x00\x00'
+    Unknown                    1          ???                               (b'\x01')
+    Counter                    2          Counter Seconds                   (b'X\xf4')
+    Unknown                    2          ???                               (b'\x00\x00')
 
     :return: Message
     """
@@ -702,15 +714,17 @@ def parse_button_press(data):
 
     Field Name                 Size       Description
     ----------                 ----       -----------
-    Preamble                   1          Unknown Preamble TBC b'\t'
-    Cluster Command            1          Cluster Command - Security Event (b'\x00')
-    Button State               2          Button State b'\x01\x00' = On, b'\x00\x00' = Off
-    Unknown                    1          ??? b'\x02'
-    Counter                    2          Counter Seconds b'\xbf\xc3'
-    Unknown                    2          ??? b'\x00\x00'
+    Preamble                   1          Unknown Preamble TBC              (b'\t')
+    Cluster Command            1          Cluster Command - Security Event  (b'\x00')
+    Button State               1          Button State                      (b'\x01' = On, b'\x00' = Off)
+    Unknown                    1          ???                               (b'\x00')
+    Unknown                    1          ???                               (b'\x01', b'\x02')
+    Counter                    2          Counter Seconds                   (b'\xbf\xc3', b\x12\xca)
+    Unknown                    2          ???                               (b'\x00\x00')
 
-    b'\t\x00\x00\x00\x02\xbf\xc3\x00\x00' {'Counter': 50111, 'State': 0}
-    b'\t\x00\x01\x00\x01\x12\xca\x00\x00' {'Counter': 51730, 'State': 1}
+    Example:
+        b'\t\x00\x00\x00\x02\xbf\xc3\x00\x00' {'State': 0, 'Counter': 50111}
+        b'\t\x00\x01\x00\x01\x12\xca\x00\x00' {'State': 1, 'Counter': 51730}
 
     :param data: Message data
     :return: Parameter dictionary of button status
@@ -732,15 +746,16 @@ def parse_tamper_state(data):
 
     Field Name                 Size       Description
     ----------                 ----       -----------
-    Preamble                   1          Unknown Preamble TBC b'\t'
-    Cluster Command            1          Cluster Command - Security Event (b'\x00')
-    Unknown                    1          ???
-    Tamper State               1          Tamper State b'\x02' = Open, b'\x01' = Closed
-    Counter                    2          ??? b'\xe8\xa6'
-    Unknown                    2          ??? b'\x00\x00'
+    Preamble                   1          Unknown Preamble TBC              (b'\t')
+    Cluster Command            1          Cluster Command - Security Event  (b'\x00')
+    Unknown                    1          ???                               (b'\x00', b'\x01')
+    Tamper State               1          Tamper State                      (b'\x01' = Closed, b'\x02' = Open)
+    Counter                    2          ???                               (b'\xe8\xa6')
+    Unknown                    2          ???                               (b'\x00\x00')
 
-    b'\t\x00\x00\x02\xe8\xa6\x00\x00'  {'TamperSwitch': 'OPEN'}
-    b'\t\x00\x01\x01+\xab\x00\x00'     {'TamperSwitch': 'CLOSED'}
+    Example:
+        b'\t\x00\x00\x02\xe8\xa6\x00\x00'  {'TamperSwitch': 'OPEN'}
+        b'\t\x00\x01\x01+\xab\x00\x00'     {'TamperSwitch': 'CLOSED'}
 
     :param data: Message data
     :return: Parameter dictionary of tamper status
@@ -761,16 +776,17 @@ def parse_security_state(data):
 
     Field Name                 Size       Description
     ----------                 ----       -----------
-    Preamble                   1          Unknown Preamble TBC
-    Cluster Command            1          Cluster Command - Security Event (b'\x00')
-    Unknown                    1          ???
-    Button State               1          Security States Bitfield
-    Unknown                    2          ??? '\x00\x00'
+    Preamble                   1          Unknown Preamble TBC              (b'\t')
+    Cluster Command            1          Cluster Command - Security Event  (b'\x00')
+    Unknown                    1          ???                               (b'\x00')
+    Button State               1          Security States Bitfield          (b'\00', b'\01', b'\04', b'\05')
+    Unknown                    2          ???                               (b'\x00\x00')
 
-    b'\t\x00\x00\x00\x00\x00'  {'ReedSwitch': 'CLOSED', 'TamperSwitch': 'CLOSED'}
-    b'\t\x00\x00\x01\x00\x00'  {'ReedSwitch': 'OPEN', 'TamperSwitch': 'CLOSED'}
-    b'\t\x00\x00\x04\x00\x00'  {'ReedSwitch': 'CLOSED', 'TamperSwitch': 'OPEN'}
-    b'\t\x00\x00\x05\x00\x00'  {'ReedSwitch': 'OPEN', 'TamperSwitch': 'OPEN'}
+    Example:
+        b'\t\x00\x00\x00\x00\x00'  {'ReedSwitch': 'CLOSED', 'TamperSwitch': 'CLOSED'}
+        b'\t\x00\x00\x01\x00\x00'  {'ReedSwitch': 'OPEN', 'TamperSwitch': 'CLOSED'}
+        b'\t\x00\x00\x04\x00\x00'  {'ReedSwitch': 'CLOSED', 'TamperSwitch': 'OPEN'}
+        b'\t\x00\x00\x05\x00\x00'  {'ReedSwitch': 'OPEN', 'TamperSwitch': 'OPEN'}
 
     :param data: Message data
     :return: Parameter dictionary of security state
@@ -799,9 +815,9 @@ def generate_security_init(params=None):
 
     Field Name                 Size       Description
     ----------                 ----       -----------
-    Preamble                   2          Unknown Preamble TBC
-    Cluster Command            1          Cluster Command - Security Event (b'\x00')
-    Unknown Value              2          Unknown Value (b'\x00\x05')
+    Preamble                   2          Unknown Preamble TBC              (b'\x11\x80')
+    Cluster Command            1          Cluster Command - Security Event  (b'\x00')
+    Unknown                    2          ???                               (b'\x00\x05')
 
     :param params: Parameter dictionary (none required)
     :return: Message data
@@ -820,15 +836,16 @@ def parse_status_update(data):
 
     Field Name                 Size       Description
     ----------                 ----       -----------
-    Preamble                   2          Unknown Preamble TBC b'\t\x89'
-    Cluster Command            1          Cluster Command - Status Update (b'\xfb')
+    Preamble                   2          Unknown Preamble TBC              (b'\t\x89')
+    Cluster Command            1          Cluster Command - Status Update   (b'\xfb')
     Type                       1          b'\x1b' Clamp, b'\x1c' Switch, b'\x1d' Key Fob, b'\x1e', b'\x1f' Door
-    Counter                    4          Counter '\xdb2\x00\x00'
-    TempFahrenheit             2          Temperature (Fahrenheit) '\xf0\x0b'
-    Unknown                    6          ??? b'na\xd3\xff\x03\x00'
+    Counter                    4          Counter                           (b'\xdb2\x00\x00')
+    TempFahrenheit             2          Temperature (Fahrenheit)          (b'\xf0\x0b')
+    Unknown                    6          ???                               (b'na\xd3\xff\x03\x00')
 
-    b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00' {'Temperature': 87.008, 'Counter': 13019}
-    b'\t\r\xfb\x1f<\xf1\x08\x02/\x10D\x02\xcf\xff\x01\x00'   {'Temperature': 106.574, 'ReedSwitch': 'CLOSED', 'TamperSwitch': 'OPEN'}
+    Example:
+        b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00' {'Temperature': 87.008, 'Counter': 13019}
+        b'\t\r\xfb\x1f<\xf1\x08\x02/\x10D\x02\xcf\xff\x01\x00'   {'Temperature': 106.574, 'ReedSwitch': 'CLOSED', 'TamperSwitch': 'OPEN'}
 
     :param data: Message data
     :return: Parameter dictionary of state
