@@ -97,7 +97,7 @@ class TestHub(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_state_request(self):
-        result = self.hub_obj.generate_state_request(1)
+        result = self.hub_obj.generate_relay_state_request(1)
         expected = {
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xee',
@@ -107,7 +107,7 @@ class TestHub(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        result = self.hub_obj.generate_state_request(0)
+        result = self.hub_obj.generate_relay_state_request(0)
         expected = {
             'profile': b'\xc2\x16',
             'cluster': b'\x00\xee',

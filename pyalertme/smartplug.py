@@ -61,7 +61,7 @@ class SmartPlug(Device):
                     if cluster_cmd == CLUSTER_CMD_AM_STATE_REQ:
                         # State Request
                         # b'\x11\x00\x01\x01'
-                        self._logger.debug('Switch State is: %s', self.relay_state)
+                        self._logger.debug('Switch Relay State is: %s', self.relay_state)
                         self.send_message(self.generate_relay_state_update(), source_addr_long, source_addr_short)
 
                     elif cluster_cmd == CLUSTER_CMD_AM_STATE_CHANGE:
@@ -69,10 +69,9 @@ class SmartPlug(Device):
                         # b'\x11\x00\x02\x01\x01' On
                         # b'\x11\x00\x02\x00\x01' Off
                         params = parse_switch_state_request(message['rf_data'])
-                        self.set_relay_state(params['State'])
-                        self._logger.debug('Switch State Changed to: %s', self.relay_state)
+                        self.set_relay_state(params['RelayState'])
                         self.send_message(self.generate_relay_state_update(), source_addr_long, source_addr_short)
-                        self._callback('Attribute', self.get_node_id(), 'State', 'ON')
+                        self._callback('Attribute', self.get_node_id(), 'RelayState', 1)
 
                     else:
                         self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
@@ -91,11 +90,9 @@ class SmartPlug(Device):
         :return:
         """
         self.relay_state = state
-        self._logger.debug('Switch State Changed to: %s', self.relay_state)
+        self._logger.debug('Switch Relay State Changed to: %s', self.relay_state)
         if self.associated:
             self.send_message(self.generate_relay_state_update(), self.hub_addr_long, self.hub_addr_short)
-        else:
-            self._logger.error('Not yet associated')
 
         # Temporary code while testing power code...
         # Randomly set the power usage value.
@@ -111,6 +108,8 @@ class SmartPlug(Device):
         """
         self.power_demand = power_demand
         self._logger.debug('Power Demand Changed to: %s', self.power_demand)
+        if self.associated:
+            self.send_message(self.generate_power_demand_update(), self.hub_addr_long, self.hub_addr_short)
 
     def generate_relay_state_update(self):
         """
@@ -118,7 +117,7 @@ class SmartPlug(Device):
 
         :return: Message of switch state
         """
-        return get_message('switch_state_update', {'State': self.relay_state})
+        return get_message('switch_state_update', {'RelayState': self.relay_state})
 
     def generate_power_demand_update(self):
         """

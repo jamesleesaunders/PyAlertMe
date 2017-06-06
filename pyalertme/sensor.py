@@ -21,8 +21,8 @@ class Sensor(Device):
         self.manu = 'PyAlertMe'
         self.manu_date = '2017-01-01'
 
-        # Relay State
-        self.tamper = 0
+        # Tamper State
+        self.tamper_state = 0
         self.triggered = 0
 
     def process_message(self, message):

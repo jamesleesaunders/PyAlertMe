@@ -333,54 +333,6 @@ class Hub(Base):
                 else:
                     self._logger.error('Unrecognised Profile ID: %r', profile_id)
 
-    def call_node_command(self, node_id, command, value):
-        """
-        Shortcut function to set node state, mode etc.
-        Calls send_state_request, send_mode_request etc.
-
-        :param node_id: Integer Short Node ID
-        :param command: Parameter or command to be sent
-        :param value: Value, State, Mode
-        """
-        if command == 'State':
-            self.send_state_request(node_id, value)
-        elif command == 'Mode':
-            self.send_mode_request(node_id, value)
-        else:
-            self._logger.error('Invalid Attribute Request')
-
-    def send_type_request(self, node_id):
-        """
-        Send Type Request
-
-        :param node_id: Integer Short Node ID
-        """
-        message = self.generate_version_info_request()
-        addresses = self.node_id_to_addrs(node_id)
-        self.send_message(message, *addresses)
-
-    def send_state_request(self, node_id, state):
-        """
-        Send State Request
-
-        :param node_id: Integer Short Node ID
-        :param state:
-        """
-        message = self.generate_state_request(state)
-        addresses = self.node_id_to_addrs(node_id)
-        self.send_message(message, *addresses)
-
-    def send_mode_request(self, node_id, mode):
-        """
-        Send Mode Request
-
-        :param node_id: Integer Short Node ID
-        :param mode:
-        """
-        message = self.generate_mode_change_request(mode)
-        addresses = self.node_id_to_addrs(node_id)
-        self.send_message(message, *addresses)
-
     def generate_active_endpoints_request(self, addr_short):
         """
         Generate Active Endpoints Request.
@@ -406,14 +358,14 @@ class Hub(Base):
         }
         return get_message('match_descriptor_response', params)
 
-    def generate_state_request(self, state=''):
+    def generate_relay_state_request(self, state=''):
         """
-        Generate Node State Change Request.
+        Generate Relay State Change Request.
 
-        :param state: Switch State
+        :param state: Switch Relay State
         :return: message
         """
-        return get_message('switch_state_request', {'State': state})
+        return get_message('switch_state_request', {'RelayState': state})
 
     def generate_mode_change_request(self, mode):
         """
@@ -440,3 +392,61 @@ class Hub(Base):
         :return: Message
         """
         return get_message('security_init')
+
+
+
+
+
+
+
+
+
+
+
+    def call_node_command(self, node_id, command, value):
+        """
+        Shortcut function to set node state, mode etc.
+        Calls send_state_request, send_mode_request etc.
+
+        :param node_id: Integer Short Node ID
+        :param command: Parameter or command to be sent
+        :param value: Value, State, Mode
+        """
+        if command == 'RelayState':
+            self.send_relay_state_request(node_id, value)
+        elif command == 'Mode':
+            self.send_mode_request(node_id, value)
+        else:
+            self._logger.error('Invalid Attribute Request')
+
+    def send_type_request(self, node_id):
+        """
+        Send Type Request
+
+        :param node_id: Integer Short Node ID
+        """
+        message = self.generate_version_info_request()
+        addresses = self.node_id_to_addrs(node_id)
+        self.send_message(message, *addresses)
+
+    def send_relay_state_request(self, node_id, state):
+        """
+        Send Relay State Request
+
+        :param node_id: Integer Short Node ID
+        :param state:
+        """
+        message = self.generate_relay_state_request(state)
+        addresses = self.node_id_to_addrs(node_id)
+        self.send_message(message, *addresses)
+
+    def send_mode_request(self, node_id, mode):
+        """
+        Send Mode Request
+
+        :param node_id: Integer Short Node ID
+        :param mode:
+        """
+        message = self.generate_mode_change_request(mode)
+        addresses = self.node_id_to_addrs(node_id)
+        self.send_message(message, *addresses)

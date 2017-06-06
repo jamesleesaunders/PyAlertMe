@@ -63,8 +63,8 @@ CLUSTER_CMD_AM_VERSION_RESP    = b'\xfe'  # Version Information Response
 # One day this dict may be used by the process_message() function and link with the parse_xxxxx() functions?
 alertme_cluster_cmds = {
     CLUSTER_ID_AM_SWITCH: {
-        CLUSTER_CMD_AM_STATE_REQ: "State Request (SmartPlug)",
-        CLUSTER_CMD_AM_STATE_CHANGE: "Change State (SmartPlug)",
+        CLUSTER_CMD_AM_STATE_REQ: "Relay State Request (SmartPlug)",
+        CLUSTER_CMD_AM_STATE_CHANGE: "Relay State Change (SmartPlug)",
         CLUSTER_CMD_AM_STATE_RESP: "Switch Status Update"
     },
     CLUSTER_ID_AM_POWER: {
@@ -120,7 +120,7 @@ messages = {
         }
     },
     'switch_state_request': {
-        'name': 'Switch State Request',
+        'name': 'Relay State Request',
         'frame': {
             'profile': PROFILE_ID_ALERTME,
             'cluster': CLUSTER_ID_AM_SWITCH,
@@ -130,7 +130,7 @@ messages = {
         }
     },
     'switch_state_update': {
-        'name': 'Switch State Update',
+        'name': 'Relay State Update',
         'frame': {
             'profile': PROFILE_ID_ALERTME,
             'cluster': CLUSTER_ID_AM_SWITCH,
@@ -483,7 +483,7 @@ def parse_power_demand(data):
     Cluster Command            1          Cluster Command - Power Demand Update (b'\x81')
     Power Value                2          Power Demand Value (kW)
 
-    Example:
+    Examples:
         b'\tj\x81\x00\x00'  {'PowerDemand': 0}
         b'\tj\x81%\x00'     {'PowerDemand': 37}
         b'\tj\x81\x16\x00'  {'PowerDemand': 22}
@@ -510,7 +510,7 @@ def parse_power_unknown(data):
     Cluster Command            1          Cluster Command - Unknown Power   (b'\x86')
     Unknown                    11         ?? TODO Work out what power values this message contains!
 
-    Example:
+    Examples:
         b'\t\x00\x86\x00\x00\x00\x00\x00\x00/\x00\x00\x00\x00'  = 0
         b'\t\x00\x86\x91\x012"\x00\x00M\x00\x00\x00\x00'        = ?
         b'\t\x00\x86F\x01{\xc9\x02\x007\x02\x00\x00\x00'        = ?
@@ -592,7 +592,7 @@ def generate_switch_state_request(params):
     ----------                 ----       -----------
     Preamble                   2          Unknown Preamble TBC
     Cluster Command            1          Cluster Command - Change State (SmartPlug) (b'\x01' / b'\x02')
-    Requested State            2*         b'\x01' = Check Only, b'\x01\x01' = On, b'\x00\x01' = Off
+    Requested Relay State      2*         b'\x01' = Check Only, b'\x01\x01' = On, b'\x00\x01' = Off
                                           * Size = 1 if check only
 
     :param params: Parameter dictionary of relay state
@@ -600,9 +600,9 @@ def generate_switch_state_request(params):
     """
     preamble = b'\x11\x00'
 
-    if 'State' in params:
+    if 'RelayState' in params:
         cluster_cmd = CLUSTER_CMD_AM_STATE_CHANGE
-        if params['State']:
+        if params['RelayState']:
             payload = b'\x01\x01'  # On
         else:
             payload = b'\x00\x01'  # Off
@@ -624,16 +624,16 @@ def parse_switch_state_request(data):
     ----------                 ----       -----------
     Preamble                   2          Unknown Preamble TBC
     Cluster Command            1          Cluster Command - Change State (SmartPlug) (b'\x02')
-    Requested State            2          b'\x01\x01' = On, b'\x00\x01' = Off
+    Requested Relay State      2          b'\x01\x01' = On, b'\x00\x01' = Off
 
     :param data: Message data
     :return: Parameter dictionary of relay state
     """
     # Parse Switch State Request
     if data == b'\x11\x00\x02\x01\x01':
-        return {'State': 1}
+        return {'RelayState': 1}
     elif data == b'\x11\x00\x02\x00\x01':
-        return {'State': 0}
+        return {'RelayState': 0}
     else:
         logging.error('Unknown State Request')
 
@@ -647,14 +647,14 @@ def generate_switch_state_update(params):
     ----------                 ----       -----------
     Preamble                   2          Unknown Preamble TBC
     Cluster Command            1          Cluster Command - Switch Status Update (b'\x80')
-    State                      2          b'\x07\x01' = On, b'\x06\x00' = Off
+    Relay State                2          b'\x07\x01' = On, b'\x06\x00' = Off
 
     :param params: Parameter dictionary of relay state
     :return: Message data
     """
     preamble = b'\th'
     cluster_cmd = CLUSTER_CMD_AM_STATE_RESP
-    payload = b'\x07\x01' if params['State'] else b'\x06\x00'
+    payload = b'\x07\x01' if params['RelayState'] else b'\x06\x00'
 
     data = preamble + cluster_cmd + payload
     return data
@@ -671,15 +671,19 @@ def parse_switch_state_update(data):
     Cluster Command            1          Cluster Command - Switch Status Update (b'\x80')
     Relay State                2          b'\x07\x01' = On, b'\x06\x00' = Off
 
+    Examples:
+        b'\th\x80\x07\x01'
+        b'\th\x80\x06\x00'
+
     :param data: Message data
     :return: Parameter dictionary of switch status
     """
     values = struct.unpack('< 2x b b b', data)
 
     if values[2] & 0x01:
-        return {'State': 1}
+        return {'RelayState': 1}
     else:
-        return {'State': 0}
+        return {'RelayState': 0}
 
 
 def generate_button_press(self):
@@ -690,15 +694,16 @@ def generate_button_press(self):
     ----------                 ----       -----------
     Preamble                   1          Unknown Preamble TBC              (b'\t')
     Cluster Command            1          Cluster Command - Security Event  (b'\x00')
-    Button State               2          Button State b'\x01\x00' = On, b'\x00\x00' = Off
+    Button State               1          Button State                      (b'\x01' = On, b'\x00' = Off)
+    Unknown                    1          ???                               (b'\x00')
     Unknown                    1          ???                               (b'\x01')
-    Counter                    2          Counter Seconds                   (b'X\xf4')
+    Counter                    2          Counter (milliseconds)            (b'X\xf4')
     Unknown                    2          ???                               (b'\x00\x00')
 
     :return: Message
     """
     params = {
-        'State': 1,
+        'ButtonState': 1,
         'Counter': 62552
     }
     # At the moment this just generates a hard coded message.
@@ -719,10 +724,10 @@ def parse_button_press(data):
     Button State               1          Button State                      (b'\x01' = On, b'\x00' = Off)
     Unknown                    1          ???                               (b'\x00')
     Unknown                    1          ???                               (b'\x01', b'\x02')
-    Counter                    2          Counter Seconds                   (b'\xbf\xc3', b\x12\xca)
+    Counter                    2          Counter (milliseconds)            (b'\xbf\xc3', b\x12\xca)
     Unknown                    2          ???                               (b'\x00\x00')
 
-    Example:
+    Examples:
         b'\t\x00\x00\x00\x02\xbf\xc3\x00\x00' {'State': 0, 'Counter': 50111}
         b'\t\x00\x01\x00\x01\x12\xca\x00\x00' {'State': 1, 'Counter': 51730}
 
@@ -731,9 +736,9 @@ def parse_button_press(data):
     """
     ret = {}
     if ord(data[2]) == 0x00:
-        ret['State'] = 0
+        ret['ButtonState'] = 0
     elif ord(data[2]) == 0x01:
-        ret['State'] = 1
+        ret['ButtonState'] = 1
 
     ret['Counter'] = struct.unpack('<H', data[5:7])[0]
 
@@ -750,21 +755,23 @@ def parse_tamper_state(data):
     Cluster Command            1          Cluster Command - Security Event  (b'\x00')
     Unknown                    1          ???                               (b'\x00', b'\x01')
     Tamper State               1          Tamper State                      (b'\x01' = Closed, b'\x02' = Open)
-    Counter                    2          ???                               (b'\xe8\xa6')
+    Counter                    2          Counter (milliseconds)            (b'\xe8\xa6')
     Unknown                    2          ???                               (b'\x00\x00')
 
-    Example:
-        b'\t\x00\x00\x02\xe8\xa6\x00\x00'  {'TamperSwitch': 'OPEN'}
-        b'\t\x00\x01\x01+\xab\x00\x00'     {'TamperSwitch': 'CLOSED'}
+    Examples:
+        b'\t\x00\x00\x02\xe8\xa6\x00\x00'  {'Counter': 42728, 'TamperState': 1}
+        b'\t\x00\x01\x01+\xab\x00\x00'     {'Counter': 43819, 'TamperState': 0}
 
     :param data: Message data
     :return: Parameter dictionary of tamper status
     """
     ret = {}
     if ord(data[3]) == 0x02:
-        ret['TamperSwitch'] = 'OPEN'
+        ret['TamperState'] = 1  # Open
     else:
-        ret['TamperSwitch'] = 'CLOSED'
+        ret['TamperState'] = 0  # Closed
+
+    ret['Counter'] = struct.unpack('<H', data[4:6])[0]
 
     return ret
 
@@ -782,11 +789,11 @@ def parse_security_state(data):
     Button State               1          Security States Bitfield          (b'\00', b'\01', b'\04', b'\05')
     Unknown                    2          ???                               (b'\x00\x00')
 
-    Example:
-        b'\t\x00\x00\x00\x00\x00'  {'ReedSwitch': 'CLOSED', 'TamperSwitch': 'CLOSED'}
-        b'\t\x00\x00\x01\x00\x00'  {'ReedSwitch': 'OPEN', 'TamperSwitch': 'CLOSED'}
-        b'\t\x00\x00\x04\x00\x00'  {'ReedSwitch': 'CLOSED', 'TamperSwitch': 'OPEN'}
-        b'\t\x00\x00\x05\x00\x00'  {'ReedSwitch': 'OPEN', 'TamperSwitch': 'OPEN'}
+    Examples:
+        b'\t\x00\x00\x00\x00\x00'  {'TriggerState': 0, 'TamperState': 0}
+        b'\t\x00\x00\x01\x00\x00'  {'TriggerState': 1, 'TamperState': 0}
+        b'\t\x00\x00\x04\x00\x00'  {'TriggerState': 0, 'TamperState': 1}
+        b'\t\x00\x00\x05\x00\x00'  {'TriggerState': 1, 'TamperState': 1}
 
     :param data: Message data
     :return: Parameter dictionary of security state
@@ -797,14 +804,14 @@ def parse_security_state(data):
     #    bit 3 is the tamper switch state
     state = ord(data[3])
     if state & 0x01:
-        ret['ReedSwitch']  = 'OPEN'
+        ret['TriggerState'] = 1  # Open
     else:
-        ret['ReedSwitch']  = 'CLOSED'
+        ret['TriggerState'] = 0  # Closed
 
     if state & 0x04:
-        ret['TamperSwitch'] = 'OPEN'
+        ret['TamperState'] = 1  # Open
     else:
-        ret['TamperSwitch'] = 'CLOSED'
+        ret['TamperState'] = 0  # Closed
 
     return ret
 
@@ -843,9 +850,9 @@ def parse_status_update(data):
     TempFahrenheit             2          Temperature (Fahrenheit)          (b'\xf0\x0b')
     Unknown                    6          ???                               (b'na\xd3\xff\x03\x00')
 
-    Example:
+    Examples:
         b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00' {'Temperature': 87.008, 'Counter': 13019}
-        b'\t\r\xfb\x1f<\xf1\x08\x02/\x10D\x02\xcf\xff\x01\x00'   {'Temperature': 106.574, 'ReedSwitch': 'CLOSED', 'TamperSwitch': 'OPEN'}
+        b'\t\r\xfb\x1f<\xf1\x08\x02/\x10D\x02\xcf\xff\x01\x00'   {'Temperature': 106.574, 'TriggerState': 0, 'TamperState': 1}
 
     :param data: Message data
     :return: Parameter dictionary of state
@@ -871,14 +878,14 @@ def parse_status_update(data):
         # Door Sensor
         ret['Temperature'] = float(struct.unpack("<h", data[8:10])[0]) / 100.0 * 1.8 + 32
         if ord(data[-1]) & 0x01 == 1:
-            ret['ReedSwitch']  = 'OPEN'
+            ret['TriggerState'] = 1  # Open
         else:
-            ret['ReedSwitch']  = 'CLOSED'
+            ret['TriggerState'] = 0  # Closed
 
         if ord(data[-1]) & 0x02 == 0:
-            ret['TamperSwitch'] = 'OPEN'
+            ret['TamperState'] = 1  # Open
         else:
-            ret['TamperSwitch'] = 'CLOSED'
+            ret['TamperState'] = 0  # Closed
 
     else:
         logging.error('Unrecognised Device Status %r  %r', type, data)
@@ -902,9 +909,9 @@ def generate_status_update(params):
     :return: Message
     """
     params = {
-        'ReedSwitch': 'CLOSED',
+        'TriggerState': 0,
         'Temperature': 106.574,
-        'TamperSwitch': 'OPEN'
+        'TamperState': 1
     }
     # At the moment this just generates a hard coded message.
     # The below is just one type of status update, see parse_status_update() for more.
@@ -920,7 +927,6 @@ def generate_active_endpoints_request(params):
     in the payload. Remember, it needs to be little endian (backwards)
     The first byte in the payload is simply a number to identify the message
     the response will have the same number in it.
-    Example: '\xaa\x9f\x88'
 
     Field Name                 Size       Description
     ----------                 ----       -----------
@@ -929,6 +935,9 @@ def generate_active_endpoints_request(params):
 
     :param params:
     :return: Message data
+
+    Example:
+        b'\xaa\x9f\x88'
     """
     sequence = struct.pack('B', params['Sequence'])                   # b'\xaa'
     net_addr = params['AddressShort'][1] + params['AddressShort'][0]  # b'\x9f\x88'
@@ -942,7 +951,6 @@ def generate_match_descriptor_request(params):
     Generate Match Descriptor Request
     Broadcast or unicast transmission used to discover the device(s) that supports
     a specified profile ID and/or clusters.
-    Example: '\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00'
 
     Field Name                 Size       Description
     ----------                 ----       -----------
@@ -954,6 +962,9 @@ def generate_match_descriptor_request(params):
     Number of Output Clusters  1          The number of output clusters in the Output Cluster List for matching. Set to 0 if no clusters supplied.
     Output Cluster List        2*         List of output cluster IDs to be used for matching.
                                           * Number of Input Clusters
+
+    Example:
+        b'\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00'
 
     :param params:
     :return: Message data
@@ -975,7 +986,6 @@ def generate_match_descriptor_response(params):
     Generate Match Descriptor Response
     If a descriptor match is found on the device, this response contains a list of endpoints that
     support the request criteria.
-    Example: '\x04\x00\x00\x00\x01\x02'
 
     Field Name                 Size       Description
     ----------                 ----       -----------
@@ -984,6 +994,9 @@ def generate_match_descriptor_response(params):
     Network Address            2          Indicates the 16-bit address of the responding device.
     Length                     1          The number of endpoints on the remote device that match the request criteria.
     Match List                 Variable   List of endpoints on the remote that match the request criteria.
+
+    Example:
+        b'\x04\x00\x00\x00\x01\x02'
 
     :param params:
     :return: Message data

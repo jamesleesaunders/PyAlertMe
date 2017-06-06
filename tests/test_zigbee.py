@@ -7,10 +7,10 @@ class TestMessages(unittest.TestCase):
 
     def test_get_message(self):
         # Test message with data lambda
-        result = get_message('switch_state_update', {'State': 1})
+        result = get_message('switch_state_update', {'RelayState': 1})
         expected = {'profile': b'\xc2\x16', 'cluster': b'\x00\xee', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x02', 'data': b'\th\x80\x07\x01'}
         self.assertEqual(result, expected)
-        result = get_message('switch_state_update', {'State': 0})
+        result = get_message('switch_state_update', {'RelayState': 0})
         expected = {'profile': b'\xc2\x16', 'cluster': b'\x00\xee', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x02', 'data': b'\th\x80\x06\x00'}
         self.assertEqual(result, expected)
 
@@ -26,12 +26,12 @@ class TestMessages(unittest.TestCase):
 
     def test_parse_tamper_state(self):
         result = parse_tamper_state(b'\t\x00\x00\x02\xe8\xa6\x00\x00')
-        expected = {'TamperSwitch': 'OPEN'}
-        self.assertEqual(result, expected, "Tamper Detected")
+        expected = {'Counter': 42728, 'TamperState': 1}
+        self.assertEqual(result, expected)
 
         result = parse_tamper_state(b'\t\x00\x01\x01+\xab\x00\x00')
-        expected = {'TamperSwitch': 'CLOSED'}
-        self.assertEqual(result, expected, "Tamper OK")
+        expected = {'Counter': 43819, 'TamperState': 0}
+        self.assertEqual(result, expected)
 
     def test_parse_power_demand(self):
         result = parse_power_demand(b'\tj\x81\x00\x00')
@@ -79,26 +79,26 @@ class TestMessages(unittest.TestCase):
 
     def test_parse_switch_state_request(self):
         result = parse_switch_state_request(b'\x11\x00\x02\x01\x01')
-        self.assertEqual(result, {'State': 1})
+        self.assertEqual(result, {'RelayState': 1})
 
         result = parse_switch_state_request(b'\x11\x00\x02\x00\x01')
-        self.assertEqual(result, {'State': 0})
+        self.assertEqual(result, {'RelayState': 0})
 
     def test_parse_switch_state_update(self):
         result = parse_switch_state_update(b'\th\x80\x07\x01')
-        expected = {'State': 1}
+        expected = {'RelayState': 1}
         self.assertEqual(result, expected)
 
         result = parse_switch_state_update(b'\th\x80\x06\x00')
-        expected = {'State': 0}
+        expected = {'RelayState': 0}
         self.assertEqual(result, expected)
 
-    def test_generate_relay_state_response(self):
-        result = generate_switch_state_update({'State': 1})
+    def test_generate_switch_state_response(self):
+        result = generate_switch_state_update({'RelayState': 1})
         expected = b'\th\x80\x07\x01'
         self.assertEqual(result, expected)
 
-        result = generate_switch_state_update({'State': 0})
+        result = generate_switch_state_update({'RelayState': 0})
         expected = b'\th\x80\x06\x00'
         self.assertEqual(result, expected)
 
@@ -122,15 +122,15 @@ class TestMessages(unittest.TestCase):
     def test_generate_switch_state_request(self):
         # Test On Request
         expected = b'\x11\x00\x02\x01\x01'
-        self.assertEqual(generate_switch_state_request({'State': 1}), expected)
-        self.assertEqual(generate_switch_state_request({'State': True}), expected)
-        self.assertEqual(generate_switch_state_request({'State': 23}), expected)
+        self.assertEqual(generate_switch_state_request({'RelayState': 1}), expected)
+        self.assertEqual(generate_switch_state_request({'RelayState': True}), expected)
+        self.assertEqual(generate_switch_state_request({'RelayState': 23}), expected)
 
         # Test Off Request
         expected = b'\x11\x00\x02\x00\x01'
-        self.assertEqual(generate_switch_state_request({'State': 0}), expected)
-        self.assertEqual(generate_switch_state_request({'State': False}), expected)
-        self.assertEqual(generate_switch_state_request({'State': None}), expected)
+        self.assertEqual(generate_switch_state_request({'RelayState': 0}), expected)
+        self.assertEqual(generate_switch_state_request({'RelayState': False}), expected)
+        self.assertEqual(generate_switch_state_request({'RelayState': None}), expected)
 
         # Test Check Only
         expected = b'\x11\x00\x01\x01'
@@ -253,11 +253,11 @@ class TestMessages(unittest.TestCase):
 
     def test_parse_button_press(self):
         result = parse_button_press(b'\t\x00\x00\x00\x02\xbf\xc3\x00\x00')
-        expected = {'Counter': 50111, 'State': 0}
+        expected = {'Counter': 50111, 'ButtonState': 0}
         self.assertEqual(result, expected, "State OFF, Counter 50111")
 
         result = parse_button_press(b'\t\x00\x01\x00\x01\x12\xca\x00\x00')
-        expected = {'Counter': 51730, 'State': 1}
+        expected = {'Counter': 51730, 'ButtonState': 1}
         self.assertEqual(result, expected, "State ON, Counter 51730")
 
     def test_parse_status_update(self):
@@ -271,19 +271,19 @@ class TestMessages(unittest.TestCase):
 
     def test_parse_security_state(self):
         result = parse_security_state('\t\x00\x00\x05\x00\x00')
-        expected = {'ReedSwitch': 'OPEN', 'TamperSwitch': 'OPEN'}
+        expected = {'TriggerState': 1, 'TamperState': 1}
         self.assertEqual(result, expected)
 
         result = parse_security_state(b'\t\x00\x00\x01\x00\x00')
-        expected = {'ReedSwitch': 'OPEN', 'TamperSwitch': 'CLOSED'}
+        expected = {'TriggerState': 1, 'TamperState': 0}
         self.assertEqual(result, expected)
 
         result = parse_security_state(b'\t\x00\x00\x00\x00\x00')
-        expected = {'ReedSwitch': 'CLOSED', 'TamperSwitch': 'CLOSED'}
+        expected = {'TriggerState': 0, 'TamperState': 0}
         self.assertEqual(result, expected)
 
         result = parse_security_state(b'\t\x00\x00\x04\x00\x00')
-        expected = {'ReedSwitch': 'CLOSED', 'TamperSwitch': 'OPEN'}
+        expected = {'TriggerState': 0, 'TamperState': 1}
         self.assertEqual(result, expected)
 
     def test_generate_active_endpoints_request(self):
@@ -311,9 +311,9 @@ class TestMessages(unittest.TestCase):
 
     def test_status_update(self):
         params = {
-            'ReedSwitch': 'CLOSED',
+            'TriggerState': 0,
             'Temperature': 106.574,
-            'TamperSwitch': 'OPEN'
+            'TamperState': 1
         }
         message = get_message('status_update', params)
         result = message['data']
