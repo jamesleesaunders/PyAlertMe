@@ -46,7 +46,7 @@ class Hub(Base):
         i = 1
         while time.time() < timeout:
             self._logger.debug('Sending Discovery Request #%s', i)
-            message = get_message('permit_join_request')
+            message = get_message('routing_table_request')
             self.send_message(message, BROADCAST_LONG, BROADCAST_SHORT)
             i += 1
             time.sleep(2.00)

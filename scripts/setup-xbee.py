@@ -54,7 +54,7 @@ if len(sys.argv) < 2:
 else:
     action = sys.argv[1]
     if action in commands:
-        XBEE_PORT = '/dev/tty.usbserial-DN018OI6'
+        XBEE_PORT = '/dev/tty.usbserial-A1014P7W'
         XBEE_BAUD = 9600
         ser = serial.Serial(XBEE_PORT, XBEE_BAUD)
         zb = ZigBee(ser=ser, callback=receive_message, error_callback=xbee_error, escaped=True)

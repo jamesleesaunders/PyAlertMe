@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding: utf-8
 
-# Filename:    hub.py
+# Filename:    smartplug-example.py
 # Description: Communicate with Hive/AlertMe devices via a XBee
 # Author:      James Saunders [james@saunders-family.net]
 # Copyright:   Copyright (C) 2017 James Saunders
@@ -37,7 +37,7 @@ logger.addHandler(fh)
 
 # Serial Configuration
 # XBEE_PORT = '/dev/tty.usbserial-DN018OI6'
-XBEE_PORT = '/dev/cu.usbserial-DN02ZXKE'
+XBEE_PORT = '/dev/cu.usbserial-DN0302BW'
 # XBEE_PORT = '/dev/tty.usbserial-A1014P7W'
 XBEE_BAUD = 9600
 ser = serial.Serial(XBEE_PORT, XBEE_BAUD)

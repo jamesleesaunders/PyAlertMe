@@ -94,6 +94,8 @@ class SmartPlug(Device):
         self._logger.debug('Switch State Changed to: %s', self.relay_state)
         if self.associated:
             self.send_message(self.generate_relay_state_update(), self.hub_addr_long, self.hub_addr_short)
+        else:
+            self._logger.error('Not yet associated')
 
         # Temporary code while testing power code...
         # Randomly set the power usage value.
