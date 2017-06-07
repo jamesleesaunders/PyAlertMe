@@ -374,9 +374,7 @@ def parse_version_info_update(data):
         .replace('\x06', '\n') \
         .replace('\x04', '\n') \
         .replace('\x12', '\n')
-    ret['Manufacturer']    = ret['ManuString'].split('\n')[0]
-    ret['Type']            = ret['ManuString'].split('\n')[1]
-    ret['ManufactureDate'] = ret['ManuString'].split('\n')[2]
+    (ret['Manufacturer'], ret['Type'], ret['ManufactureDate']) = ret['ManuString'].split('\n')
 
     # Delete not required keys
     del ret['ManuString']
@@ -405,6 +403,7 @@ def generate_range_update(params):
 
     data = preamble + cluster_cmd + payload
     return data
+
 
 def parse_range_info_update(data):
     """
