@@ -373,10 +373,10 @@ def parse_version_info_update(data):
         .replace('\x06', '\n') \
         .replace('\x04', '\n') \
         .replace('\x12', '\n')
-    # ret['Manufacturer']    = ret['ManuString'].split('\n')[0]
-    # ret['Type']            = ret['ManuString'].split('\n')[1]
-    # ret['ManufactureDate'] = ret['ManuString'].split('\n')[2]
-    ret('Manufacturer', 'Type', 'ManufacturerDate') = ret['ManuString'].split('\n')
+    ret['Manufacturer']    = ret['ManuString'].split('\n')[0]
+    ret['Type']            = ret['ManuString'].split('\n')[1]
+    ret['ManufactureDate'] = ret['ManuString'].split('\n')[2]
+    # ret('Manufacturer', 'Type', 'ManufacturerDate') = ret['ManuString'].split('\n')
 
     # Delete unrequired keys
     del ret['ManufacturerString']
