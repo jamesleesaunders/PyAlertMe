@@ -359,15 +359,13 @@ def parse_version_info_update(data):
     # The version string is variable length. We therefore have to calculate the
     # length of the string which we then use in the unpack
     l = len(data) - 22
-    values = dict(zip(
-        ('cluster_cmd', 'hw_version', 'string'),
+    ret = dict(zip(
+        ('ClusterCmd', 'Version', 'ManuString'),
         struct.unpack('< 2x s H 17x %ds' % l, data)
     ))
 
     # Break down the version string into its component parts
-    ret = {}
-    ret['Version'] = values['hw_version']
-    ret['String']  = str(values['string'].decode()) \
+    ret['ManuString']  = str(ret['ManuString'].decode()) \
         .replace('\t', '\n') \
         .replace('\r', '\n') \
         .replace('\x0e', '\n') \
@@ -375,11 +373,14 @@ def parse_version_info_update(data):
         .replace('\x06', '\n') \
         .replace('\x04', '\n') \
         .replace('\x12', '\n')
+    # ret['Manufacturer']    = ret['ManuString'].split('\n')[0]
+    # ret['Type']            = ret['ManuString'].split('\n')[1]
+    # ret['ManufactureDate'] = ret['ManuString'].split('\n')[2]
+    ret('Manufacturer', 'Type', 'ManufacturerDate') = ret['ManuString'].split('\n')
 
-    ret['Manufacturer']    = ret['String'].split('\n')[0]
-    ret['Type']            = ret['String'].split('\n')[1]
-    ret['ManufactureDate'] = ret['String'].split('\n')[2]
-    del ret['String']
+    # Delete unrequired keys
+    del ret['ManufacturerString']
+    del ret['ClusterCmd']
 
     return ret
 
