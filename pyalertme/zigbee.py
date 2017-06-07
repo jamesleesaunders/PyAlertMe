@@ -323,7 +323,7 @@ def generate_version_info_update(params):
     Cluster Command            1          Cluster Command - Version Information Response (b'\xfe')
     Unknown                    17         Unknown Values TBC. There may be more interesting stuff in here?
     HW Version                 2          Hardware Version
-    Type Info                  Variable   Type Information (b'AlertMe.com\tSmartPlug\n2013-09-26')
+    Type Info                  Variable   Type Information (b'AlertMe.com\nSmartPlug\n2013-09-26')
 
     :param params: Parameter dictionary of version info
     :return: Message data
@@ -343,7 +343,7 @@ def generate_version_info_update(params):
 def parse_version_info_update(data):
     """
     Process message, parse for version information:
-    Type, Version, Manufacturer and Manufacturer Date
+        Version, Type, Manufacturer, Date
 
     Field Name                 Size       Description
     ----------                 ----       -----------
@@ -351,13 +351,13 @@ def parse_version_info_update(data):
     Cluster Command            1          Cluster Command - Version Information Response (b'\xfe')
     Unknown                    17         Unknown Content TBC There may be more interesting stuff in here?
     HW Version                 2          Hardware Version
-    Type Info                  Variable   Type Information (b'AlertMe.com\tSmartPlug\n2013-09-26')
+    Type Info                  Variable   Type Information (b'AlertMe.com\nSmartPlug\n2013-09-26')
 
     :param data: Message data
     :return: Parameter dictionary of version info
     """
-    # The version string is variable length. We therefore have to calculate the
-    # length of the string which we then use in the unpack
+    # The version string is variable length.
+    # We therefore have to calculate the length of the string which we then use in the unpack.
     l = len(data) - 22
     ret = dict(zip(
         ('ClusterCmd', 'Version', 'ManuString'),
@@ -365,7 +365,8 @@ def parse_version_info_update(data):
     ))
 
     # Break down the version string into its component parts
-    ret['ManuString']  = str(ret['ManuString'].decode()) \
+    # AlertMe.com\nSmartPlug\n2013-09-26
+    ret['ManuString'] = str(ret['ManuString'].decode()) \
         .replace('\t', '\n') \
         .replace('\r', '\n') \
         .replace('\x0e', '\n') \
@@ -376,10 +377,9 @@ def parse_version_info_update(data):
     ret['Manufacturer']    = ret['ManuString'].split('\n')[0]
     ret['Type']            = ret['ManuString'].split('\n')[1]
     ret['ManufactureDate'] = ret['ManuString'].split('\n')[2]
-    # ret('Manufacturer', 'Type', 'ManufacturerDate') = ret['ManuString'].split('\n')
 
-    # Delete unrequired keys
-    del ret['ManufacturerString']
+    # Delete not required keys
+    del ret['ManuString']
     del ret['ClusterCmd']
 
     return ret
