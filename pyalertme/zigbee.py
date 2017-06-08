@@ -119,7 +119,8 @@ messages = {
             'src_endpoint': ENDPOINT_ALERTME,
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_range_update(params)
-        }
+        },
+        'expected_params': ['RSSI']
     },
     'switch_state_request': {
         'name': 'Relay State Request',
@@ -129,7 +130,8 @@ messages = {
             'src_endpoint': ENDPOINT_ALERTME,
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_switch_state_request(params)
-        }
+        },
+        'expected_params': ['RelayState']
     },
     'switch_state_update': {
         'name': 'Relay State Update',
@@ -142,14 +144,15 @@ messages = {
         }
     },
     'mode_change_request': {
-       'name': 'Mode Change Request',
-       'frame': {
-           'profile': PROFILE_ID_ALERTME,
-           'cluster': CLUSTER_ID_AM_STATUS,
-           'src_endpoint': ENDPOINT_ALERTME,
-           'dest_endpoint': ENDPOINT_ALERTME,
-           'data': lambda params: generate_mode_change_request(params)
-       }
+        'name': 'Mode Change Request',
+        'frame': {
+            'profile': PROFILE_ID_ALERTME,
+            'cluster': CLUSTER_ID_AM_STATUS,
+            'src_endpoint': ENDPOINT_ALERTME,
+            'dest_endpoint': ENDPOINT_ALERTME,
+            'data': lambda params: generate_mode_change_request(params)
+        },
+        'expected_params': ['Mode']
     },
     'status_update': {
         'name': 'Status Update',
