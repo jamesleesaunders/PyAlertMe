@@ -107,7 +107,8 @@ messages = {
             'src_endpoint': ENDPOINT_ALERTME,
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_version_info_update(params)
-        }
+        },
+        'expected_params': ('Version', 'Type', 'Manufacturer', 'ManufacturerDate')
     },
     'range_info_update': {
         'name': 'Range Info Update',
@@ -264,9 +265,16 @@ def get_message(message_id, params=None):
         params = {}
 
     if message_id in messages.keys():
-        # Make a copy of the message
+        # Take a copy of the message
         message = copy.deepcopy(messages[message_id])
         data = message['frame']['data']
+        
+
+        expected_params = message['frame']['expected_params']
+        provided_params = params.keys()
+
+        if (expected_params = provided_params):
+            print("same")
 
         # If 'data' is a lambda, then call it and replace with the return value
         if callable(data):
