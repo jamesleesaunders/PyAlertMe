@@ -1,7 +1,6 @@
 import logging
 import struct
 import copy
-import collections
 
 # ZigBee Addressing
 BROADCAST_LONG = b'\x00\x00\x00\x00\x00\x00\xff\xff' 
@@ -269,15 +268,15 @@ def get_message(message_id, params=None):
         params = {}
 
     if message_id in messages.keys():
-        # Take a copy of the message
+        # Take a deep copy of the message
         message = copy.deepcopy(messages[message_id])
 
         if 'expected_params' in message.keys():
             expected_params = sorted(message['expected_params'])
             provided_params = sorted(params.keys())
+            missing_params  = sorted(set(expected_params).difference(set(provided_params)))
 
-            if collections.Counter(expected_params) != collections.Counter(provided_params):
-                missing_params = sorted(set(expected_params).difference(set(provided_params)))
+            if len(missing_params) > 0:
                 raise Exception("Missing Parameters: %s" % missing_params)
 
         # If 'data' is a lambda, then call it and replace with the return value
