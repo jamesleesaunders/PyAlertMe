@@ -1,6 +1,7 @@
 import logging
 import struct
 import copy
+import collections
 
 # ZigBee Addressing
 BROADCAST_LONG = b'\x00\x00\x00\x00\x00\x00\xff\xff' 
@@ -108,7 +109,7 @@ messages = {
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_version_info_update(params)
         },
-        'expected_params': ('Version', 'Type', 'Manufacturer', 'ManufacturerDate')
+        'expected_params': ['Version', 'Type', 'Manufacturer', 'ManufactureDate']
     },
     'range_info_update': {
         'name': 'Range Info Update',
@@ -267,16 +268,17 @@ def get_message(message_id, params=None):
     if message_id in messages.keys():
         # Take a copy of the message
         message = copy.deepcopy(messages[message_id])
-        data = message['frame']['data']
-        
 
-        expected_params = message['frame']['expected_params']
-        provided_params = params.keys()
+        if 'expected_params' in message.keys():
+            expected_params = sorted(message['expected_params'])
+            provided_params = sorted(params.keys())
 
-        if (expected_params = provided_params):
-            print("same")
+            if collections.Counter(expected_params) != collections.Counter(provided_params):
+                missing_params = sorted(set(expected_params).difference(set(provided_params)))
+                raise Exception("Missing Parameters: %s" % missing_params)
 
         # If 'data' is a lambda, then call it and replace with the return value
+        data = message['frame']['data']
         if callable(data):
             message['frame']['data'] = data(params)
 
@@ -284,7 +286,7 @@ def get_message(message_id, params=None):
         return message['frame']
 
     else:
-        raise Exception('Message does not exist')
+        raise Exception("Message '%s' does not exist" % message_id)
 
         
 def list_messages():

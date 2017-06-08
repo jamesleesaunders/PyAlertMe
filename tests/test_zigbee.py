@@ -6,23 +6,35 @@ import unittest
 class TestMessages(unittest.TestCase):
 
     def test_get_message(self):
-        # Test message with data lambda
-        result = get_message('switch_state_update', {'RelayState': 1})
-        expected = {'profile': b'\xc2\x16', 'cluster': b'\x00\xee', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x02', 'data': b'\th\x80\x07\x01'}
+        # Test providing all the appropriate parameters
+        result = get_message('version_info_update', {'Version': 20045, 'Manufacturer': 'AlertMe.com', 'Type': 'SmartPlug', 'ManufactureDate': '2013-09-26'})
+        expected = {'profile': b'\xc2\x16', 'cluster': '\x00\xf6', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x02', 'data': b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\nSmartPlug\n2013-09-26'}
         self.assertEqual(result, expected)
-        result = get_message('switch_state_update', {'RelayState': 0})
-        expected = {'profile': b'\xc2\x16', 'cluster': b'\x00\xee', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x02', 'data': b'\th\x80\x06\x00'}
-        self.assertEqual(result, expected)
+
+        # Test providing a couple of parameters missing
+        # Should throw exception detailing the parameters which are missing
+        with self.assertRaises(Exception) as context:
+            get_message('version_info_update', {'Manufacturer': 'AlertMe.com', 'Type': 'SmartPlug'})
+        self.assertTrue("Missing Parameters: ['ManufactureDate', 'Version']" in context.exception)
+
+        # Test providing no parameters
+        with self.assertRaises(Exception) as context:
+            get_message('version_info_update', {})
+        self.assertTrue("Missing Parameters: ['ManufactureDate', 'Manufacturer', 'Type', 'Version']" in context.exception)
+        with self.assertRaises(Exception) as context:
+            get_message('version_info_update')
+        self.assertTrue("Missing Parameters: ['ManufactureDate', 'Manufacturer', 'Type', 'Version']" in context.exception)
 
         # Test message without data lambda
         result = get_message('permit_join_request')
         expected = {'profile': b'\x00\x00', 'cluster': b'\x00\x36', 'dest_endpoint': b'\x00', 'src_endpoint': b'\x00', 'data': b'\xff\x00'}
         self.assertEqual(result, expected)
 
-        # Test message that does not exist throws exception
+        # Test calling for a message which does not exist
+        # Should throws exception that message does not exist
         with self.assertRaises(Exception) as context:
             get_message('foo_lorem_ipsum')
-        self.assertTrue('Message does not exist' in context.exception)
+        self.assertTrue("Message 'foo_lorem_ipsum' does not exist" in context.exception)
 
     def test_parse_tamper_state(self):
         result = parse_tamper_state(b'\t\x00\x00\x02\xe8\xa6\x00\x00')
