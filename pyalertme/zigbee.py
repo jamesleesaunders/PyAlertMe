@@ -60,7 +60,7 @@ CLUSTER_CMD_AM_VERSION_RESP    = b'\xfe'  # Version Information Response
 
 # At the moment I am not sure what/if the following dictionary will be used?
 # It is here to describe the relationship between Cluster ID and Cmd.
-# One day this dict may be used by the process_message() function and link with the parse_xxxxx() functions?
+# One day this may be used by the process_message() function and link with the parse_xxxxx() functions?
 alertme_cluster_cmds = {
     CLUSTER_ID_AM_SWITCH: {
         CLUSTER_CMD_AM_STATE_REQ: "Relay State Request (SmartPlug)",
@@ -88,6 +88,10 @@ alertme_cluster_cmds = {
     }
 }
 
+# This messages dict holds the skellington for the various ZDO and AlertMe messages. 
+# it is used in conjunction with get_message() to generate the messages. 
+# Those with a lambda in the data key make use of the generate_xxxx() functions 
+# to generate the data based on parameters pasded.
 messages = {
     'version_info_request': {
         'name': 'Version Info Request',
