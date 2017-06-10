@@ -24,7 +24,6 @@ ZDP_STATUS_NOT_FOUND  = b'\x81'
 # ZDO Clusters
 CLUSTER_ID_ZDO_NETWORK_ADDRESS_REQ   = b'\x00\x00'   # Network (16-bit) Address Request
 CLUSTER_ID_ZDO_NETWORK_ADDRESS_RESP  = b'\x80\x00'   # Network (16-bit) Address Response
-CLUSTER_ID_ZDO_NODE_DESCRIPTOR_RESP  = b'\x802'      # Node Descriptor Response
 CLUSTER_ID_ZDO_SIMPLE_DESCRIPTOR_REQ = b'\x00\x04'   # Simple Descriptor Request
 CLUSTER_ID_ZDO_ACTIVE_ENDPOINTS_REQ  = b'\x00\x05'   # Active Endpoints Request
 CLUSTER_ID_ZDO_ACTIVE_ENDPOINTS_RESP = b'\x80\x05'   # Active Endpoints Response
@@ -32,6 +31,7 @@ CLUSTER_ID_ZDO_MATCH_DESCRIPTOR_REQ  = b'\x00\x06'   # Match Descriptor Request
 CLUSTER_ID_ZDO_MATCH_DESCRIPTOR_RESP = b'\x80\x06'   # Match Descriptor Response
 CLUSTER_ID_ZDO_DEVICE_ANNOUNCE       = b'\x00\x13'   # Device Announce Message
 CLUSTER_ID_ZDO_MGNT_ROUTING_REQ      = b'\x00\x32'   # Management Routing Request
+CLUSTER_ID_ZDO_NODE_DESCRIPTOR_RESP  = b'\x80\x32'   # Node Descriptor Response
 CLUSTER_ID_ZDO_PERMIT_JOIN_REQ       = b'\x00\x36'   # Permit Join Request
 CLUSTER_ID_ZDO_MGNT_NETWORK_UPDATE   = b'\x80\x38'   # Management Network Update Notify
 
