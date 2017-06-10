@@ -340,7 +340,8 @@ def generate_version_info_update(params):
     :param params: Parameter dictionary of version info
     :return: Message data
     """
-    preamble = b'\tq'
+    # preamble = b'\tq'
+    preamble = b'\x09\x71'
     cluster_cmd = CLUSTER_CMD_AM_VERSION_RESP
     payload = struct.pack('H', params['Version']) \
               + b'\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0b' \
@@ -409,7 +410,8 @@ def generate_range_update(params):
     :param params: Parameter dictionary of RSSI value
     :return: Message data
     """
-    preamble = b'\t+'
+    # preamble = b'\t+'
+    preamble = b'\x09\x2b'
     cluster_cmd = CLUSTER_CMD_AM_RSSI
     payload = struct.pack('B 1x', params['RSSI'])
 
@@ -452,7 +454,8 @@ def generate_power_demand_update(params):
     :param params: Parameter dictionary of power demand value
     :return: Message data
     """
-    preamble = b'\tj'
+    # preamble = b'\tj'
+    preamble = b'\x09\x6a'
     cluster_cmd = CLUSTER_CMD_AM_PWR_DEMAND
     payload = struct.pack('H', params['PowerDemand'])
 
@@ -664,7 +667,8 @@ def generate_switch_state_update(params):
     :param params: Parameter dictionary of relay state
     :return: Message data
     """
-    preamble = b'\th'
+    # preamble = b'\th'
+    preamble = b'\x09\x68'
     cluster_cmd = CLUSTER_CMD_AM_STATE_RESP
     payload = b'\x07\x01' if params['RelayState'] else b'\x06\x00'
 
