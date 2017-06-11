@@ -13,50 +13,55 @@ PROFILE_ID_LL      = b'\xc0\x5e'  # Light Link Profile
 PROFILE_ID_ALERTME = b'\xc2\x16'  # AlertMe Private Profile
 
 # ZigBee Endpoints
-ENDPOINT_ZDO       = b'\x00'      # ZigBee Device Objects Endpoint
-ENDPOINT_ALERTME   = b'\x02'      # AlertMe / Iris Endpoint
+ENDPOINT_ZDO     = b'\x00'      # ZigBee Device Objects Endpoint
+ENDPOINT_ALERTME = b'\x02'      # AlertMe / Iris Endpoint
 
 # ZDP Status
-ZDP_STATUS_OK         = b'\x00'
-ZDP_STATUS_INVALID    = b'\x80'
-ZDP_STATUS_NOT_FOUND  = b'\x81'
+ZDP_STATUS_OK        = b'\x00'
+ZDP_STATUS_INVALID   = b'\x80'
+ZDP_STATUS_NOT_FOUND = b'\x81'
 
 # ZDO Clusters
-CLUSTER_ID_ZDO_NETWORK_ADDRESS_REQ   = b'\x00\x00'   # Network (16-bit) Address Request
-CLUSTER_ID_ZDO_NETWORK_ADDRESS_RESP  = b'\x80\x00'   # Network (16-bit) Address Response
-CLUSTER_ID_ZDO_SIMPLE_DESCRIPTOR_REQ = b'\x00\x04'   # Simple Descriptor Request
-CLUSTER_ID_ZDO_ACTIVE_ENDPOINTS_REQ  = b'\x00\x05'   # Active Endpoints Request
-CLUSTER_ID_ZDO_ACTIVE_ENDPOINTS_RESP = b'\x80\x05'   # Active Endpoints Response
-CLUSTER_ID_ZDO_MATCH_DESCRIPTOR_REQ  = b'\x00\x06'   # Match Descriptor Request
-CLUSTER_ID_ZDO_MATCH_DESCRIPTOR_RESP = b'\x80\x06'   # Match Descriptor Response
-CLUSTER_ID_ZDO_DEVICE_ANNOUNCE       = b'\x00\x13'   # Device Announce Message
-CLUSTER_ID_ZDO_MGNT_ROUTING_REQ      = b'\x00\x32'   # Management Routing Request
-CLUSTER_ID_ZDO_NODE_DESCRIPTOR_RESP  = b'\x80\x32'   # Node Descriptor Response
-CLUSTER_ID_ZDO_PERMIT_JOIN_REQ       = b'\x00\x36'   # Permit Join Request
-CLUSTER_ID_ZDO_MGNT_NETWORK_UPDATE   = b'\x80\x38'   # Management Network Update Notify
+# See:
+#    http://ftp1.digi.com/support/images/APP_NOTE_XBee_ZigBee_Device_Profile.pdf
+#    http://www.cel.com/pdf/misc/zic09_zdp_api.pdf
+CLUSTER_ID_ZDO_NWK_ADDR_REQ         = b'\x00\x00'   # Network (16-bit) Address Request
+CLUSTER_ID_ZDO_NWK_ADDR_RSP         = b'\x80\x00'   # Network (16-bit) Address Response
+CLUSTER_ID_ZDO_SIMPLE_DESC_REQ      = b'\x00\x04'   # Simple Descriptor Request
+CLUSTER_ID_ZDO_ACTIVE_EP_REQ        = b'\x00\x05'   # Active Endpoints Request
+CLUSTER_ID_ZDO_ACTIVE_EP_RSP        = b'\x80\x05'   # Active Endpoints Response
+CLUSTER_ID_ZDO_MATCH_DESC_REQ       = b'\x00\x06'   # Match Descriptor Request
+CLUSTER_ID_ZDO_MATCH_DESC_RSP       = b'\x80\x06'   # Match Descriptor Response
+CLUSTER_ID_ZDO_END_DEVICE_ANNCE     = b'\x00\x13'   # End Device Announce
+CLUSTER_ID_ZDO_MGMT_RTG_REQ         = b'\x00\x32'   # Management Routing Request
+CLUSTER_ID_ZDO_MGMT_RTG_RSP         = b'\x80\x32'   # Management Routing Response
+CLUSTER_ID_ZDO_MGMT_PERMIT_JOIN_REQ = b'\x00\x36'   # Permit Join Request Request
+CLUSTER_ID_ZDO_MGMT_NETWORK_UPDATE  = b'\x80\x38'   # Management Network Update
 
 # AlertMe Clusters
-CLUSTER_ID_AM_SWITCH    = b'\x00\xee'
-CLUSTER_ID_AM_POWER     = b'\x00\xef'
-CLUSTER_ID_AM_STATUS    = b'\x00\xf0'
-CLUSTER_ID_AM_TAMPER    = b'\x00\xf2'
-CLUSTER_ID_AM_BUTTON    = b'\x00\xf3'
-CLUSTER_ID_AM_DISCOVERY = b'\x00\xf6'
-CLUSTER_ID_AM_SECURITY  = b'\x05\x00'
+# See:
+#    http://www.desert-home.com/2015/06/hacking-into-iris-door-sensor-part-4.html
+CLUSTER_ID_AM_SWITCH                = b'\x00\xee'   # SmartPlug Switch Cluster
+CLUSTER_ID_AM_POWER                 = b'\x00\xef'   # Power Information
+CLUSTER_ID_AM_STATUS                = b'\x00\xf0'   # Device Status
+CLUSTER_ID_AM_TAMPER                = b'\x00\xf2'   # Device Tamper Cluster
+CLUSTER_ID_AM_BUTTON                = b'\x00\xf3'   # Keyfob / Button
+CLUSTER_ID_AM_DISCOVERY             = b'\x00\xf6'   # Device Discovery
+CLUSTER_ID_AM_SECURITY              = b'\x05\x00'   # Security
 
 # AlertMe Cluster Commands
-CLUSTER_CMD_AM_SECURITY        = b'\x00'  # Security Event (Sensors)
-CLUSTER_CMD_AM_STATE_REQ       = b'\x01'  # State Request (SmartPlug)
-CLUSTER_CMD_AM_STATE_CHANGE    = b'\x02'  # Change State (SmartPlug)
-CLUSTER_CMD_AM_STATE_RESP      = b'\x80'  # Switch Status Update
-CLUSTER_CMD_AM_PWR_DEMAND      = b'\x81'  # Power Demand Update
-CLUSTER_CMD_AM_PWR_CONSUMPTION = b'\x82'  # Power Consumption & Uptime Update
-CLUSTER_CMD_AM_PWR_UNKNOWN     = b'\x86'  # Unknown British Gas Power Meter Update
-CLUSTER_CMD_AM_MODE_REQ        = b'\xfa'  # Mode Change Request
-CLUSTER_CMD_AM_STATUS          = b'\xfb'  # Status Update
-CLUSTER_CMD_AM_VERSION_REQ     = b'\xfc'  # Version Information Request
-CLUSTER_CMD_AM_RSSI            = b'\xfd'  # RSSI Range Test Update
-CLUSTER_CMD_AM_VERSION_RESP    = b'\xfe'  # Version Information Response
+CLUSTER_CMD_AM_SECURITY        = b'\x00'   # Security Event (Sensors)
+CLUSTER_CMD_AM_STATE_REQ       = b'\x01'   # State Request (SmartPlug)
+CLUSTER_CMD_AM_STATE_CHANGE    = b'\x02'   # Change State (SmartPlug)
+CLUSTER_CMD_AM_STATE_RESP      = b'\x80'   # Switch Status Update
+CLUSTER_CMD_AM_PWR_DEMAND      = b'\x81'   # Power Demand Update
+CLUSTER_CMD_AM_PWR_CONSUMPTION = b'\x82'   # Power Consumption & Uptime Update
+CLUSTER_CMD_AM_PWR_UNKNOWN     = b'\x86'   # Unknown British Gas Power Meter Update
+CLUSTER_CMD_AM_MODE_REQ        = b'\xfa'   # Mode Change Request
+CLUSTER_CMD_AM_STATUS          = b'\xfb'   # Status Update
+CLUSTER_CMD_AM_VERSION_REQ     = b'\xfc'   # Version Information Request
+CLUSTER_CMD_AM_RSSI            = b'\xfd'   # RSSI Range Test Update
+CLUSTER_CMD_AM_VERSION_RESP    = b'\xfe'   # Version Information Response
 
 # At the moment I am not sure what/if the following dictionary will be used?
 # It is here to describe the relationship between Cluster ID and Cmd.
@@ -211,7 +216,7 @@ messages = {
         'name': 'Active Endpoints Request',
         'frame': {
             'profile': PROFILE_ID_ZDP,
-            'cluster': CLUSTER_ID_ZDO_ACTIVE_ENDPOINTS_REQ,
+            'cluster': CLUSTER_ID_ZDO_ACTIVE_EP_REQ,
             'src_endpoint': ENDPOINT_ZDO,
             'dest_endpoint': ENDPOINT_ZDO,
             'data': lambda params: generate_active_endpoints_request(params)
@@ -221,7 +226,7 @@ messages = {
         'name': 'Match Descriptor Request',
         'frame': {
             'profile': PROFILE_ID_ZDP,
-            'cluster': CLUSTER_ID_ZDO_MATCH_DESCRIPTOR_REQ,
+            'cluster': CLUSTER_ID_ZDO_MATCH_DESC_REQ,
             'src_endpoint': ENDPOINT_ZDO,
             'dest_endpoint': ENDPOINT_ZDO,
             'data': lambda params: generate_match_descriptor_request(params)
@@ -231,7 +236,7 @@ messages = {
         'name': 'Match Descriptor Response',
         'frame': {
             'profile': PROFILE_ID_ZDP,
-            'cluster': CLUSTER_ID_ZDO_MATCH_DESCRIPTOR_RESP,
+            'cluster': CLUSTER_ID_ZDO_MATCH_DESC_RSP,
             'src_endpoint': ENDPOINT_ZDO,
             'dest_endpoint': ENDPOINT_ZDO,
             'data': lambda params: generate_match_descriptor_response(params)
@@ -241,7 +246,7 @@ messages = {
         'name': 'Management Routing Table Request',
         'frame': {
             'profile': PROFILE_ID_ZDP,
-            'cluster': CLUSTER_ID_ZDO_MGNT_ROUTING_REQ,
+            'cluster': CLUSTER_ID_ZDO_MGMT_RTG_REQ,
             'src_endpoint': ENDPOINT_ZDO,
             'dest_endpoint': ENDPOINT_ZDO,
             'data': b'\x12\x01'
@@ -251,7 +256,7 @@ messages = {
         'name': 'Management Permit Join Request',
         'frame': {
             'profile': PROFILE_ID_ZDP,
-            'cluster': CLUSTER_ID_ZDO_PERMIT_JOIN_REQ,
+            'cluster': CLUSTER_ID_ZDO_MGMT_PERMIT_JOIN_REQ,
             'src_endpoint': ENDPOINT_ZDO,
             'dest_endpoint': ENDPOINT_ZDO,
             'data': b'\xff\x00'

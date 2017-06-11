@@ -54,13 +54,13 @@ class Device(Base):
 
             if profile_id == PROFILE_ID_ZDP:
                 # ZigBee Device Profile ID
-                if cluster_id == CLUSTER_ID_ZDO_MGNT_ROUTING_REQ:
+                if cluster_id == CLUSTER_ID_ZDO_MGMT_RTG_REQ:
                     self._logger.debug('Received Management Routing Table Request')
 
-                elif cluster_id == CLUSTER_ID_ZDO_ACTIVE_ENDPOINTS_REQ:
+                elif cluster_id == CLUSTER_ID_ZDO_ACTIVE_EP_REQ:
                     self._logger.debug('Received Active Endpoint Request')
 
-                elif cluster_id == CLUSTER_ID_ZDO_MATCH_DESCRIPTOR_RESP:
+                elif cluster_id == CLUSTER_ID_ZDO_MATCH_DESC_RSP:
                     self._logger.debug('Received Match Descriptor Response')
 
             elif profile_id == PROFILE_ID_ALERTME:

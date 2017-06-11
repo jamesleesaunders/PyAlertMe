@@ -181,38 +181,35 @@ class Hub(Base):
 
                 if profile_id == PROFILE_ID_ZDP:
                     # ZigBee Device Profile ID
-                    if cluster_id == CLUSTER_ID_ZDO_NETWORK_ADDRESS_REQ:
-                        # Network (16-bit) Address Request.
+                    if cluster_id == CLUSTER_ID_ZDO_NWK_ADDR_REQ:
+                        # Network (16-bit) Address Request
                         self._logger.debug('Received Network (16-bit) Address Request')
 
-                    elif cluster_id == CLUSTER_ID_ZDO_NETWORK_ADDRESS_RESP:
+                    elif cluster_id == CLUSTER_ID_ZDO_NWK_ADDR_RSP:
                         # Network (16-bit) Address Response.
-                        # Not sure what this is? Only seen on the Hive ActivePlug?
-                        # See: http://www.desert-home.com/2015/06/hacking-into-iris-door-sensor-part-4.html
-                        # http://ftp1.digi.com/support/images/APP_NOTE_XBee_ZigBee_Device_Profile.pdf
                         self._logger.debug('Received Network (16-bit) Address Response')
 
-                    elif cluster_id == CLUSTER_ID_ZDO_NODE_DESCRIPTOR_RESP:
-                        # Node Descriptor Response.
-                        self._logger.debug('Received Node Descriptor Response')
+                    elif cluster_id == CLUSTER_ID_ZDO_MGMT_RTG_RSP:
+                        # Management Routing Response
+                        self._logger.debug('Received Management Routing Response')
                         
-                    elif cluster_id == CLUSTER_ID_ZDO_SIMPLE_DESCRIPTOR_REQ:
+                    elif cluster_id == CLUSTER_ID_ZDO_SIMPLE_DESC_REQ:
                         # Simple Descriptor Request.
                         self._logger.debug('Received Simple Descriptor Request')
                         
-                    elif cluster_id == CLUSTER_ID_ZDO_ACTIVE_ENDPOINTS_REQ:
+                    elif cluster_id == CLUSTER_ID_ZDO_ACTIVE_EP_REQ:
                         # Active Endpoint Request.
                         self._logger.debug('Received Active Endpoint Request')
 
-                    elif cluster_id == CLUSTER_ID_ZDO_ACTIVE_ENDPOINTS_RESP:
-                        # Active Endpoints Response.
+                    elif cluster_id == CLUSTER_ID_ZDO_ACTIVE_EP_RSP:
+                        # Active Endpoints Response
                         # This message tells us what the device can do, but it isn't constructed correctly to match what
                         # the switch can do according to the spec. This is another message that gets it's response after
                         # we receive the Match Descriptor below.
                         self._logger.debug('Received Active Endpoint Response')
 
-                    elif cluster_id == CLUSTER_ID_ZDO_MATCH_DESCRIPTOR_REQ:
-                        # Match Descriptor Request.
+                    elif cluster_id == CLUSTER_ID_ZDO_MATCH_DESC_REQ:
+                        # Match Descriptor Request
                         self._logger.debug('Received Match Descriptor Request')
                         # This is the point where we finally respond to the switch. A couple of messages are sent
                         # to cause the switch to join with the controller at a network level and to cause it to
@@ -235,15 +232,15 @@ class Hub(Base):
                         # We are fully associated!
                         self._logger.debug('New Device Fully Associated')
                         
-                    elif cluster_id == CLUSTER_ID_ZDO_DEVICE_ANNOUNCE:
-                        # Device Announce Message.
+                    elif cluster_id == CLUSTER_ID_ZDO_END_DEVICE_ANNCE:
+                        # Device Announce Message
                         self._logger.debug('Received Device Announce Message')
                         # This will tell me the address of the new thing
                         # so we're going to send an active endpoint request
                         reply = self.generate_active_endpoints_request(source_addr_short)
                         self.send_message(reply, source_addr_long, source_addr_short)
                         
-                    elif cluster_id == CLUSTER_ID_ZDO_MGNT_NETWORK_UPDATE:
+                    elif cluster_id == CLUSTER_ID_ZDO_MGMT_NETWORK_UPDATE:
                         # Management Network Update Notify.
                         self._logger.debug('Received Management Network Update Notify')
 
@@ -317,7 +314,7 @@ class Hub(Base):
 
                     elif cluster_id == CLUSTER_ID_AM_SECURITY:
                         self._logger.debug('Received Security Event')
-                        # Security Cluster.
+                        # Security Cluster
                         # When the device first connects, it comes up in a state that needs initialization, this command
                         # seems to take care of that. So, look at the value of the data and send the command.
                         if message['rf_data'][3:7] == b'\x15\x00\x39\x10':
