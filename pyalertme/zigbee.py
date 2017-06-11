@@ -624,9 +624,9 @@ def generate_switch_state_request(params):
     """
     preamble = b'\x11\x00'
 
-    if 'RelayState' in params:
+    if params['RelayState'] != '':
         cluster_cmd = CLUSTER_CMD_AM_STATE_CHANGE
-        if params['RelayState']:
+        if int(params['RelayState']) == 1:
             payload = b'\x01\x01'  # On
         else:
             payload = b'\x00\x01'  # Off

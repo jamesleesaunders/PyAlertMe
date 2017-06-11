@@ -146,18 +146,14 @@ class TestMessages(unittest.TestCase):
         # Test On Request
         expected = b'\x11\x00\x02\x01\x01'
         self.assertEqual(generate_switch_state_request({'RelayState': 1}), expected)
-        self.assertEqual(generate_switch_state_request({'RelayState': True}), expected)
-        self.assertEqual(generate_switch_state_request({'RelayState': 23}), expected)
 
         # Test Off Request
         expected = b'\x11\x00\x02\x00\x01'
         self.assertEqual(generate_switch_state_request({'RelayState': 0}), expected)
-        self.assertEqual(generate_switch_state_request({'RelayState': False}), expected)
-        self.assertEqual(generate_switch_state_request({'RelayState': None}), expected)
 
         # Test Check Only
         expected = b'\x11\x00\x01\x01'
-        self.assertEqual(generate_switch_state_request({}), expected)
+        self.assertEqual(generate_switch_state_request({'RelayState': ''}), expected)
 
     def test_generate_version_info_request(self):
         result = generate_version_info_request()

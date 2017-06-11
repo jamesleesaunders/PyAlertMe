@@ -62,15 +62,26 @@ while True:
 
         nodes = hub_obj.get_nodes()
         pp.pprint(nodes)
-        print("Select device:\n")
+        print("Select Device:\n")
         node_id = raw_input("")
 
         while True:
-            pp.pprint(list_messages())
-            print("Select command:\n")
-            action = raw_input("")
-            message_id, val = action.split()
-            params = {'State': val}
+            messages = list_messages()
+            pp.pprint(messages)
+
+            # Select Message
+            message_id = raw_input("Select Message: ")
+            message = messages[message_id]
+
+            # Select Parameters
+            params = {}
+            if 'expected_params' in message.keys():
+                print("Message Parameters:")
+                for param_name in message['expected_params']:
+                    param_value = raw_input("   %s: " % param_name)
+                    params = {param_name: param_value}
+
+            # Send Message
             message = get_message(message_id, params)
             addresses = hub_obj.node_id_to_addrs(node_id)
             hub_obj.send_message(message, *addresses)
