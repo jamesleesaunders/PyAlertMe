@@ -36,6 +36,17 @@ class TestMessages(unittest.TestCase):
             get_message('foo_lorem_ipsum')
         self.assertTrue("Message 'foo_lorem_ipsum' does not exist" in context.exception)
 
+    def test_list_messages(self):
+        # Test the resulting dict is in the expected structure.
+        # We don't test the entire dict matches but check one message.
+        messages = list_messages()
+        message = messages['version_info_update']
+        expected = {
+            'name': 'Version Info Update',
+            'expected_params': ['Version', 'Type', 'Manufacturer', 'ManufactureDate']
+        }
+        self.assertEqual(message, expected)
+
     def test_parse_tamper_state(self):
         result = parse_tamper_state(b'\t\x00\x00\x02\xe8\xa6\x00\x00')
         expected = {'Counter': 42728, 'TamperState': 1}
