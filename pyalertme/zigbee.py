@@ -1000,6 +1000,7 @@ def generate_match_descriptor_request(params):
     input_cluster_list = params['InClusterList']                                     # b''
     num_output_clusters = struct.pack('B', len(params['OutClusterList']) / 2)        # b'\x01'
     output_cluster_list = params['OutClusterList'][1] + params['OutClusterList'][0]  # b'\xf0\x00'  CLUSTER_ID_AM_STATUS (reversed)
+    # TODO Finish this off! At the moment this does not support multiple clusters, it just supports one!
 
     data = sequence + net_addr + profile_id + num_input_clusters + input_cluster_list + num_output_clusters + output_cluster_list
     return data
