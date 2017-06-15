@@ -1,5 +1,4 @@
 import logging
-from pyalertme import *
 from pyalertme.zigbee import *
 import struct
 import time
@@ -140,7 +139,7 @@ class Hub(Base):
         else:
             # If not generate new node_id and add to list of known devices.
             node_id = Base.pretty_mac(addr_long)
-            device_obj = device.Device()
+            device_obj = Device()
             self.nodes[node_id] = {'AddressLong': addr_long, 'Attributes': {}, 'Obj': device_obj}
 
         return node_id

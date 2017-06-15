@@ -1,5 +1,4 @@
 import logging
-from pyalertme import *
 from pyalertme.zigbee import *
 import struct
 import time
