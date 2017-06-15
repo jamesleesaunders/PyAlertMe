@@ -140,7 +140,8 @@ class Hub(Base):
         else:
             # If not generate new node_id and add to list of known devices.
             node_id = Base.pretty_mac(addr_long)
-            self.nodes[node_id] = {'AddressLong': addr_long, 'Attributes': {}}
+            node_obj = Device()
+            self.nodes[node_id] = {'AddressLong': addr_long, 'Attributes': {}, 'Obj': node_obj}
 
         return node_id
 
