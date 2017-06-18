@@ -41,6 +41,9 @@ class Base(object):
         # ZDO Sequence
         self.zdo_sequence = 1
 
+    def __str__(self):
+        return self.type
+
     def start(self, serial):
         """
         Start Device
