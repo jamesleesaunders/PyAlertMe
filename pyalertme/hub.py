@@ -28,6 +28,7 @@ class Hub(Base):
         # Discovery thread and list of discovered nodes
         self._discovery_thread = threading.Thread(target=self._discovery)
         self.nodes = {}
+        self.devices = {}
 
     def discovery(self):
         """
@@ -141,8 +142,13 @@ class Hub(Base):
         else:
             # If not generate new node_id and add to list of known devices.
             node_id = Base.pretty_mac(addr_long)
-            device_obj = Device()
-            self.nodes[node_id] = {'AddressLong': addr_long, 'Attributes': {}, 'Obj': device_obj}
+            self.nodes[node_id] = {'AddressLong': addr_long, 'Attributes': {}}
+
+            # Strategically move to use objects for nodes list.
+            module = __import__('pyalertme')
+            class_ = getattr(module, 'SmartPlug')
+            device_obj = class_()
+            self.devices[node_id] = device_obj
 
         return node_id
 
