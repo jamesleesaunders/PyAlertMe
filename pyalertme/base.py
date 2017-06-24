@@ -152,6 +152,16 @@ class Base(object):
         self._logger.debug('Received Message: %s', message)
         self.process_message(message)
 
+    def list_messages(self):
+        """
+        List Messages
+
+        :param message: Dict of message
+        :return:
+        """
+        return list_messages()
+
+
     def set_addr_short(self, addr_short):
         """
         Set Short Address

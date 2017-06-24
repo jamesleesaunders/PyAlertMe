@@ -60,24 +60,25 @@ while True:
     try:
         time.sleep(0.001)
 
-        nodes = hub_obj.get_nodes()
+        # nodes = hub_obj.get_nodes()
+        nodes = hub_obj.devices
         pp.pprint(nodes)
         print("Select Device:\n")
         node_id = raw_input("")
 
         while True:
-            messages = list_messages()
-            pp.pprint(messages)
+            device_obj = hub_obj.devices[node_id]
+            pp.pprint(vars(device_obj))
+            pp.pprint(device_obj.list_messages())
 
             # Select Message
             message_id = raw_input("Select Message: ")
-            message = messages[message_id]
 
             # Select Parameters
             params = {}
-            if 'expected_params' in message.keys():
+            if 'expected_params' in messages[message_id].keys():
                 print("Message Parameters:")
-                for param_name in message['expected_params']:
+                for param_name in messages[message_id]['expected_params']:
                     param_value = raw_input("   %s: " % param_name)
                     params = {param_name: param_value}
 

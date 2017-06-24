@@ -82,6 +82,8 @@ class Hub(Base):
         self.nodes[node_id]['Attributes'][attrib_name] = value
         self._callback('Attribute', node_id, attrib_name, value)
 
+        self.devices[node_id].set_attribute(attrib_name, value)
+
     def save_node_properties(self, node_id, properties):
         """
         Save Multiple Node Properties
@@ -145,9 +147,10 @@ class Hub(Base):
             self.nodes[node_id] = {'AddressLong': addr_long, 'Attributes': {}}
 
             # Strategically move to use objects for nodes list.
-            module = __import__('pyalertme')
-            class_ = getattr(module, 'SmartPlug')
-            device_obj = class_()
+            # module = __import__('pyalertme')
+            # class_ = getattr(module, 'SmartPlug')
+            # device_obj = class_()
+            device_obj = Device()
             self.devices[node_id] = device_obj
 
         return node_id
@@ -181,8 +184,13 @@ class Hub(Base):
             node_id = self.addr_long_to_node_id(source_addr_long)
 
             if node_id != None:
+                # Old way
                 self.nodes[node_id]['AddressLong'] = source_addr_long
                 self.nodes[node_id]['AddressShort'] = source_addr_short
+
+                # New way
+                self.devices[node_id].set_addr_long(source_addr_long)
+                self.devices[node_id].set_addr_short(source_addr_short)
 
                 profile_id = message['profile']
                 cluster_id = message['cluster']
@@ -238,6 +246,7 @@ class Hub(Base):
                         self.send_message(reply, source_addr_long, source_addr_short)
 
                         # We are fully associated!
+                        self.devices[node_id].set_associated(True)
                         self._logger.debug('New Device Fully Associated')
                         
                     elif cluster_id == CLUSTER_ID_ZDO_END_DEVICE_ANNCE:

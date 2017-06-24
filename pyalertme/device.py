@@ -118,6 +118,28 @@ class Device(Base):
             else:
                 self._logger.error('Unrecognised Profile ID: %r', profile_id)
 
+    def set_associated(self, associated):
+        """
+        Set Attribute
+
+        :param bool: associated Associated True/False
+        :return:
+        """
+        self._logger.debug('Associated: %s', associated)
+        self.associated = associated
+
+    def set_attribute(self, attribute, value):
+        """
+        Set Associated
+
+        :param string: attribute
+        :param mixed: value
+        :return:
+        """
+        self._logger.debug('Setting attribute: %s to value: %s', attribute, value)
+        setattr(self, attribute, value)
+
+
     def generate_version_info_update(self):
         """
         Generate type message
