@@ -84,7 +84,7 @@ while True:
 
             # Send Message
             message = get_message(message_id, params)
-            addresses = hub_obj.node_id_to_addrs(node_id)
+            addresses = hub_obj.device_id_to_addrs(node_id)
             hub_obj.send_message(message, *addresses)
 
     except IndexError:

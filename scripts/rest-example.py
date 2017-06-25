@@ -59,7 +59,7 @@ def not_found(error):
 
 @app.route(API_BASE + '/nodes', methods=['GET'])
 def get_nodes():
-    nodes = hub_obj.get_nodes()
+    nodes = hub_obj.list_devices()
     for id, node in nodes.iteritems():
         nodes[id]['AddressLong'] = ''
         nodes[id]['AddressShort'] = ''
@@ -67,7 +67,7 @@ def get_nodes():
 
 @app.route(API_BASE + '/nodes/<int:node_id>', methods=['GET'])
 def get_node(node_id):
-    node = hub_obj.get_node(node_id)
+    node = hub_obj.get_device(node_id)
 
     if node:
         # Blank out the addresses for now
@@ -89,14 +89,14 @@ def update_node(node_id):
     if not request.json or not request.json['Nodes'][0].has_key('Attributes'):
         abort(400)
 
-    node = hub_obj.get_node(node_id)
+    node = hub_obj.get_device(node_id)
 
     # Loop round attribute update request updating values
     for attribute in request.json['Nodes'][0]['Attributes']:
         if node['Attributes'].has_key(attribute):
             for key in request.json['Nodes'][0]['Attributes'][attribute]:
                 value = request.json['Nodes'][0]['Attributes'][attribute][key]
-                hub_obj.call_node_command(node_id, attribute, value)
+                hub_obj.call_device_command(node_id, attribute, value)
         else:
             abort(404)
 

@@ -25,9 +25,8 @@ class Hub(Base):
         # By default the Hub is associated
         self.associated = True
 
-        # Discovery thread and list of discovered nodes
+        # Discovery thread and list of discovered devices
         self._discovery_thread = threading.Thread(target=self._discovery)
-        self.nodes = {}
         self.devices = {}
 
     def discovery(self):
@@ -53,118 +52,99 @@ class Hub(Base):
             i += 1
             time.sleep(2.00)
 
-        # Next, sent out a version request to each node we have discovered above
-        for node_id in self.nodes.keys():
-            self.send_type_request(node_id)
+        # Next, sent out a version request to each device we have discovered above
+        for device_id in self.devices.keys():
+            self.send_type_request(device_id)
             time.sleep(1.00)
 
-    def save_node_attributes(self, node_id, attributes):
+    def save_device_attributes(self, device_id, attributes):
         """
         Save Multiple Node Attributes
 
-        :param node_id:
+        :param device_id:
         :param attributes:
         :return:
         """
         for attrib_name, value in attributes.iteritems():
-            self.save_node_attribute(node_id, attrib_name, value)
+            self.save_device_attribute(device_id, attrib_name, value)
 
-    def save_node_attribute(self, node_id, attrib_name, value):
+    def save_device_attribute(self, device_id, attrib_name, value):
         """
         Save Single Node Attribute
 
-        :param node_id:
+        :param device_id:
         :param attrib_name:
         :param value:
         :return:
         """
         self._logger.debug('Updating Node Attribute: %s Value: %s', attrib_name, value)
-        self.nodes[node_id]['Attributes'][attrib_name] = value
-        self._callback('Attribute', node_id, attrib_name, value)
+        self.devices[device_id].set_attribute(attrib_name, value)
+        self._callback('Attribute', device_id, attrib_name, value)
 
-        self.devices[node_id].set_attribute(attrib_name, value)
-
-    def save_node_properties(self, node_id, properties):
+    def list_devices(self):
         """
-        Save Multiple Node Properties
-
-        :param node_id:
-        :param properties:
-        :return:
-        """
-        for property_name, value in properties.iteritems():
-            self.save_node_property(node_id, property_name, value)
-
-    def save_node_property(self, node_id, property_name, value):
-        """
-        Save Single Node Property
-
-        :param node_id:
-        :param property_name:
-        :param value:
-        :return:
-        """
-        self._logger.debug('Updating Node Property: %s Value: %s', property_name, value)
-        self.nodes[node_id][property_name] = value
-        self._callback('Property', node_id, property_name, value)
-
-    def get_nodes(self):
-        """
-        Get Nodes
+        Get Devices List
 
         :return: Dictionary of Nodes
         """
-        return self.nodes
+        devices = {}
+        for (device_id, device_obj) in self.devices.items():
+            devices[device_id] = {
+                'Type': device_obj.Type,
+                'Manufacturer': device_obj.Manufacturer,
+                'Version': device_obj.Version
+            }
 
-    def get_node(self, node_id):
+        return devices
+
+    def get_device(self, device_id):
         """
-        Given a Node ID return node.
+        Given a Device ID return Device Object.
 
-        :param node_id: Integer Short Node ID
+        :param device_id: Integer Short Device ID
         :return: Node record
         """
-        return self.nodes[node_id]
+        return self.devices[device_id]
 
-    def addr_long_to_node_id(self, addr_long):
+    def addr_long_to_device_id(self, addr_long):
         """
-        Given a 48-bit Long Address lookup or generate new Node ID.
+        Given a 48-bit Long Address lookup or generate new Device ID.
+        We also use this method to add any new devices to the devices list.
 
         :param addr_long: 48-bits Long Address
-        :return: Node ID
+        :return: Device ID
         """
-        # If this address is me, don't add to nodes list and don't generate node_id,
-        # also if we don't know what our own address is yet.
+        # If this address is me, don't add to devices list and don't generate device_id,
+        # also if we don't know what our own address is yet we can't check.
         if self.addr_long == addr_long or self.addr_long is None:
-            return None
+            device_id = None
 
-        # See if we already know about this device.
-        addr_long_to_id = dict((addresses['AddressLong'], id) for id, addresses in self.nodes.iteritems())
-        if addr_long in addr_long_to_id:
-            node_id = addr_long_to_id[addr_long]
         else:
-            # If not generate new node_id and add to list of known devices.
-            node_id = Base.pretty_mac(addr_long)
-            self.nodes[node_id] = {'AddressLong': addr_long, 'Attributes': {}}
+            device_id = Base.pretty_mac(addr_long)
 
-            # Strategically move to use objects for nodes list.
-            # module = __import__('pyalertme')
-            # class_ = getattr(module, 'SmartPlug')
-            # device_obj = class_()
-            device_obj = Device()
-            self.devices[node_id] = device_obj
+            # See if we already know about this device.
+            # If not generate new device_id and add to list of known devices.
+            if device_id not in self.devices.keys():
+                device_id = Base.pretty_mac(addr_long)
 
-        return node_id
+                module = __import__('pyalertme')
+                class_ = getattr(module, 'SmartPlug')
+                device_obj = class_()
+                # device_obj = Device()
+                self.devices[device_id] = device_obj
 
-    def node_id_to_addrs(self, node_id):
+        return device_id
+
+    def device_id_to_addrs(self, device_id):
         """
-        Given a Node ID return a tuple of 48-bit Long Address and 16-bit Short Address.
+        Given a Device ID return a tuple of 48-bit Long Address and 16-bit Short Address.
         This is typically used to pass addresses to send_message().
 
-        :param node_id:  Integer Short Node ID
+        :param device_id:  Device ID
         :return: Tuple of long and short addresses
         """
-        addr_long = self.nodes[node_id]['AddressLong']
-        addr_short = self.nodes[node_id]['AddressShort']
+        addr_long = self.devices[device_id].addr_long
+        addr_short = self.devices[device_id].addr_short
 
         return addr_long, addr_short
 
@@ -181,16 +161,11 @@ class Hub(Base):
         if message['id'] == 'rx_explicit':
             source_addr_long = message['source_addr_long']
             source_addr_short = message['source_addr']
-            node_id = self.addr_long_to_node_id(source_addr_long)
+            device_id = self.addr_long_to_device_id(source_addr_long)
 
-            if node_id != None:
-                # Old way
-                self.nodes[node_id]['AddressLong'] = source_addr_long
-                self.nodes[node_id]['AddressShort'] = source_addr_short
-
-                # New way
-                self.devices[node_id].addr_long = source_addr_long
-                self.devices[node_id].addr_short = source_addr_short
+            if device_id is not None:
+                self.devices[device_id].addr_long = source_addr_long
+                self.devices[device_id].addr_short = source_addr_short
 
                 profile_id = message['profile']
                 cluster_id = message['cluster']
@@ -246,7 +221,7 @@ class Hub(Base):
                         self.send_message(reply, source_addr_long, source_addr_short)
 
                         # We are fully associated!
-                        self.devices[node_id].associated = True
+                        self.devices[device_id].associated = True
                         self._logger.debug('New Device Fully Associated')
                         
                     elif cluster_id == CLUSTER_ID_ZDO_END_DEVICE_ANNCE:
@@ -272,7 +247,7 @@ class Hub(Base):
                         if cluster_cmd == CLUSTER_CMD_AM_STATE_RESP:
                             self._logger.debug('Received Switch Status Update')
                             attributes = parse_switch_state_update(message['rf_data'])
-                            self.save_node_attributes(node_id, attributes)
+                            self.save_device_attributes(device_id, attributes)
 
                         else:
                             self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
@@ -281,17 +256,17 @@ class Hub(Base):
                         if cluster_cmd == CLUSTER_CMD_AM_PWR_DEMAND:
                             self._logger.debug('Received Power Demand Update')
                             attributes = parse_power_demand(message['rf_data'])
-                            self.save_node_attributes(node_id, attributes)
+                            self.save_device_attributes(device_id, attributes)
 
                         elif cluster_cmd == CLUSTER_CMD_AM_PWR_CONSUMPTION:
                             self._logger.debug('Received Power Consumption & Uptime Update')
                             attributes = parse_power_consumption(message['rf_data'])
-                            self.save_node_attributes(node_id, attributes)
+                            self.save_device_attributes(device_id, attributes)
 
                         elif cluster_cmd == CLUSTER_CMD_AM_PWR_UNKNOWN:
                             self._logger.debug('Unknown Power Update')
                             attributes = parse_power_unknown(message['rf_data'])
-                            self.save_node_attributes(node_id, attributes)
+                            self.save_device_attributes(device_id, attributes)
 
                         else:
                             self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
@@ -300,7 +275,7 @@ class Hub(Base):
                         if cluster_cmd == CLUSTER_CMD_AM_STATUS:
                             self._logger.debug('Received Status Update')
                             attributes = parse_status_update(message['rf_data'])
-                            self.save_node_attributes(node_id, attributes)
+                            self.save_device_attributes(device_id, attributes)
 
                         else:
                             self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
@@ -308,23 +283,23 @@ class Hub(Base):
                     elif cluster_id == CLUSTER_ID_AM_TAMPER:
                         self._logger.debug('Received Tamper Switch Changed Update')
                         attributes = parse_tamper_state(message['rf_data'])
-                        self.save_node_attributes(node_id, attributes)
+                        self.save_device_attributes(device_id, attributes)
 
                     elif cluster_id == CLUSTER_ID_AM_BUTTON:
                         self._logger.debug('Received Button Press Update')
                         attributes = parse_button_press(message['rf_data'])
-                        self.save_node_attributes(node_id, attributes)
+                        self.save_device_attributes(device_id, attributes)
 
                     elif cluster_id == CLUSTER_ID_AM_DISCOVERY:
                         if cluster_cmd == CLUSTER_CMD_AM_RSSI:
                             self._logger.debug('Received RSSI Range Test Update')
                             attributes = parse_range_info_update(message['rf_data'])
-                            self.save_node_attributes(node_id, attributes)
+                            self.save_device_attributes(device_id, attributes)
 
                         elif cluster_cmd == CLUSTER_CMD_AM_VERSION_RESP:
                             self._logger.debug('Received Version Information')
-                            properties = parse_version_info_update(message['rf_data'])
-                            self.save_node_properties(node_id, properties)
+                            attributes = parse_version_info_update(message['rf_data'])
+                            self.save_device_attributes(device_id, attributes)
 
                         else:
                             self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
@@ -339,7 +314,7 @@ class Hub(Base):
                             self.send_message(reply, source_addr_long, source_addr_short)
 
                         attributes = parse_security_state(message['rf_data'])
-                        self.save_node_attributes(node_id, attributes)
+                        self.save_device_attributes(device_id, attributes)
 
                     else:
                         self._logger.error('Unrecognised Cluster ID: %r', cluster_id)
@@ -417,50 +392,50 @@ class Hub(Base):
 
 
 
-    def call_node_command(self, node_id, command, value):
+    def call_device_command(self, device_id, command, value):
         """
-        Shortcut function to set node state, mode etc.
+        Shortcut function to set device state, mode etc.
         Calls send_state_request, send_mode_request etc.
 
-        :param node_id: Integer Short Node ID
+        :param device_id: Integer Short Node ID
         :param command: Parameter or command to be sent
         :param value: Value, State, Mode
         """
         if command == 'RelayState':
-            self.send_relay_state_request(node_id, value)
+            self.send_relay_state_request(device_id, value)
         elif command == 'Mode':
-            self.send_mode_request(node_id, value)
+            self.send_mode_request(device_id, value)
         else:
             self._logger.error('Invalid Attribute Request')
 
-    def send_type_request(self, node_id):
+    def send_type_request(self, device_id):
         """
         Send Type Request
 
-        :param node_id: Integer Short Node ID
+        :param device_id: Integer Short Node ID
         """
         message = self.generate_version_info_request()
-        addresses = self.node_id_to_addrs(node_id)
+        addresses = self.device_id_to_addrs(device_id)
         self.send_message(message, *addresses)
 
-    def send_relay_state_request(self, node_id, state):
+    def send_relay_state_request(self, device_id, state):
         """
         Send Relay State Request
 
-        :param node_id: Integer Short Node ID
+        :param device_id: Integer Short Node ID
         :param state:
         """
         message = self.generate_relay_state_request(state)
-        addresses = self.node_id_to_addrs(node_id)
+        addresses = self.device_id_to_addrs(device_id)
         self.send_message(message, *addresses)
 
-    def send_mode_request(self, node_id, mode):
+    def send_mode_request(self, device_id, mode):
         """
         Send Mode Request
 
-        :param node_id: Integer Short Node ID
+        :param device_id: Integer Short Node ID
         :param mode:
         """
         message = self.generate_mode_change_request(mode)
-        addresses = self.node_id_to_addrs(node_id)
+        addresses = self.device_id_to_addrs(device_id)
         self.send_message(message, *addresses)

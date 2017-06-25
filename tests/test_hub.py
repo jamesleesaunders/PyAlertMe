@@ -7,6 +7,7 @@ from mock_serial import Serial
 class TestHub(unittest.TestCase):
 
     def setUp(self):
+        self.maxDiff = None
         self.ser1 = Serial()
         self.hub_obj = Hub()
         self.hub_obj.start(self.ser1)
@@ -35,16 +36,12 @@ class TestHub(unittest.TestCase):
             'src_endpoint': b'\x02'
         }
         self.hub_obj.receive_message(message)
-        result = self.hub_obj.get_nodes()
+        result = self.hub_obj.list_devices()
         expected = {
             '00:0d:6f:00:03:bb:b9:f8': {
-                'ManufactureDate': '2013-09-26',
-                'Manufacturer': 'AlertMe.com',
                 'Type': 'SmartPlug',
-                'Version': 20045,
-                'AddressLong': b'\x00\ro\x00\x03\xbb\xb9\xf8',
-                'AddressShort': b'\x88\x9f',
-                'Attributes': {}
+                'Manufacturer': 'AlertMe.com',
+                'Version': 20045
             }
         }
         self.assertEqual(result, expected)
@@ -56,25 +53,17 @@ class TestHub(unittest.TestCase):
         message['source_addr_long'] = b'\x00\x0d\x6f\x00\x00\x00\xff\xff'
         message['rf_data'] = message['data']
         self.hub_obj.receive_message(message)
-        result = self.hub_obj.get_nodes()
+        result = self.hub_obj.list_devices()
         expected = {
             '00:0d:6f:00:03:bb:b9:f8': {
-                'ManufactureDate': '2013-09-26',
-                'Manufacturer': 'AlertMe.com',
                 'Type': 'SmartPlug',
-                'Version': 20045,
-                'AddressLong': b'\x00\ro\x00\x03\xbb\xb9\xf8',
-                'AddressShort': b'\x88\x9f',
-                'Attributes': {}
+                'Manufacturer': 'AlertMe.com',
+                'Version': 20045
             },
             '00:0d:6f:00:00:00:ff:ff': {
-                'ManufactureDate': '2017-01-01',
-                'Manufacturer': 'PyAlertMe',
                 'Type': 'Generic Device',
-                'Version': 12345,
-                'AddressLong': b'\x00\x0d\x6f\x00\x00\x00\xff\xff',
-                'AddressShort': b'\x88\xfd',
-                'Attributes': {}
+                'Manufacturer': 'PyAlertMe',
+                'Version': 12345
             }
         }
         self.assertEqual(result, expected)
