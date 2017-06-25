@@ -60,9 +60,8 @@ while True:
     try:
         time.sleep(0.001)
 
-        # nodes = hub_obj.get_nodes()
-        nodes = hub_obj.devices
-        pp.pprint(nodes)
+        # List Devices
+        pp.pprint(hub_obj.list_devices())
         print("Select Device:\n")
         node_id = raw_input("")
 
@@ -84,7 +83,7 @@ while True:
 
             # Send Message
             message = get_message(message_id, params)
-            addresses = hub_obj.device_id_to_addrs(node_id)
+            addresses = hub_obj.device_obj_to_addrs(device_obj)
             hub_obj.send_message(message, *addresses)
 
     except IndexError:

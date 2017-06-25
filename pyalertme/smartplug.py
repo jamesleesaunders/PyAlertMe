@@ -72,7 +72,7 @@ class SmartPlug(Device):
                         params = parse_switch_state_request(message['rf_data'])
                         self.relay_state = params['relay_state']
                         self.send_message(self.generate_relay_state_update(), source_addr_long, source_addr_short)
-                        self._callback('Attribute', self.node_id, 'relay_state', 1)
+                        self._callback('Attribute', self.id, 'relay_state', 1)
 
                     else:
                         self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)

@@ -42,7 +42,7 @@ class Base(object):
         self.zdo_sequence = 1
 
     @property
-    def node_id(self):
+    def id(self):
         return self.pretty_mac(self.addr_long)
 
     def __str__(self):
