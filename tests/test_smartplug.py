@@ -10,7 +10,7 @@ class TestSmartPlug(unittest.TestCase):
         self.ser = Serial()
         self.device_obj = SmartPlug()
         self.device_obj.start(self.ser)
-        self.device_obj.set_addr_long(b'\x00\x1e\x5e\x09\x02\x14\xc5\xab')
+        self.device_obj.addr_long = b'\x00\x1e\x5e\x09\x02\x14\xc5\xab'
 
     def tearDown(self):
         self.device_obj.halt()
@@ -95,7 +95,7 @@ class TestSmartPlug(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_power_demand_update(self):
-        self.device_obj.set_power_demand(0)
+        self.device_obj.power_demand = 0
         result = self.device_obj.generate_power_demand_update()
         expected = {
             'profile': b'\xc2\x16',
@@ -106,7 +106,7 @@ class TestSmartPlug(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        self.device_obj.set_power_demand(37)
+        self.device_obj.power_demand = 37
         result = self.device_obj.generate_power_demand_update()
         expected = {
             'profile': b'\xc2\x16',
@@ -117,7 +117,7 @@ class TestSmartPlug(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        self.device_obj.set_power_demand(22.4)
+        self.device_obj.power_demand = 22.4
         result = self.device_obj.generate_power_demand_update()
         expected = {
             'profile': b'\xc2\x16',

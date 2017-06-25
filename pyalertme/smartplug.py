@@ -70,9 +70,9 @@ class SmartPlug(Device):
                         # b'\x11\x00\x02\x01\x01' On
                         # b'\x11\x00\x02\x00\x01' Off
                         params = parse_switch_state_request(message['rf_data'])
-                        self.set_relay_state(params['RelayState'])
+                        self.relay_state = params['RelayState']
                         self.send_message(self.generate_relay_state_update(), source_addr_long, source_addr_short)
-                        self._callback('Attribute', self.get_node_id(), 'RelayState', 1)
+                        self._callback('Attribute', self.node_id, 'RelayState', 1)
 
                     else:
                         self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
@@ -82,35 +82,6 @@ class SmartPlug(Device):
 
             # else:
                 # self._logger.error('Unrecognised Profile ID: %r', profile_id)
-
-    def set_relay_state(self, state):
-        """
-        This simulates the physical button being pressed
-
-        :param state:
-        :return:
-        """
-        self.relay_state = state
-        self._logger.debug('Switch Relay State Changed to: %s', self.relay_state)
-        if self.associated:
-            self.send_message(self.generate_relay_state_update(), self.hub_addr_long, self.hub_addr_short)
-
-        # Temporary code while testing power code...
-        # Randomly set the power usage value.
-        from random import randint
-        self.set_power_demand(randint(0, 100))
-
-    def set_power_demand(self, power_demand):
-        """
-        Set Power Demand
-
-        :param power_demand:
-        :return:
-        """
-        self.power_demand = power_demand
-        self._logger.debug('Power Demand Changed to: %s', self.power_demand)
-        if self.associated:
-            self.send_message(self.generate_power_demand_update(), self.hub_addr_long, self.hub_addr_short)
 
     def generate_relay_state_update(self):
         """

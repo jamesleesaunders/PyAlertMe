@@ -118,16 +118,6 @@ class Device(Base):
             else:
                 self._logger.error('Unrecognised Profile ID: %r', profile_id)
 
-    def set_associated(self, associated):
-        """
-        Set Attribute
-
-        :param bool: associated Associated True/False
-        :return:
-        """
-        self._logger.debug('Associated: %s', associated)
-        self.associated = associated
-
     def set_attribute(self, attribute, value):
         """
         Set Associated

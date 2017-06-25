@@ -41,6 +41,10 @@ class Base(object):
         # ZDO Sequence
         self.zdo_sequence = 1
 
+    @property
+    def node_id(self):
+        return self.pretty_mac(self.addr_long)
+
     def __str__(self):
         return self.type
 
@@ -100,9 +104,6 @@ class Base(object):
         """
         self._logger.debug('Continual Update')
 
-    def get_node_id(self):
-        return self.pretty_mac(self.addr_long)
-
     def xbee_error(self, error):
         """
         On XBee error this function is called
@@ -161,27 +162,6 @@ class Base(object):
         """
         return list_messages()
 
-
-    def set_addr_short(self, addr_short):
-        """
-        Set Short Address
-
-        :param addr_short: Long Address
-        :return:
-        """
-        self._logger.debug('Setting Short Address: %s', addr_short)
-        self.addr_short = addr_short
-
-    def set_addr_long(self, addr_long):
-        """
-        Set Long Address
-
-        :param addr_long: Long Address
-        :return:
-        """
-        self._logger.debug('Setting Long Address: %s', addr_long)
-        self.addr_long = addr_long
-
     def process_message(self, message):
         """
         Process incoming message
@@ -192,14 +172,14 @@ class Base(object):
         # AT Packets
         if message['id'] == 'at_response':
             if message['command'] == 'MY':
-                self.set_addr_short(message['parameter'])
+                self.addr_short = message['parameter']
             if message['command'] == 'SH':
                 self._addr_long_list[0] = message['parameter']
             if message['command'] == 'SL':
                 self._addr_long_list[1] = message['parameter']
             # If we have worked out both the High and Low addresses then calculate the full addr_long
             if self._addr_long_list[0] and self._addr_long_list[1]:
-                self.set_addr_long(b''.join(self._addr_long_list))
+                self.addr_long = b''.join(self._addr_long_list)
 
         # ZigBee Explicit Packets
         if message['id'] == 'rx_explicit':

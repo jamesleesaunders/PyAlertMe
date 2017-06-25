@@ -189,8 +189,8 @@ class Hub(Base):
                 self.nodes[node_id]['AddressShort'] = source_addr_short
 
                 # New way
-                self.devices[node_id].set_addr_long(source_addr_long)
-                self.devices[node_id].set_addr_short(source_addr_short)
+                self.devices[node_id].addr_long = source_addr_long
+                self.devices[node_id].addr_short = source_addr_short
 
                 profile_id = message['profile']
                 cluster_id = message['cluster']
@@ -246,7 +246,7 @@ class Hub(Base):
                         self.send_message(reply, source_addr_long, source_addr_short)
 
                         # We are fully associated!
-                        self.devices[node_id].set_associated(True)
+                        self.devices[node_id].associated = True
                         self._logger.debug('New Device Fully Associated')
                         
                     elif cluster_id == CLUSTER_ID_ZDO_END_DEVICE_ANNCE:
