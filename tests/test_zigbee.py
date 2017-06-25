@@ -7,23 +7,23 @@ class TestMessages(unittest.TestCase):
 
     def test_get_message(self):
         # Test providing all the appropriate parameters
-        result = get_message('version_info_update', {'Version': 20045, 'Manufacturer': 'AlertMe.com', 'Type': 'SmartPlug', 'ManufactureDate': '2013-09-26'})
+        result = get_message('version_info_update', {'version': 20045, 'manu': 'AlertMe.com', 'type': 'SmartPlug', 'manu_date': '2013-09-26'})
         expected = {'profile': b'\xc2\x16', 'cluster': '\x00\xf6', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x02', 'data': b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\nSmartPlug\n2013-09-26'}
         self.assertEqual(result, expected)
 
         # Test providing a couple of parameters missing
         # Should throw exception detailing the parameters which are missing
         with self.assertRaises(Exception) as context:
-            get_message('version_info_update', {'Manufacturer': 'AlertMe.com', 'Type': 'SmartPlug'})
-        self.assertTrue("Missing Parameters: ['ManufactureDate', 'Version']" in context.exception)
+            get_message('version_info_update', {'manu': 'AlertMe.com', 'type': 'SmartPlug'})
+        self.assertTrue("Missing Parameters: ['manu_date', 'version']" in context.exception)
 
         # Test providing no parameters
         with self.assertRaises(Exception) as context:
             get_message('version_info_update', {})
-        self.assertTrue("Missing Parameters: ['ManufactureDate', 'Manufacturer', 'Type', 'Version']" in context.exception)
+        self.assertTrue("Missing Parameters: ['manu', 'manu_date', 'type', 'version']" in context.exception)
         with self.assertRaises(Exception) as context:
             get_message('version_info_update')
-        self.assertTrue("Missing Parameters: ['ManufactureDate', 'Manufacturer', 'Type', 'Version']" in context.exception)
+        self.assertTrue("Missing Parameters: ['manu', 'manu_date', 'type', 'version']" in context.exception)
 
         # Test message without data lambda
         result = get_message('permit_join_request')
@@ -43,49 +43,49 @@ class TestMessages(unittest.TestCase):
         message = messages['version_info_update']
         expected = {
             'name': 'Version Info Update',
-            'expected_params': ['Version', 'Type', 'Manufacturer', 'ManufactureDate']
+            'expected_params': ['version', 'type', 'manu', 'manu_date']
         }
         self.assertEqual(message, expected)
 
     def test_parse_tamper_state(self):
         result = parse_tamper_state(b'\t\x00\x00\x02\xe8\xa6\x00\x00')
-        expected = {'Counter': 42728, 'TamperState': 1}
+        expected = {'counter': 42728, 'tamper_state': 1}
         self.assertEqual(result, expected)
 
         result = parse_tamper_state(b'\t\x00\x01\x01+\xab\x00\x00')
-        expected = {'Counter': 43819, 'TamperState': 0}
+        expected = {'counter': 43819, 'tamper_state': 0}
         self.assertEqual(result, expected)
 
     def test_parse_power_demand(self):
         result = parse_power_demand(b'\tj\x81\x00\x00')
-        expected = {'PowerDemand': 0}
+        expected = {'power_demand': 0}
         self.assertEqual(result, expected)
 
         result = parse_power_demand(b'\tj\x81%\x00')
-        expected = {'PowerDemand': 37}
+        expected = {'power_demand': 37}
         self.assertEqual(result, expected)
         
         result = parse_power_demand(b'\tj\x81\x16\x00')
-        expected = {'PowerDemand': 22}
+        expected = {'power_demand': 22}
         self.assertEqual(result, expected)
 
     def test_generate_power_demand_update(self):
-        result = generate_power_demand_update({'PowerDemand': 0})
+        result = generate_power_demand_update({'power_demand': 0})
         expected = b'\tj\x81\x00\x00'
         self.assertEqual(result, expected)
 
-        result = generate_power_demand_update({'PowerDemand': 37})
+        result = generate_power_demand_update({'power_demand': 37})
         expected = b'\tj\x81%\x00'
         self.assertEqual(result, expected)
 
-        result = generate_power_demand_update({'PowerDemand': 22.4})
+        result = generate_power_demand_update({'power_demand': 22.4})
         expected = b'\tj\x81\x16\x00'
         self.assertEqual(result, expected)
 
     def test_generate_power_consumption_update(self):
         params = {
-            'PowerConsumption': 19973,
-            'UpTime': 33207
+            'power_consumption': 19973,
+            'up_time': 33207
         }
         message = get_message('power_consumption_update', params)
         result = message['data']
@@ -95,65 +95,65 @@ class TestMessages(unittest.TestCase):
     def test_parse_power_consumption(self):
         result = parse_power_consumption(b'\t\x00\x82Z\xbb\x04\x00\xdf\x86\x04\x00\x00')
         expected = {
-            'PowerConsumption': 310106,
-            'UpTime': 296671
+            'power_consumption': 310106,
+            'up_time': 296671
         }
         self.assertEqual(result, expected)
 
     def test_parse_switch_state_request(self):
         result = parse_switch_state_request(b'\x11\x00\x02\x01\x01')
-        self.assertEqual(result, {'RelayState': 1})
+        self.assertEqual(result, {'relay_state': 1})
 
         result = parse_switch_state_request(b'\x11\x00\x02\x00\x01')
-        self.assertEqual(result, {'RelayState': 0})
+        self.assertEqual(result, {'relay_state': 0})
 
     def test_parse_switch_state_update(self):
         result = parse_switch_state_update(b'\th\x80\x07\x01')
-        expected = {'RelayState': 1}
+        expected = {'relay_state': 1}
         self.assertEqual(result, expected)
 
         result = parse_switch_state_update(b'\th\x80\x06\x00')
-        expected = {'RelayState': 0}
+        expected = {'relay_state': 0}
         self.assertEqual(result, expected)
 
     def test_generate_switch_state_response(self):
-        result = generate_switch_state_update({'RelayState': 1})
+        result = generate_switch_state_update({'relay_state': 1})
         expected = b'\th\x80\x07\x01'
         self.assertEqual(result, expected)
 
-        result = generate_switch_state_update({'RelayState': 0})
+        result = generate_switch_state_update({'relay_state': 0})
         expected = b'\th\x80\x06\x00'
         self.assertEqual(result, expected)
 
     def test_generate_mode_change_request(self):
-        result = generate_mode_change_request({'Mode': 'Normal'})
+        result = generate_mode_change_request({'mode': 'Normal'})
         expected = b'\x11\x00\xfa\x00\x01'
         self.assertEqual(result, expected)
 
-        result = generate_mode_change_request({'Mode': 'RangeTest'})
+        result = generate_mode_change_request({'mode': 'RangeTest'})
         expected = b'\x11\x00\xfa\x01\x01'
         self.assertEqual(result, expected)
 
-        result = generate_mode_change_request({'Mode': 'Locked'})
+        result = generate_mode_change_request({'mode': 'Locked'})
         expected = b'\x11\x00\xfa\x02\x01'
         self.assertEqual(result, expected)
 
-        result = generate_mode_change_request({'Mode': 'Silent'})
+        result = generate_mode_change_request({'mode': 'Silent'})
         expected = b'\x11\x00\xfa\x03\x01'
         self.assertEqual(result, expected)
 
     def test_generate_switch_state_request(self):
         # Test On Request
         expected = b'\x11\x00\x02\x01\x01'
-        self.assertEqual(generate_switch_state_request({'RelayState': 1}), expected)
+        self.assertEqual(generate_switch_state_request({'relay_state': 1}), expected)
 
         # Test Off Request
         expected = b'\x11\x00\x02\x00\x01'
-        self.assertEqual(generate_switch_state_request({'RelayState': 0}), expected)
+        self.assertEqual(generate_switch_state_request({'relay_state': 0}), expected)
 
         # Test Check Only
         expected = b'\x11\x00\x01\x01'
-        self.assertEqual(generate_switch_state_request({'RelayState': ''}), expected)
+        self.assertEqual(generate_switch_state_request({'relay_state': ''}), expected)
 
     def test_generate_version_info_request(self):
         result = generate_version_info_request()
@@ -163,91 +163,91 @@ class TestMessages(unittest.TestCase):
     def test_parse_version_info_update(self):
         result = parse_version_info_update(b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\tSmartPlug\n2013-09-26')
         expected = {
-            'Version': 20045,
-            'Manufacturer': 'AlertMe.com',
-            'Type': 'SmartPlug',
-            'ManufactureDate': '2013-09-26'
+            'version': 20045,
+            'manu': 'AlertMe.com',
+            'type': 'SmartPlug',
+            'manu_date': '2013-09-26'
         }
         self.assertEqual(result, expected)
 
         result = parse_version_info_update(b'\tp\xfebI\xb2\x8a\xc2\x00\x00o\r\x009\x10\r\x00\x03#\x01\x01\x0bAlertMe.com\x0bPower Clamp\n2010-05-19')
         expected = {
-            'Version': 18786,
-            'Manufacturer': 'AlertMe.com',
-            'Type': 'Power Clamp',
-            'ManufactureDate': '2010-05-19'
+            'version': 18786,
+            'manu': 'AlertMe.com',
+            'type': 'Power Clamp',
+            'manu_date': '2010-05-19'
         }
         self.assertEqual(result, expected)
 
         result = parse_version_info_update(b'\tp\xfe+\xe8\xc0ax\x00\x00o\r\x009\x10\x01\x00\x01#\x00\x01\x0bAlertMe.com\rButton Device\n2010-11-15')
         expected = {
-            'Version': 59435,
-            'Manufacturer': 'AlertMe.com',
-            'Type': 'Button Device',
-            'ManufactureDate': '2010-11-15'
+            'version': 59435,
+            'manu': 'AlertMe.com',
+            'type': 'Button Device',
+            'manu_date': '2010-11-15'
         }
         self.assertEqual(result, expected)
 
         result = parse_version_info_update(b'\tp\xfe\xb6\xb7x\x1dx\x00\x00o\r\x009\x10\x06\x00\x00#\x00\x02\x0bAlertMe.com\nPIR Device\n2010-11-24')
         expected = {
-            'Version': 47030,
-            'Manufacturer': 'AlertMe.com',
-            'Type': 'PIR Device',
-            'ManufactureDate': '2010-11-24'
+            'version': 47030,
+            'manu': 'AlertMe.com',
+            'type': 'PIR Device',
+            'manu_date': '2010-11-24'
         }
         self.assertEqual(result, expected)
 
         result = parse_version_info_update(b'\t\x00\xfe\xad\xe3jj\x1b\x00\x00o\r\x009\x10\x05\x00\x06\x12\x00\x01\x0bAlertMe.com\x12Door/Window sensor\n2008-04-17')
         expected = {
-            'Version': 58285,
-            'Manufacturer': 'AlertMe.com',
-            'Type': 'Door/Window sensor',
-            'ManufactureDate': '2008-04-17'
+            'version': 58285,
+            'manu': 'AlertMe.com',
+            'type': 'Door/Window sensor',
+            'manu_date': '2008-04-17'
         }
         self.assertEqual(result, expected)
 
         result = parse_version_info_update(b'\tp\xfe\x82@\xc1e\x1d\x00\x00o\r\x009\x10\x04\x00\x01#\x00\x01\x0bAlertMe.com\x0eAlarm Detector\n2010-11-24')
         expected = {
-            'Version': 16514,
-            'Manufacturer': 'AlertMe.com',
-            'Type': 'Alarm Detector',
-            'ManufactureDate': '2010-11-24'
+            'version': 16514,
+            'manu': 'AlertMe.com',
+            'type': 'Alarm Detector',
+            'manu_date': '2010-11-24'
         }
         self.assertEqual(result, expected)
 
         result = parse_version_info_update(b'\t0\xfe3B\x08BI\x00\x00o\r\x009\x10\x03\x00\x03#\x00\x01\x0bAlertMe.com\rKeyfob Device\n2010-11-10')
         expected = {
-            'Version': 16947,
-            'Manufacturer': 'AlertMe.com',
-            'Type': 'Keyfob Device',
-            'ManufactureDate': '2010-11-10'
+            'version': 16947,
+            'manu': 'AlertMe.com',
+            'type': 'Keyfob Device',
+            'manu_date': '2010-11-10'
         }
         self.assertEqual(result, expected)
 
         result = parse_version_info_update(b'\t\x00\xfe\x1b\x15V_\x1b\x00\x00o\r\x009\x10\x02\x00\x07\x12\x00\x02\x0bAlertMe.com\x06Beacon\n2008-07-08')
         expected = {
-            'Version': 5403,
-            'Manufacturer': 'AlertMe.com',
-            'Type': 'Beacon',
-            'ManufactureDate': '2008-07-08'
+            'version': 5403,
+            'manu': 'AlertMe.com',
+            'type': 'Beacon',
+            'manu_date': '2008-07-08'
         }
         self.assertEqual(result, expected)
 
         result = parse_version_info_update(b'\t\x00\xfe\xde\xa4\xeav\x1b\x00\x00o\r\x009\x10\x02\x00\x06\x12\x01\x01\x0bAlertMe.com\x04Lamp\n2008-04-17')
         expected = {
-            'Version': 42206,
-            'Manufacturer': 'AlertMe.com',
-            'Type': 'Lamp',
-            'ManufactureDate': '2008-04-17'
+            'version': 42206,
+            'manu': 'AlertMe.com',
+            'type': 'Lamp',
+            'manu_date': '2008-04-17'
         }
         self.assertEqual(result, expected)
 
     def test_generate_version_info_update(self):
         params = {
-            'Version': 12345,
-            'Manufacturer': 'PyAlertMe',
-            'Type': 'Generic',
-            'ManufactureDate': '2017-01-01'
+            'version': 12345,
+            'manu': 'PyAlertMe',
+            'type': 'Generic',
+            'manu_date': '2017-01-01'
         }
         result = generate_version_info_update(params)
         expected = b'\tq\xfe90\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bPyAlertMe\nGeneric\n2017-01-01'
@@ -256,32 +256,32 @@ class TestMessages(unittest.TestCase):
 
     def test_parse_range_info_update(self):
         result = parse_range_info_update(b'\t+\xfd\xc5w')
-        expected = {'RSSI': 197}
+        expected = {'rssi': 197}
         self.assertEqual(result, expected)
 
     def test_generate_range_update(self):
-        result = generate_range_update({'RSSI': 197})
+        result = generate_range_update({'rssi': 197})
         expected = b'\t+\xfd\xc5\x00'
         self.assertEqual(result, expected)
 
     def test_generate_button_press(self):
-        params = {'State': 1, 'Counter': 62552}
+        params = {'state': 1, 'counter': 62552}
         result = generate_button_press(params)
         expected = b'\t\x00\x01\x00\x01X\xf4\x00\x00'
         self.assertEqual(result, expected)
 
     def test_parse_button_press(self):
         result = parse_button_press(b'\t\x00\x00\x00\x02\xbf\xc3\x00\x00')
-        expected = {'Counter': 50111, 'ButtonState': 0}
+        expected = {'counter': 50111, 'button_state': 0}
         self.assertEqual(result, expected, "State OFF, Counter 50111")
 
         result = parse_button_press(b'\t\x00\x01\x00\x01\x12\xca\x00\x00')
-        expected = {'Counter': 51730, 'ButtonState': 1}
+        expected = {'counter': 51730, 'button_state': 1}
         self.assertEqual(result, expected, "State ON, Counter 51730")
 
     def test_parse_status_update(self):
         result = parse_status_update(b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00')
-        expected = {'Temperature': 87.008, 'Counter': 13019}
+        expected = {'temperature': 87.008, 'counter': 13019}
         self.assertEqual(result, expected)
 
         result = parse_status_update(b'\t\x00\xfb\x1b\x97H\x00\x00H\x0c\x9c\x01\xd4\xff\x00\x00')
@@ -290,25 +290,25 @@ class TestMessages(unittest.TestCase):
 
     def test_parse_security_state(self):
         result = parse_security_state('\t\x00\x00\x05\x00\x00')
-        expected = {'TriggerState': 1, 'TamperState': 1}
+        expected = {'trigger_state': 1, 'tamper_state': 1}
         self.assertEqual(result, expected)
 
         result = parse_security_state(b'\t\x00\x00\x01\x00\x00')
-        expected = {'TriggerState': 1, 'TamperState': 0}
+        expected = {'trigger_state': 1, 'tamper_state': 0}
         self.assertEqual(result, expected)
 
         result = parse_security_state(b'\t\x00\x00\x00\x00\x00')
-        expected = {'TriggerState': 0, 'TamperState': 0}
+        expected = {'trigger_state': 0, 'tamper_state': 0}
         self.assertEqual(result, expected)
 
         result = parse_security_state(b'\t\x00\x00\x04\x00\x00')
-        expected = {'TriggerState': 0, 'TamperState': 1}
+        expected = {'trigger_state': 0, 'tamper_state': 1}
         self.assertEqual(result, expected)
 
     def test_generate_active_endpoints_request(self):
         params = {
-            'Sequence':  170,
-            'AddressShort': b'\x88\x9f'
+            'sequence':  170,
+            'addr_short': b'\x88\x9f'
         }
         message = get_message('active_endpoints_request', params)
         result = message['data']
@@ -317,11 +317,11 @@ class TestMessages(unittest.TestCase):
 
     def test_generate_match_descriptor_request(self):
         params = {
-            'Sequence': 1,
-            'AddressShort': b'\xff\xfd',
-            'ProfileId': PROFILE_ID_ALERTME,
-            'InClusterList': b'',
-            'OutClusterList': b'\x00\xf0'
+            'sequence': 1,
+            'addr_short': b'\xff\xfd',
+            'profile_id': PROFILE_ID_ALERTME,
+            'in_cluster_list': b'',
+            'out_cluster_list': b'\x00\xf0'
         }
         message = get_message('match_descriptor_request', params)
         result = message['data']
@@ -330,9 +330,9 @@ class TestMessages(unittest.TestCase):
 
     def test_status_update(self):
         params = {
-            'TriggerState': 0,
-            'Temperature': 106.574,
-            'TamperState': 1
+            'trigger_state': 0,
+            'temperature': 106.574,
+            'tamper_state': 1
         }
         message = get_message('status_update', params)
         result = message['data']
@@ -341,9 +341,9 @@ class TestMessages(unittest.TestCase):
 
     def test_generate_match_descriptor_response(self):
         params = {
-            'Sequence': 3,
-            'AddressShort': b'\xe1\x00',
-            'EndpointList': b'\x00\x02'
+            'sequence': 3,
+            'addr_short': b'\xe1\x00',
+            'endpoint_list': b'\x00\x02'
         }
         message = get_message('match_descriptor_response', params)
         result = message['data']

@@ -70,9 +70,9 @@ class SmartPlug(Device):
                         # b'\x11\x00\x02\x01\x01' On
                         # b'\x11\x00\x02\x00\x01' Off
                         params = parse_switch_state_request(message['rf_data'])
-                        self.relay_state = params['RelayState']
+                        self.relay_state = params['relay_state']
                         self.send_message(self.generate_relay_state_update(), source_addr_long, source_addr_short)
-                        self._callback('Attribute', self.node_id, 'RelayState', 1)
+                        self._callback('Attribute', self.node_id, 'relay_state', 1)
 
                     else:
                         self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
@@ -89,7 +89,7 @@ class SmartPlug(Device):
 
         :return: Message of switch state
         """
-        return get_message('switch_state_update', {'RelayState': self.relay_state})
+        return get_message('switch_state_update', {'relay_state': self.relay_state})
 
     def generate_power_demand_update(self):
         """
@@ -97,5 +97,5 @@ class SmartPlug(Device):
 
         :return: Message
         """
-        return get_message('power_demand_update', {'PowerDemand': self.power_demand})
+        return get_message('power_demand_update', {'power_demand': self.power_demand})
 

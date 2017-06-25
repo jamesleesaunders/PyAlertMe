@@ -137,10 +137,10 @@ class Device(Base):
         :return: Message of device type
         """
         params = {
-            'Type': self.type,
-            'Version': self.version,
-            'Manufacturer': self.manu,
-            'ManufactureDate': self.manu_date
+            'type': self.type,
+            'version': self.version,
+            'manu': self.manu,
+            'manu_date': self.manu_date
         }
         return get_message('version_info_update', params)
 
@@ -151,7 +151,7 @@ class Device(Base):
         :return: Message of range value
         """
 
-        return get_message('range_info_update', {'RSSI': self.rssi})
+        return get_message('range_info_update', {'rssi': self.rssi})
 
     def generate_match_descriptor_request(self):
         """
@@ -159,11 +159,11 @@ class Device(Base):
 
         """
         params = {
-            'Sequence': 1,
-            'AddressShort': BROADCAST_SHORT,
-            'ProfileId': PROFILE_ID_ALERTME,
-            'InClusterList': b'',
-            'OutClusterList': CLUSTER_ID_AM_STATUS
+            'sequence': 1,
+            'addr_short': BROADCAST_SHORT,
+            'profile_id': PROFILE_ID_ALERTME,
+            'in_cluster_list': b'',
+            'out_cluster_list': CLUSTER_ID_AM_STATUS
         }
         return get_message('match_descriptor_request', params)
 

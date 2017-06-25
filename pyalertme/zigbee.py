@@ -117,7 +117,7 @@ messages = {
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_version_info_update(params)
         },
-        'expected_params': ['Version', 'Type', 'Manufacturer', 'ManufactureDate']
+        'expected_params': ['version', 'type', 'manu', 'manu_date']
     },
     'range_info_update': {
         'name': 'Range Info Update',
@@ -128,7 +128,7 @@ messages = {
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_range_update(params)
         },
-        'expected_params': ['RSSI']
+        'expected_params': ['rssi']
     },
     'switch_state_request': {
         'name': 'Relay State Request',
@@ -139,7 +139,7 @@ messages = {
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_switch_state_request(params)
         },
-        'expected_params': ['RelayState']
+        'expected_params': ['relay_state']
     },
     'switch_state_update': {
         'name': 'Relay State Update',
@@ -160,7 +160,7 @@ messages = {
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda params: generate_mode_change_request(params)
         },
-        'expected_params': ['Mode']
+        'expected_params': ['mode']
     },
     'status_update': {
         'name': 'Status Update',
@@ -354,11 +354,11 @@ def generate_version_info_update(params):
     """
     preamble = b'\x09\x71'  # b'\tq'
     cluster_cmd = CLUSTER_CMD_AM_VERSION_RESP
-    payload = struct.pack('H', params['Version']) \
+    payload = struct.pack('H', params['version']) \
               + b'\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0b' \
-              + params['Manufacturer'] \
-              + '\n' + params['Type'] \
-              + '\n' + params['ManufactureDate']
+              + params['manu'] \
+              + '\n' + params['type'] \
+              + '\n' + params['manu_date']
 
     data = preamble + cluster_cmd + payload
     return data
@@ -384,13 +384,13 @@ def parse_version_info_update(data):
     # We therefore have to calculate the length of the string which we then use in the unpack.
     l = len(data) - 22
     ret = dict(zip(
-        ('ClusterCmd', 'Version', 'ManuString'),
+        ('cluster_cmd', 'version', 'manu_string'),
         struct.unpack('< 2x s H 17x %ds' % l, data)
     ))
 
     # Break down the version string into its component parts
     # AlertMe.com\nSmartPlug\n2013-09-26
-    ret['ManuString'] = str(ret['ManuString'].decode()) \
+    ret['manu_string'] = str(ret['manu_string'].decode()) \
         .replace('\t', '\n') \
         .replace('\r', '\n') \
         .replace('\x0e', '\n') \
@@ -398,11 +398,11 @@ def parse_version_info_update(data):
         .replace('\x06', '\n') \
         .replace('\x04', '\n') \
         .replace('\x12', '\n')
-    (ret['Manufacturer'], ret['Type'], ret['ManufactureDate']) = ret['ManuString'].split('\n')
+    (ret['manu'], ret['type'], ret['manu_date']) = ret['manu_string'].split('\n')
 
     # Delete not required keys
-    del ret['ManuString']
-    del ret['ClusterCmd']
+    del ret['manu_string']
+    del ret['cluster_cmd']
 
     return ret
 
@@ -423,7 +423,7 @@ def generate_range_update(params):
     """
     preamble = b'\x09\x2b'  # b'\t+'
     cluster_cmd = CLUSTER_CMD_AM_RSSI
-    payload = struct.pack('B 1x', params['RSSI'])
+    payload = struct.pack('B 1x', params['rssi'])
 
     data = preamble + cluster_cmd + payload
     return data
@@ -444,11 +444,11 @@ def parse_range_info_update(data):
     :return: Parameter dictionary of RSSI value
     """
     values = dict(zip(
-        ('cluster_cmd', 'RSSI'),
+        ('cluster_cmd', 'rssi'),
         struct.unpack('< 2x s B 1x', data)
     ))
-    rssi = values['RSSI']
-    return {'RSSI' : rssi}
+    rssi = values['rssi']
+    return {'rssi': rssi}
 
 
 def generate_power_demand_update(params):
@@ -466,7 +466,7 @@ def generate_power_demand_update(params):
     """
     preamble = b'\x09\x6a'  # b'\tj'
     cluster_cmd = CLUSTER_CMD_AM_PWR_DEMAND
-    payload = struct.pack('H', params['PowerDemand'])
+    payload = struct.pack('H', params['power_demand'])
 
     data = preamble + cluster_cmd + payload
     return data
@@ -487,8 +487,8 @@ def generate_power_consumption_update(params):
     :return: Message
     """
     params = {
-        'PowerConsumption': 19973,
-        'UpTime': 33207
+        'power_consumption': 19973,
+        'up_time': 33207
     }
     # At the moment this just generates a hard coded message.
     # Also see parse_power_consumption().
@@ -515,12 +515,13 @@ def parse_power_demand(data):
     :param data: Message data
     :return: Parameter dictionary of power demand value
     """
-    values = dict(zip(
+    ret = dict(zip(
         ('cluster_cmd', 'power_demand'),
         struct.unpack('< 2x s H', data)
     ))
+    del ret['cluster_cmd']
 
-    return {'PowerDemand': values['power_demand']}
+    return ret
 
 
 def parse_power_unknown(data):
@@ -544,7 +545,7 @@ def parse_power_unknown(data):
     """
 
     value = struct.unpack('<H', data[3:5])[0]  # TBC
-    return {'PowerDemand': value}
+    return {'power_demand': value}
 
 
 def parse_power_consumption(data):
@@ -563,12 +564,11 @@ def parse_power_consumption(data):
     :return: Parameter dictionary of usage stats
     """
     ret = {}
-    values = dict(zip(
-        ('cluster_cmd', 'powerConsumption', 'upTime'),
+    ret = dict(zip(
+        ('cluster_cmd', 'power_consumption', 'up_time'),
         struct.unpack('< 2x s I I 1x', data)
     ))
-    ret['PowerConsumption'] = values['powerConsumption']
-    ret['UpTime'] = values['upTime']
+    del ret['cluster_cmd']
 
     return ret
 
@@ -591,7 +591,7 @@ def generate_mode_change_request(params):
     cluster_cmd = CLUSTER_CMD_AM_MODE_REQ
     payload = b'\x00\x01' # Default normal if no mode
 
-    mode = params['Mode']
+    mode = params['mode']
     if mode == 'Normal':
         payload = b'\x00\x01'
     elif mode == 'RangeTest':
@@ -624,9 +624,9 @@ def generate_switch_state_request(params):
     """
     preamble = b'\x11\x00'
 
-    if params['RelayState'] != '':
+    if params['relay_state'] != '':
         cluster_cmd = CLUSTER_CMD_AM_STATE_CHANGE
-        if int(params['RelayState']) == 1:
+        if int(params['relay_state']) == 1:
             payload = b'\x01\x01'  # On
         else:
             payload = b'\x00\x01'  # Off
@@ -655,9 +655,9 @@ def parse_switch_state_request(data):
     """
     # Parse Switch State Request
     if data == b'\x11\x00\x02\x01\x01':
-        return {'RelayState': 1}
+        return {'relay_state': 1}
     elif data == b'\x11\x00\x02\x00\x01':
-        return {'RelayState': 0}
+        return {'relay_state': 0}
     else:
         logging.error('Unknown State Request')
 
@@ -678,7 +678,7 @@ def generate_switch_state_update(params):
     """
     preamble = b'\x09\x68'  # b'\th'
     cluster_cmd = CLUSTER_CMD_AM_STATE_RESP
-    payload = b'\x07\x01' if params['RelayState'] else b'\x06\x00'
+    payload = b'\x07\x01' if params['relay_state'] else b'\x06\x00'
 
     data = preamble + cluster_cmd + payload
     return data
@@ -705,9 +705,9 @@ def parse_switch_state_update(data):
     values = struct.unpack('< 2x b b b', data)
 
     if values[2] & 0x01:
-        return {'RelayState': 1}
+        return {'relay_state': 1}
     else:
-        return {'RelayState': 0}
+        return {'relay_state': 0}
 
 
 def generate_button_press(self):
@@ -727,8 +727,8 @@ def generate_button_press(self):
     :return: Message
     """
     params = {
-        'ButtonState': 1,
-        'Counter': 62552
+        'button_state': 1,
+        'counter': 62552
     }
     # At the moment this just generates a hard coded message.
     # Also see parse_button_press().
@@ -760,11 +760,11 @@ def parse_button_press(data):
     """
     ret = {}
     if ord(data[2]) == 0x00:
-        ret['ButtonState'] = 0
+        ret['button_state'] = 0
     elif ord(data[2]) == 0x01:
-        ret['ButtonState'] = 1
+        ret['button_state'] = 1
 
-    ret['Counter'] = struct.unpack('<H', data[5:7])[0]
+    ret['counter'] = struct.unpack('<H', data[5:7])[0]
 
     return ret
 
@@ -791,11 +791,11 @@ def parse_tamper_state(data):
     """
     ret = {}
     if ord(data[3]) == 0x02:
-        ret['TamperState'] = 1  # Open
+        ret['tamper_state'] = 1  # Open
     else:
-        ret['TamperState'] = 0  # Closed
+        ret['tamper_state'] = 0  # Closed
 
-    ret['Counter'] = struct.unpack('<H', data[4:6])[0]
+    ret['counter'] = struct.unpack('<H', data[4:6])[0]
 
     return ret
 
@@ -828,14 +828,14 @@ def parse_security_state(data):
     #    bit 3 is the tamper switch state
     state = ord(data[3])
     if state & 0x01:
-        ret['TriggerState'] = 1  # Open
+        ret['trigger_state'] = 1  # Open
     else:
-        ret['TriggerState'] = 0  # Closed
+        ret['trigger_state'] = 0  # Closed
 
     if state & 0x04:
-        ret['TamperState'] = 1  # Open
+        ret['tamper_state'] = 1  # Open
     else:
-        ret['TamperState'] = 0  # Closed
+        ret['tamper_state'] = 0  # Closed
 
     return ret
 
@@ -895,21 +895,21 @@ def parse_status_update(data):
 
     elif type == b'\x1d':
         # Key Fob
-        ret['Temperature'] = float(struct.unpack("<h", data[8:10])[0]) / 100.0 * 1.8 + 32
-        ret['Counter'] = struct.unpack('<I', data[4:8])[0]
+        ret['temperature'] = float(struct.unpack("<h", data[8:10])[0]) / 100.0 * 1.8 + 32
+        ret['counter'] = struct.unpack('<I', data[4:8])[0]
 
     elif type == b'\x1e' or type == b'\x1f':
         # Door Sensor
-        ret['Temperature'] = float(struct.unpack("<h", data[8:10])[0]) / 100.0 * 1.8 + 32
+        ret['temperature'] = float(struct.unpack("<h", data[8:10])[0]) / 100.0 * 1.8 + 32
         if ord(data[-1]) & 0x01 == 1:
-            ret['TriggerState'] = 1  # Open
+            ret['trigger_state'] = 1  # Open
         else:
-            ret['TriggerState'] = 0  # Closed
+            ret['trigger_state'] = 0  # Closed
 
         if ord(data[-1]) & 0x02 == 0:
-            ret['TamperState'] = 1  # Open
+            ret['tamper_state'] = 1  # Open
         else:
-            ret['TamperState'] = 0  # Closed
+            ret['tamper_state'] = 0  # Closed
 
     else:
         logging.error('Unrecognised Device Status %r  %r', type, data)
@@ -933,9 +933,9 @@ def generate_status_update(params):
     :return: Message
     """
     params = {
-        'TriggerState': 0,
-        'Temperature': 106.574,
-        'TamperState': 1
+        'trigger_state': 0,
+        'temperature': 106.574,
+        'tamper_state': 1
     }
     # At the moment this just generates a hard coded message.
     # The below is just one type of status update, see parse_status_update() for more.
@@ -963,8 +963,8 @@ def generate_active_endpoints_request(params):
     Example:
         b'\xaa\x9f\x88'
     """
-    sequence = struct.pack('B', params['Sequence'])                   # b'\xaa'
-    net_addr = params['AddressShort'][1] + params['AddressShort'][0]  # b'\x9f\x88'
+    sequence = struct.pack('B', params['sequence'])               # b'\xaa'
+    net_addr = params['addr_short'][1] + params['addr_short'][0]  # b'\x9f\x88'
 
     data = sequence + net_addr
     return data
@@ -993,13 +993,13 @@ def generate_match_descriptor_request(params):
     :param params:
     :return: Message data
     """
-    sequence = struct.pack('B', params['Sequence'])                                  # b'\x01'
-    net_addr = params['AddressShort'][1] + params['AddressShort'][0]                 # b'\xfd\xff'
-    profile_id = params['ProfileId'][1] + params['ProfileId'][0]                     # b'\x16\xc2'  PROFILE_ID_ALERTME (reversed)
-    num_input_clusters = struct.pack('B', len(params['InClusterList']) / 2)          # b'\x00'
-    input_cluster_list = params['InClusterList']                                     # b''
-    num_output_clusters = struct.pack('B', len(params['OutClusterList']) / 2)        # b'\x01'
-    output_cluster_list = params['OutClusterList'][1] + params['OutClusterList'][0]  # b'\xf0\x00'  CLUSTER_ID_AM_STATUS (reversed)
+    sequence = struct.pack('B', params['sequence'])                                      # b'\x01'
+    net_addr = params['addr_short'][1] + params['addr_short'][0]                         # b'\xfd\xff'
+    profile_id = params['profile_id'][1] + params['profile_id'][0]                       # b'\x16\xc2'  PROFILE_ID_ALERTME (reversed)
+    num_input_clusters = struct.pack('B', len(params['in_cluster_list']) / 2)            # b'\x00'
+    input_cluster_list = params['in_cluster_list']                                       # b''
+    num_output_clusters = struct.pack('B', len(params['out_cluster_list']) / 2)          # b'\x01'
+    output_cluster_list = params['out_cluster_list'][1] + params['out_cluster_list'][0]  # b'\xf0\x00'  CLUSTER_ID_AM_STATUS (reversed)
     # TODO Finish this off! At the moment this does not support multiple clusters, it just supports one!
 
     data = sequence + net_addr + profile_id + num_input_clusters + input_cluster_list + num_output_clusters + output_cluster_list
@@ -1026,11 +1026,11 @@ def generate_match_descriptor_response(params):
     :param params:
     :return: Message data
     """
-    sequence   = struct.pack('B', params['Sequence'])                   # b'\x04'
+    sequence   = struct.pack('B', params['sequence'])                   # b'\x04'
     status     = ZDP_STATUS_OK                                          # b'\x00'
-    net_addr   = params['AddressShort'][1] + params['AddressShort'][0]  # b'\x00\x00'
-    length     = struct.pack('B', len(params['EndpointList']))          # b'\x01'
-    match_list = params['EndpointList']                                 # b'\x02'
+    net_addr   = params['addr_short'][1] + params['addr_short'][0]      # b'\x00\x00'
+    length     = struct.pack('B', len(params['endpoint_list']))         # b'\x01'
+    match_list = params['endpoint_list']                                # b'\x02'
 
     data = sequence + status + net_addr + length + match_list
     return data

@@ -39,9 +39,9 @@ class TestHub(unittest.TestCase):
         result = self.hub_obj.list_devices()
         expected = {
             '00:0d:6f:00:03:bb:b9:f8': {
-                'Type': 'SmartPlug',
-                'Manufacturer': 'AlertMe.com',
-                'Version': 20045
+                'type': 'SmartPlug',
+                'manu': 'AlertMe.com',
+                'version': 20045
             }
         }
         self.assertEqual(result, expected)
@@ -56,14 +56,14 @@ class TestHub(unittest.TestCase):
         result = self.hub_obj.list_devices()
         expected = {
             '00:0d:6f:00:03:bb:b9:f8': {
-                'Type': 'SmartPlug',
-                'Manufacturer': 'AlertMe.com',
-                'Version': 20045
+                'type': 'SmartPlug',
+                'manu': 'AlertMe.com',
+                'version': 20045
             },
             '00:0d:6f:00:00:00:ff:ff': {
-                'Type': 'Generic Device',
-                'Manufacturer': 'PyAlertMe',
-                'Version': 12345
+                'type': 'Generic Device',
+                'manu': 'PyAlertMe',
+                'version': 12345
             }
         }
         self.assertEqual(result, expected)

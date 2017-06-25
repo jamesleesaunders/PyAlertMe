@@ -90,9 +90,9 @@ class Hub(Base):
         devices = {}
         for (device_id, device_obj) in self.devices.items():
             devices[device_id] = {
-                'Type': device_obj.Type,
-                'Manufacturer': device_obj.Manufacturer,
-                'Version': device_obj.Version
+                'type': device_obj.type,
+                'manu': device_obj.manu,
+                'version': device_obj.version
             }
 
         return devices
@@ -329,8 +329,8 @@ class Hub(Base):
         :param addr_short:
         """
         params = {
-            'Sequence':  170,
-            'AddressShort': addr_short
+            'sequence':  170,
+            'addr_short': addr_short
         }
         return get_message('active_endpoints_request', params)
 
@@ -341,9 +341,9 @@ class Hub(Base):
         :param rf_data:
         """
         params = {
-            'Sequence': 3, # sequence,
-            'AddressShort': self.addr_short,
-            'EndpointList': ENDPOINT_ALERTME
+            'sequence': 3, # sequence,
+            'addr_short': self.addr_short,
+            'endpoint_list': ENDPOINT_ALERTME
         }
         return get_message('match_descriptor_response', params)
 
@@ -354,7 +354,7 @@ class Hub(Base):
         :param state: Switch Relay State
         :return: message
         """
-        return get_message('switch_state_request', {'RelayState': state})
+        return get_message('switch_state_request', {'relay_state': state})
 
     def generate_mode_change_request(self, mode):
         """
@@ -364,7 +364,7 @@ class Hub(Base):
         :param mode: Switch Mode
         :return: message
         """
-        return get_message('mode_change_request', {'Mode': mode})
+        return get_message('mode_change_request', {'mode': mode})
 
     def generate_version_info_request(self):
         """
@@ -401,9 +401,9 @@ class Hub(Base):
         :param command: Parameter or command to be sent
         :param value: Value, State, Mode
         """
-        if command == 'RelayState':
+        if command == 'relay_state':
             self.send_relay_state_request(device_id, value)
-        elif command == 'Mode':
+        elif command == 'mode':
             self.send_mode_request(device_id, value)
         else:
             self._logger.error('Invalid Attribute Request')
