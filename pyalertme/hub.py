@@ -113,29 +113,31 @@ class Hub(Base):
 
         return device_obj
 
-    def device_obj_from_addr_long(self, addr_long):
+    def device_obj_from_addr_long(self, device_addr_long):
         """
         Given a 48-bit Long Address return Device Object.
         If the device is not in the known devices list of known devices
         then generate new Device Object and add it to the list.
 
-        :param addr_long: 48-bits Long Address
+        :param device_addr_long: 48-bits Long Address
         :return: Device Object
         """
         # If this address is me (i.e. the hub), don't add to known devices list and don't
         # generate device object, also if we don't know what our own address is yet we can't check.
-        if self.addr_long == addr_long or self.addr_long is None:
+        if self.addr_long == device_addr_long or self.addr_long is None:
             device_obj = None
 
         else:
             # See if we already know about this device.
             # If not get device_id and add to list of known devices.
-            device_id = Base.pretty_mac(addr_long)
+            device_id = Base.pretty_mac(device_addr_long)
             device_obj = self.device_obj_from_id(device_id)
 
             if not device_obj:
                 device_obj = Device()
-                device_obj.addr_long = addr_long
+                device_obj.addr_long = device_addr_long
+                device_obj.hub_addr_long = self.addr_long
+                device_obj.hub_addr_short = self.addr_short
                 self.devices[device_id] = device_obj
 
         return device_obj
