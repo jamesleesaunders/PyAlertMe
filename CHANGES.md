@@ -59,3 +59,7 @@ v0.2.2 - 08 May 2017
 * Improving thread quit speed.
 * Moved tests folder in package... again.
 
+v0.3.0 - 26 Jun 2017
+* Hub device list is now a list of device objects rather than a simple dict.
+* Making more use of device objects - not only ate they used to create new devices but also in the hub.
+* Zigbee message improvements.
