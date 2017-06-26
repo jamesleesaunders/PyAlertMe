@@ -67,7 +67,7 @@ def get_nodes():
 
 @app.route(API_BASE + '/nodes/<int:node_id>', methods=['GET'])
 def get_node(node_id):
-    node = hub_obj.get_device(node_id)
+    node = hub_obj.device_obj_from_id(node_id)
 
     if node:
         # Blank out the addresses for now
@@ -89,7 +89,7 @@ def update_node(node_id):
     if not request.json or not request.json['Nodes'][0].has_key('Attributes'):
         abort(400)
 
-    node = hub_obj.get_device(node_id)
+    node = hub_obj.device_obj_from_id(node_id)
 
     # Loop round attribute update request updating values
     for attribute in request.json['Nodes'][0]['Attributes']:

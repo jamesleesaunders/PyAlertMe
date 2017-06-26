@@ -70,7 +70,7 @@ class TestCmd(Command):
                 return 'Type Request Sent'
 
             if args[1] == "detail":
-                return hub_obj.get_device(node_id)
+                return hub_obj.device_obj_from_id(node_id)
 
         return 'Unknown Argument'
 

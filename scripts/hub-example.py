@@ -61,45 +61,40 @@ while True:
         time.sleep(0.001)
 
         # List Devices
-        pp.pprint(hub_obj.list_devices())
-        print("Select Device:\n")
-        node_id = raw_input("")
+        device_list = hub_obj.list_devices()
+        pp.pprint(device_list)
+        node_id = raw_input("Select Device:")
 
-        while True:
-            device_obj = hub_obj.devices[node_id]
-            pp.pprint(vars(device_obj))
-            pp.pprint(device_obj.list_messages())
+        if node_id in device_list.keys():
+            while True:
+                # Select Message
+                device_obj = hub_obj.devices[node_id]
+                pp.pprint(device_obj.list_messages())
+                message_id = raw_input("Select Message:")
 
-            # Select Message
-            message_id = raw_input("Select Message: ")
+                if message_id in messages.keys():
+                    # Select Parameters
+                    params = {}
+                    if 'expected_params' in messages[message_id].keys():
+                        print("Message Parameters:")
+                        for param_name in messages[message_id]['expected_params']:
+                            param_value = raw_input("   %s: " % param_name)
+                            params = {param_name: param_value}
 
-            # Select Parameters
-            params = {}
-            if 'expected_params' in messages[message_id].keys():
-                print("Message Parameters:")
-                for param_name in messages[message_id]['expected_params']:
-                    param_value = raw_input("   %s: " % param_name)
-                    params = {param_name: param_value}
+                    # Send Message
+                    message = get_message(message_id, params)
+                    addresses = device_obj.addr_tuple
+                    hub_obj.send_message(message, *addresses)
 
-            # Send Message
-            message = get_message(message_id, params)
-            addresses = hub_obj.device_obj_to_addrs(device_obj)
-            hub_obj.send_message(message, *addresses)
-
-    except IndexError:
-        print("No Command")
+                else:
+                    break
 
     except KeyboardInterrupt:
         print("Keyboard Interrupt")
         break
 
-    except NameError as e:
-        print("Name Error:")
-        print(e.message.split("'")[1])
-
     except:
         print("Unexpected Error:", sys.exc_info()[0], sys.exc_info()[1])
-
 
 # Close up shop
 print("Closing Serial Port")
