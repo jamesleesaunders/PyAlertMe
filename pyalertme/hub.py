@@ -122,13 +122,14 @@ class Hub(Base):
         :param device_addr_long: 48-bits Long Address
         :return: Device Object
         """
-        # If this address is me (i.e. the hub), don't add to known devices list and don't
-        # generate device object, also if we don't know what our own address is yet we can't check.
+        # If this address is me (i.e. the hub), do not add it to known devices list and
+        # do not generate device object, also if we don't know what our own address is 
+        # yet we can't check.
         if self.addr_long == device_addr_long or self.addr_long is None:
             device_obj = None
 
         else:
-            # See if we already know about this device.
+            # Do we already know about this device. Is it in our list of known devices?
             # If not get device_id and add to list of known devices.
             device_id = Base.pretty_mac(device_addr_long)
             device_obj = self.device_obj_from_id(device_id)
@@ -188,25 +189,28 @@ class Hub(Base):
 
                     elif cluster_id == CLUSTER_ID_ZDO_ACTIVE_EP_RSP:
                         # Active Endpoints Response
-                        # This message tells us what the device can do, but it isn't constructed correctly to match what
-                        # the switch can do according to the spec. This is another message that gets it's response after
-                        # we receive the Match Descriptor below.
+                        # This message tells us what the device can do, but it isn't
+                        # constructed correctly to match what the switch can do according
+                        # to the spec. This is another message that gets it's response
+                        # after we receive the Match Descriptor below.
                         self._logger.debug('Received Active Endpoint Response')
 
                     elif cluster_id == CLUSTER_ID_ZDO_MATCH_DESC_REQ:
                         # Match Descriptor Request
                         self._logger.debug('Received Match Descriptor Request')
-                        # This is the point where we finally respond to the switch. A couple of messages are sent
-                        # to cause the switch to join with the controller at a network level and to cause it to
-                        # regard this controller as valid.
+                        # This is the point where we finally respond to the switch. 
+                        # A couple of messages are sent to cause the switch to join with
+                        # the controller at a network level and to cause it to regard 
+                        # this controller as valid.
 
                         # First send the Match Descriptor Response
                         sequence = message['rf_data'][0:1]
                         reply = self.generate_match_descriptor_response(sequence)
                         self.send_message(reply, source_addr_long, source_addr_short)
 
-                        # The next messages are directed at the hardware code (rather than the network code).
-                        # The device has to receive these two message to stay joined.
+                        # The next messages are directed at the hardware code (rather 
+                        # than the network code). The device has to receive these two
+                        # messages to stay joined.
                         time.sleep(2)
                         reply = self.generate_version_info_request()
                         self.send_message(reply, source_addr_long, source_addr_short)
@@ -301,8 +305,9 @@ class Hub(Base):
                     elif cluster_id == CLUSTER_ID_AM_SECURITY:
                         self._logger.debug('Received Security Event')
                         # Security Cluster
-                        # When the device first connects, it comes up in a state that needs initialization, this command
-                        # seems to take care of that. So, look at the value of the data and send the command.
+                        # When the device first connects, it comes up in a state that
+                        # needs initialization, this command seems to take care of that.
+                        # So, look at the value of the data and send the command.
                         if message['rf_data'][3:7] == b'\x15\x00\x39\x10':
                             reply = self.generate_security_init()
                             self.send_message(reply, source_addr_long, source_addr_short)
