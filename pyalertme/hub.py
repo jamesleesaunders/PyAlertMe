@@ -113,13 +113,14 @@ class Hub(Base):
 
         return device_obj
 
-    def device_obj_from_addr_long(self, device_addr_long):
+    def device_obj_from_addrs(self, device_addr_long, device_addr_short):
         """
-        Given a 48-bit Long Address return Device Object.
+        Given Addresses return Device Object.
         If the device is not in the known devices list of known devices
         then generate new Device Object and add it to the list.
 
         :param device_addr_long: 48-bits Long Address
+        :param device_addr_short: Short Address
         :return: Device Object
         """
         # If this address is me (i.e. the hub), do not add it to known devices list and
@@ -130,15 +131,14 @@ class Hub(Base):
 
         else:
             # Do we already know about this device. Is it in our list of known devices?
-            # If not get device_id and add to list of known devices.
+            # If not generate a device_id (pretty mac) and add to list of known devices.
             device_id = Base.pretty_mac(device_addr_long)
             device_obj = self.device_obj_from_id(device_id)
 
             if not device_obj:
                 device_obj = Device()
                 device_obj.addr_long = device_addr_long
-                device_obj.hub_addr_long = self.addr_long
-                device_obj.hub_addr_short = self.addr_short
+                device_obj.addr_short = device_addr_short
                 self.devices[device_id] = device_obj
 
         return device_obj
@@ -156,12 +156,14 @@ class Hub(Base):
         if message['id'] == 'rx_explicit':
             source_addr_long = message['source_addr_long']
             source_addr_short = message['source_addr']
-            device_obj = self.device_obj_from_addr_long(source_addr_long)
+
+            # Load the device object from the known devices list which corresponds
+            # to the originator of this message.
+            # If this message has come from an as of yet unknown device then create 
+            # a new object entry for it in the known devices list.
+            device_obj = self.device_obj_from_addrs(source_addr_long, source_addr_short)
 
             if device_obj is not None:
-                # We don't need to do this every time!
-                device_obj.addr_short = source_addr_short
-
                 profile_id = message['profile']
                 cluster_id = message['cluster']
 
@@ -220,6 +222,8 @@ class Hub(Base):
 
                         # We are fully associated!
                         device_obj.associated = True
+                        device_obj.hub_addr_long = self.addr_long
+                        device_obj.hub_addr_short = self.addr_short
                         self._logger.debug('New Device Fully Associated')
                         
                     elif cluster_id == CLUSTER_ID_ZDO_END_DEVICE_ANNCE:
