@@ -4,7 +4,7 @@ from pyalertme import *
 import unittest
 from mock_serial import Serial
 
-class TestHub(unittest.TestCase):
+class TestZigBeeHub(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff = None

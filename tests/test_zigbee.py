@@ -3,7 +3,7 @@ sys.path.insert(0, '../')
 from pyalertme.zigbee import *
 import unittest
 
-class TestMessages(unittest.TestCase):
+class TestZigBee(unittest.TestCase):
 
     def test_get_message(self):
         # Test providing all the appropriate parameters

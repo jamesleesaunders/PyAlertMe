@@ -4,7 +4,7 @@ from pyalertme import *
 import unittest
 from mock_serial import Serial
 
-class TestSmartPlug(unittest.TestCase):
+class TestZigBeeSmartPlug(unittest.TestCase):
 
     def setUp(self):
         self.ser = Serial()
