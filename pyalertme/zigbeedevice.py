@@ -1,11 +1,11 @@
 import logging
+from xbee import ZigBee
 from pyalertme.zigbee import *
 from pyalertme.device import Device
 import struct
 import time
 import binascii
 import threading
-from xbee import ZigBee
 
 class ZigBeeDevice(Device):
 
@@ -144,15 +144,6 @@ class ZigBeeDevice(Device):
         """
         self._logger.debug('Received Message: %s', message)
         self.process_message(message)
-
-    def list_messages(self):
-        """
-        List Messages
-
-        :param message: Dict of message
-        :return:
-        """
-        return list_messages()
 
     def process_message(self, message):
         """

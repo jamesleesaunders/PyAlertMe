@@ -1,10 +1,8 @@
 import logging
 from pyalertme.zigbee import *
-import struct
-import time
 import binascii
-import threading
-from xbee import ZigBee
+
+
 
 class Device(object):
     def __init__(self, callback=None):
@@ -94,3 +92,12 @@ class Device(object):
         """
         self._logger.debug('Setting attribute: %s to value: %s', attribute, value)
         setattr(self, attribute, value)
+
+    def list_messages(self):
+        """
+        List Messages
+
+        :param message: Dict of message
+        :return:
+        """
+        return list_messages()
