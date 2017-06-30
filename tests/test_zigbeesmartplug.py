@@ -8,8 +8,7 @@ class TestZigBeeSmartPlug(unittest.TestCase):
 
     def setUp(self):
         self.ser = Serial()
-        self.device_obj = ZigBeeSmartPlug()
-        self.device_obj.start(self.ser)
+        self.device_obj = ZigBeeSmartPlug(self.ser)
         self.device_obj.addr_long = b'\x00\x1e\x5e\x09\x02\x14\xc5\xab'
 
     def tearDown(self):
@@ -22,7 +21,7 @@ class TestZigBeeSmartPlug(unittest.TestCase):
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xf6',
             'profile': b'\xc2\x16',
-            'data': b'\tq\xfe90\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bPyAlertMe\nSmartPlug\n2017-01-01'
+            'data': b'\tq\xfe90\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bPyAlertMe\nZigBeeSmartPlug\n2017-01-01'
         }
         self.assertEqual(result, expected)
 

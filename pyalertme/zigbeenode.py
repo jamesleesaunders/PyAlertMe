@@ -9,25 +9,25 @@ import threading
 
 class ZigBeeNode(ZigBeeDevice):
 
-    def __init__(self, callback=None):
+    def __init__(self, serial, callback=None):
         """
         Device Constructor
 
+        :param serial: Serial Object
+        :param callback: Optional
         """
-        ZigBeeDevice.__init__(self, callback)
+        ZigBeeDevice.__init__(self, serial, callback)
 
         # Type Info
-        self.type = 'Generic Device'
+        self.type = 'ZigBeeNode'
         self.version = 12345
         self.manu = 'PyAlertMe'
         self.manu_date = '2017-01-01'
 
-        # Start off not associated
-        self.associated = False
-
         # Addresses of the hub we are associated with
         self.hub_addr_long = None
         self.hub_addr_short = None
+        self.associated = False
 
         # Attributes
         self.rssi = 197

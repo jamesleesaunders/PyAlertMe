@@ -9,57 +9,42 @@ import threading
 
 class ZigBeeDevice(Device):
 
-    def __init__(self, callback=None):
+    def __init__(self, serial, callback=None):
         """
         Base Constructor
 
+        :param serial: Serial Object
         :param callback: Optional
         """
         Device.__init__(self, callback)
 
-        # Resources
-        self._xbee = None
-        self._serial = None
+        # Start up Serial and ZigBee
+        self._serial = serial
+        self._xbee = ZigBee(ser=self._serial, callback=self.receive_message, error_callback=self.xbee_error, escaped=True)
 
-        # Type Info
-        self.type = None
-        self.version = None
-        self.manu = None
-        self.manu_date = None
-
-        # Scheduler Thread
-        self._schedule_thread = threading.Thread(target=self._schedule_loop)
-        self._schedule_interval = 2
-
-        # My addresses
+        # Fire off messages to discover own addresses
+        self.read_addresses()
         self._addr_long_list = [b'', b'']
         self.addr_long = None
         self.addr_short = None
 
-        # Status Flags
-        self.associated = False
-        self.started = False
+        # Type Info
+        self.type = 'ZigBeeDevice'
+        self.version = 12345
+        self.manu = 'PyAlertMe'
+        self.manu_date = '2017-01-01'
+
+        # Scheduler Thread
+        self._started = True
+        self._schedule_thread = threading.Thread(target=self._schedule_loop)
+        self._schedule_interval = 2
+        self._schedule_thread.start()
 
         # ZDO Sequence
         self.zdo_sequence = 1
 
     def __str__(self):
         return self.type
-
-    def start(self, serial):
-        """
-        Start Device
-        Initiate Serial and XBee
-
-        :param serial: Serial Object
-        :return:
-        """
-        if serial:
-            self._serial = serial
-            self._xbee = ZigBee(ser=self._serial, callback=self.receive_message, error_callback=self.xbee_error, escaped=True)
-            self.read_addresses()
-            self._started = True
-            self._schedule_thread.start()
 
     def halt(self):
         """

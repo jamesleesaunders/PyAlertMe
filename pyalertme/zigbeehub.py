@@ -8,21 +8,20 @@ import binascii
 import threading
 
 class ZigBeeHub(ZigBeeDevice):
-    def __init__(self, callback=None):
+    def __init__(self, serial, callback=None):
         """
         Hub Constructor
 
+        :param serial: Serial Object
+        :param callback: Optional
         """
-        ZigBeeDevice.__init__(self, callback)
+        ZigBeeDevice.__init__(self, serial, callback)
 
         # Type Info
-        self.type = 'Nano Hub'
+        self.type = 'ZigBeeHub'
         self.version = 12345
         self.manu = 'PyAlertMe'
         self.manu_date = '2017-01-01'
-
-        # By default the Hub is associated
-        self.associated = True
 
         # Discovery thread and list of known device objects
         self._discovery_thread = threading.Thread(target=self._discovery)

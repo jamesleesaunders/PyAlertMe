@@ -14,23 +14,21 @@ class Device(object):
         # Resources
         self._logger = logging.getLogger('pyalertme')
 
+        # My addresses
+        self.addr_long = None
+        self.addr_short = None
+
         # Type Info
         self.type = None
         self.version = None
         self.manu = None
         self.manu_date = None
 
-        # Callback
-        self._callback = callback if callback else self._callback
-
-        # My addresses
-        self._addr_long_list = [b'', b'']
-        self.addr_long = None
-        self.addr_short = None
-
         # Status Flags
         self.associated = False
-        self.started = False
+
+        # Callback
+        self._callback = callback if callback else self._callback
 
     @property
     def id(self):

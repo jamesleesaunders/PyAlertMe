@@ -8,15 +8,13 @@ class TestZigBeeHub(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff = None
-        self.ser1 = Serial()
-        self.hub_obj = ZigBeeHub()
-        self.hub_obj.start(self.ser1)
+        self.hub_ser = Serial()
+        self.hub_obj = ZigBeeHub(self.hub_ser)
         self.hub_obj.addr_long = b'\x00\x1e\x5e\x09\x02\x14\xc5\xab'
         self.hub_obj.addr_short = b'\x88\xd2'
 
-        self.ser2 = Serial()
-        self.device_obj = ZigBeeNode()
-        self.device_obj.start(self.ser2)
+        self.device_ser = Serial()
+        self.device_obj = ZigBeeNode(self.device_ser)
 
     def tearDown(self):
         self.hub_obj.halt()
@@ -61,7 +59,7 @@ class TestZigBeeHub(unittest.TestCase):
                 'version': 20045
             },
             '00:0d:6f:00:00:00:ff:ff': {
-                'type': 'Generic Device',
+                'type': 'ZigBeeNode',
                 'manu': 'PyAlertMe',
                 'version': 12345
             }
@@ -81,7 +79,7 @@ class TestZigBeeHub(unittest.TestCase):
             'options': b'\x01',
         }
         self.hub_obj.receive_message(message)
-        result = self.ser1.get_data_written()
+        result = self.hub_ser.get_data_written()
         expected = b'~\x00\x19}1\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x02\x02\x00\xf0\xc2\x16\x00\x00}1\x00\xfa\x00\x01\x04'
         self.assertEqual(result, expected)
 

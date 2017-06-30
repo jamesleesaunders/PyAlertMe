@@ -8,8 +8,7 @@ class TestZigBeeSensor(unittest.TestCase):
 
     def setUp(self):
         self.ser = Serial()
-        self.device_obj = ZigBeeSensor()
-        self.device_obj.start(self.ser)
+        self.device_obj = ZigBeeSensor(self.ser)
 
     def tearDown(self):
         self.device_obj.halt()
@@ -21,7 +20,7 @@ class TestZigBeeSensor(unittest.TestCase):
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xf6',
             'profile': b'\xc2\x16',
-            'data': b'\tq\xfe90\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bPyAlertMe\nButton Device\n2017-01-01'
+            'data': b'\tq\xfe90\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bPyAlertMe\nZigBeeSensor\n2017-01-01'
         }
         self.assertEqual(result, expected)
 

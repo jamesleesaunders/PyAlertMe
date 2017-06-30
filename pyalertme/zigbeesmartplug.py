@@ -8,24 +8,25 @@ import threading
 
 class ZigBeeSmartPlug(ZigBeeNode):
 
-    def __init__(self, callback=None):
+    def __init__(self, serial, callback=None):
         """
         SmartPlug Constructor
 
+        :param serial: Serial Object
+        :param callback: Optional
         """
-        ZigBeeNode.__init__(self, callback)
+        ZigBeeNode.__init__(self, serial, callback)
 
         # Type Info
-        self.type = 'SmartPlug'
+        self.type = 'ZigBeeSmartPlug'
         self.version = 12345
         self.manu = 'PyAlertMe'
         self.manu_date = '2017-01-01'
 
-
         # Set continual updates to every 5 seconds
         self._schedule_interval = 5
 
-        # Attributes - Relay State and Power Values
+        # Attributes
         self.relay_state = False
         self.power_demand = 0
         self.power_consumption = 0
