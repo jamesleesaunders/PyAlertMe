@@ -24,8 +24,10 @@ class ZigBeeSensor(ZigBeeNode):
         self.manu_date = '2017-01-01'
 
         # Attributes
-        self.tamper_state = 0
-        self.triggered = 0
+        self.attributes = {
+            'tamper_state': 0,
+            'triggered': 0
+        }
 
     def process_message(self, message):
         """

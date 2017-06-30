@@ -30,8 +30,10 @@ class ZigBeeNode(ZigBeeDevice):
         self.associated = False
 
         # Attributes
-        self.rssi = 197
-        self.mode = 'NORMAL'
+        self.attributes = {
+            'rssi': 197,
+            'mode': 'NORMAL'
+        }
 
     def process_message(self, message):
         """

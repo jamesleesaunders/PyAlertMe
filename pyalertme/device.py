@@ -30,6 +30,9 @@ class Device(object):
         # Callback
         self._callback = callback if callback else self._callback
 
+        # Attributes
+        self.attributes = {}
+
     @property
     def id(self):
         """
@@ -89,7 +92,7 @@ class Device(object):
         :return:
         """
         self._logger.debug('Setting attribute: %s to value: %s', attribute, value)
-        setattr(self, attribute, value)
+        self.attributes[attribute] = value
 
     def list_messages(self):
         """

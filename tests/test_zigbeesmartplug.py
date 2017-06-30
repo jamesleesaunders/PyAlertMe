@@ -55,7 +55,7 @@ class TestZigBeeSmartPlug(unittest.TestCase):
         self.assertEqual(self.device_obj.relay_state, False)
 
     def test_generate_state_update(self):
-        self.device_obj.relay_state = 1
+        self.device_obj.attributes['relay_state'] = 1
         result = self.device_obj.generate_relay_state_update()
         expected = {
             'profile': b'\xc2\x16',
@@ -65,7 +65,7 @@ class TestZigBeeSmartPlug(unittest.TestCase):
             'dest_endpoint': b'\x02'
         }
         self.assertEqual(result, expected)
-        self.device_obj.relay_state = 0
+        self.device_obj.attributes['relay_state'] = 0
         result = self.device_obj.generate_relay_state_update()
         expected = {
             'profile': b'\xc2\x16',
@@ -94,7 +94,7 @@ class TestZigBeeSmartPlug(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_power_demand_update(self):
-        self.device_obj.power_demand = 0
+        self.device_obj.attributes['power_demand'] = 0
         result = self.device_obj.generate_power_demand_update()
         expected = {
             'profile': b'\xc2\x16',
@@ -105,7 +105,7 @@ class TestZigBeeSmartPlug(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        self.device_obj.power_demand = 37
+        self.device_obj.attributes['power_demand'] = 37
         result = self.device_obj.generate_power_demand_update()
         expected = {
             'profile': b'\xc2\x16',
@@ -116,7 +116,7 @@ class TestZigBeeSmartPlug(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-        self.device_obj.power_demand = 22.4
+        self.device_obj.attributes['power_demand'] = 22.4
         result = self.device_obj.generate_power_demand_update()
         expected = {
             'profile': b'\xc2\x16',

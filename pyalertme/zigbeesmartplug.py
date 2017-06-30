@@ -27,9 +27,11 @@ class ZigBeeSmartPlug(ZigBeeNode):
         self._schedule_interval = 5
 
         # Attributes
-        self.relay_state = False
-        self.power_demand = 0
-        self.power_consumption = 0
+        self.attributes = {
+            'relay_state': False,
+            'power_demand': 0,
+            'power_consumption': 0
+        }
 
     def _schedule_event(self):
         """
@@ -62,7 +64,7 @@ class ZigBeeSmartPlug(ZigBeeNode):
                     if cluster_cmd == CLUSTER_CMD_AM_STATE_REQ:
                         # State Request
                         # b'\x11\x00\x01\x01'
-                        self._logger.debug('Switch Relay State is: %s', self.relay_state)
+                        self._logger.debug('Switch Relay State is: %s', self.attributes['relay_state'])
                         self.send_message(self.generate_relay_state_update(), source_addr_long, source_addr_short)
 
                     elif cluster_cmd == CLUSTER_CMD_AM_STATE_CHANGE:
@@ -89,7 +91,7 @@ class ZigBeeSmartPlug(ZigBeeNode):
 
         :return: Message of switch state
         """
-        return get_message('switch_state_update', {'relay_state': self.relay_state})
+        return get_message('switch_state_update', {'relay_state': self.attributes['relay_state']})
 
     def generate_power_demand_update(self):
         """
@@ -97,5 +99,5 @@ class ZigBeeSmartPlug(ZigBeeNode):
 
         :return: Message
         """
-        return get_message('power_demand_update', {'power_demand': self.power_demand})
+        return get_message('power_demand_update', {'power_demand': self.attributes['power_demand']})
 
