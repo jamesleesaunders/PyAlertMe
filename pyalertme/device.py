@@ -94,6 +94,19 @@ class Device(object):
         self._logger.debug('Setting attribute: %s to value: %s', attribute, value)
         self.attributes[attribute] = value
 
+    def set_type_info(self, type_info):
+        """
+        Set Type Info
+
+        :param type_info:
+        :return:
+        """
+        self._logger.debug('Setting type info: %s', type_info['type'])
+        self.type      = type_info['type']
+        self.version   = type_info['version']
+        self.manu      = type_info['manu']
+        self.manu_date = type_info['manu_date']
+
     def list_messages(self):
         """
         List Messages

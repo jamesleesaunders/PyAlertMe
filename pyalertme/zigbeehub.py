@@ -55,19 +55,6 @@ class ZigBeeHub(ZigBeeDevice):
             self.send_type_request(device_obj)
             time.sleep(1.00)
 
-    def set_device_type_info(self, device_obj, type_info):
-        """
-        Save Multiple Node Type Info
-
-        :param device_obj: Device Object
-        :param type_info: Type Information
-        :return:
-        """
-        device_obj.type = type_info['type']
-        device_obj.version = type_info['version']
-        device_obj.manu = type_info['manu']
-        device_obj.manu_date = type_info['manu_date']
-
     def set_device_attributes(self, device_obj, attributes):
         """
         Save Multiple Node Attributes
@@ -313,7 +300,7 @@ class ZigBeeHub(ZigBeeDevice):
                         elif cluster_cmd == CLUSTER_CMD_AM_VERSION_RESP:
                             self._logger.debug('Received Version Information')
                             type_info = parse_version_info_update(message['rf_data'])
-                            self.set_device_type_info(device_obj, type_info)
+                            device_obj.set_type_info(type_info)
 
                         else:
                             self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
