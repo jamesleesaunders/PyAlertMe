@@ -49,8 +49,7 @@ def callback(type, node_id, field, value):
         print("Node Update\n\tNode ID: " + node_id + "  Field: " + field + "  Value: " + str(value))
 
 # Create Hub Object
-hub_obj = ZigBeeHub()
-hub_obj.start(ser)
+hub_obj = ZigBeeHub(ser)
 
 # Kick Off Discovery
 hub_obj.discovery()

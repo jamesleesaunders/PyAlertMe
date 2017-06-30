@@ -23,10 +23,10 @@ class ZigBeeDevice(Device):
         self._xbee = ZigBee(ser=self._serial, callback=self.receive_message, error_callback=self.xbee_error, escaped=True)
 
         # Fire off messages to discover own addresses
-        self.read_addresses()
         self._addr_long_list = [b'', b'']
         self.addr_long = None
         self.addr_short = None
+        self.read_addresses()
 
         # Type Info
         self.type = 'ZigBeeDevice'
