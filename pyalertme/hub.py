@@ -25,7 +25,7 @@ class Hub(Base):
         # By default the Hub is associated
         self.associated = True
 
-        # Discovery thread and list of discovered devices
+        # Discovery thread and list of known device objects
         self._discovery_thread = threading.Thread(target=self._discovery)
         self.devices = {}
 
@@ -140,6 +140,7 @@ class Hub(Base):
                 device_obj.addr_long = device_addr_long
                 device_obj.addr_short = device_addr_short
                 self.devices[device_id] = device_obj
+                self.send_type_request(device_obj)
 
         return device_obj
 
