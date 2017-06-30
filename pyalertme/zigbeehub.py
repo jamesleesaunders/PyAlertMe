@@ -1,20 +1,19 @@
 import logging
 from pyalertme.zigbee import *
-from pyalertme.base import Base
-from pyalertme.device import Device
+from pyalertme.zigbeedevice import ZigBeeDevice
+from pyalertme.zigbeedevice import Device
 import struct
 import time
 import binascii
 import threading
 
-class Hub(Base):
-
+class ZigBeeHub(ZigBeeDevice):
     def __init__(self, callback=None):
         """
         Hub Constructor
 
         """
-        Base.__init__(self, callback)
+        ZigBeeDevice.__init__(self, callback)
 
         # Type Info
         self.type = 'Nano Hub'
@@ -132,7 +131,7 @@ class Hub(Base):
         else:
             # Do we already know about this device. Is it in our list of known devices?
             # If not generate a device_id (pretty mac) and add to list of known devices.
-            device_id = Base.pretty_mac(device_addr_long)
+            device_id = ZigBeeDevice.pretty_mac(device_addr_long)
             device_obj = self.device_obj_from_id(device_id)
 
             if not device_obj:
@@ -151,7 +150,7 @@ class Hub(Base):
         :param message:
         :return:
         """
-        super(Hub, self).process_message(message)
+        super(ZigBeeHub, self).process_message(message)
 
         # ZigBee Explicit Packets
         if message['id'] == 'rx_explicit':

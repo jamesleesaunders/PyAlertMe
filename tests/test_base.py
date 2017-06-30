@@ -8,18 +8,18 @@ class TestBase(unittest.TestCase):
 
     def setUp(self):
         self.ser = Serial()
-        self.device_obj = Base()
+        self.device_obj = ZigBeeDevice()
         self.device_obj.start(self.ser)
 
     def tearDown(self):
         self.device_obj.halt()
 
     def test_pretty_mac(self):
-        result = Base.pretty_mac(b'\x00\x1E\x5E\x09\x02\x14\xC5\xAB')
+        result = Device.pretty_mac(b'\x00\x1E\x5E\x09\x02\x14\xC5\xAB')
         expected = '00:1e:5e:09:02:14:c5:ab'
         self.assertEqual(result, expected, 'Test MAC 1')
 
-        result = Base.pretty_mac(b'\x00\ro\x00\x03\xbb\xb9\xf8')
+        result = Device.pretty_mac(b'\x00\ro\x00\x03\xbb\xb9\xf8')
         expected = '00:0d:6f:00:03:bb:b9:f8'
         self.assertEqual(result, expected, 'Test MAC 2')
 

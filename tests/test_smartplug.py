@@ -8,7 +8,7 @@ class TestSmartPlug(unittest.TestCase):
 
     def setUp(self):
         self.ser = Serial()
-        self.device_obj = SmartPlug()
+        self.device_obj = ZigBeeSmartPlug()
         self.device_obj.start(self.ser)
         self.device_obj.addr_long = b'\x00\x1e\x5e\x09\x02\x14\xc5\xab'
 
