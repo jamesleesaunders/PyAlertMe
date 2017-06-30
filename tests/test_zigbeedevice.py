@@ -13,15 +13,6 @@ class TestZigBeeDevice(unittest.TestCase):
     def tearDown(self):
         self.device_obj.halt()
 
-    def test_pretty_mac(self):
-        result = Device.pretty_mac(b'\x00\x1E\x5E\x09\x02\x14\xC5\xAB')
-        expected = '00:1e:5e:09:02:14:c5:ab'
-        self.assertEqual(result, expected, 'Test MAC 1')
-
-        result = Device.pretty_mac(b'\x00\ro\x00\x03\xbb\xb9\xf8')
-        expected = '00:0d:6f:00:03:bb:b9:f8'
-        self.assertEqual(result, expected, 'Test MAC 2')
-
     def test_get_addresses(self):
         self.device_obj.receive_message({'status': b'\x00', 'frame_id': b'\x01', 'parameter': b'\x88\x9f', 'command': 'MY', 'id': 'at_response'})
         self.assertEqual(self.device_obj.addr_short, b'\x88\x9f')
