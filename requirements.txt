@@ -1,2 +1,2 @@
 pyserial==3.3
-xbee==2.2.5
+xbee==2.3.1
