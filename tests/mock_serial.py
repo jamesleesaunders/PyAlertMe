@@ -15,7 +15,7 @@ class Serial(object):
                  bytesize=8, parity='N', stopbits=1, xonxoff=0,
                  rtscts=0):
         """
-        Init constructor, setup standard serial variables with default values.
+        Init constructor, setup standard _serial variables with default values.
         """
         self.name = port
         self.port = port
@@ -33,25 +33,25 @@ class Serial(object):
 
     def isOpen(self):
         """
-        Returns True if the serial port is open, otherwise False.
+        Returns True if the _serial port is open, otherwise False.
         """
         return self._is_open
 
     def open(self):
         """
-        Open the serial port.
+        Open the _serial port.
         """
         self._is_open = True
 
     def close(self):
         """
-        Close the serial port.
+        Close the _serial port.
         """
         self._is_open = False
 
     def write(self, data):
         """
-        Write a string of characters to the serial port.
+        Write a string of characters to the _serial port.
         """
         self._data_written = data
 
@@ -116,7 +116,7 @@ class Serial(object):
 
     def __str__(self):
         """
-        Returns a string representation of the serial class.
+        Returns a string representation of the _serial class.
         """
         return "Serial<id=0xa81c10, open=%s>( port='%s', baudrate=%d," \
                % (str(self._is_open), self.port, self.baudrate) \

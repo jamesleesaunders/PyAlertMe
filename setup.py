@@ -9,9 +9,9 @@ setup(
     author_email='james@saunders-family.net',
     license='MIT',
     packages=['pyalertme'],
-    keywords='xbee zigbee hive alertme lowes iris',
+    keywords='_xbee zigbee hive alertme lowes iris',
     zip_safe=False,
-    install_requires=['pyserial', 'xbee'],
+    install_requires=['pyserial', '_xbee'],
     test_suite='nose.collector',
     tests_require=['nose']
 )

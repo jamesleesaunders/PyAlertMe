@@ -9,12 +9,12 @@ class TestZigBeeHub(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
         self.hub_ser = Serial()
-        self.hub_obj = ZigBeeHub(self.hub_ser)
+        self.hub_obj = ZBHub(self.hub_ser)
         self.hub_obj.addr_long = b'\x00\x1e\x5e\x09\x02\x14\xc5\xab'
         self.hub_obj.addr_short = b'\x88\xd2'
 
         self.device_ser = Serial()
-        self.device_obj = ZigBeeNode(self.device_ser)
+        self.device_obj = ZBDevice(self.device_ser)
 
     def tearDown(self):
         self.hub_obj.halt()

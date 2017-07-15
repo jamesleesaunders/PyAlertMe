@@ -1,12 +1,12 @@
 import logging
-from pyalertme.zigbee import *
-from pyalertme.zigbeenode import ZigBeeNode
+from pyalertme.zb import *
+from pyalertme.zbdevice import ZBDevice
 import struct
 import time
 import binascii
 import threading
 
-class ZigBeeSmartPlug(ZigBeeNode):
+class ZBSmartPlug(ZBDevice):
 
     def __init__(self, serial, callback=None):
         """
@@ -15,7 +15,7 @@ class ZigBeeSmartPlug(ZigBeeNode):
         :param serial: Serial Object
         :param callback: Optional
         """
-        ZigBeeNode.__init__(self, serial, callback)
+        ZBDevice.__init__(self, serial, callback)
 
         # Type Info
         self.type = 'ZigBeeSmartPlug'
@@ -27,6 +27,7 @@ class ZigBeeSmartPlug(ZigBeeNode):
         self._schedule_interval = 5
 
         # Attributes
+        self.power_demand = 2
         self.attributes = {
             'relay_state': False,
             'power_demand': 0,
@@ -38,7 +39,8 @@ class ZigBeeSmartPlug(ZigBeeNode):
         The _schedule_event function is called by the _schedule_loop() thread function called at regular intervals.
 
         """
-        self.send_message(self.generate_power_demand_update(), self.hub_addr_long, self.hub_addr_short)
+        message = self.generate_power_demand_update({'power_demand': self.power_demand})
+        self.send_message(message, self.hub_addr_long, self.hub_addr_short)
 
     def process_message(self, message):
         """
@@ -47,7 +49,7 @@ class ZigBeeSmartPlug(ZigBeeNode):
         :param message: Dict of message
         :return:
         """
-        super(ZigBeeSmartPlug, self).process_message(message)
+        super(ZBSmartPlug, self).process_message(message)
 
         # ZigBee Explicit Packets
         if message['id'] == 'rx_explicit':
@@ -71,7 +73,7 @@ class ZigBeeSmartPlug(ZigBeeNode):
                         # Change State
                         # b'\x11\x00\x02\x01\x01' On
                         # b'\x11\x00\x02\x00\x01' Off
-                        params = parse_switch_state_request(message['rf_data'])
+                        params = self.parse_switch_state_request(message['rf_data'])
                         self.relay_state = params['relay_state']
                         self.send_message(self.generate_relay_state_update(), source_addr_long, source_addr_short)
                         self._callback('Attribute', self.id, 'relay_state', 1)
@@ -84,20 +86,4 @@ class ZigBeeSmartPlug(ZigBeeNode):
 
             # else:
                 # self._logger.error('Unrecognised Profile ID: %r', profile_id)
-
-    def generate_relay_state_update(self):
-        """
-        Generate State Message
-
-        :return: Message of switch state
-        """
-        return get_message('switch_state_update', {'relay_state': self.attributes['relay_state']})
-
-    def generate_power_demand_update(self):
-        """
-        Generate Power Demand Update
-
-        :return: Message
-        """
-        return get_message('power_demand_update', {'power_demand': self.attributes['power_demand']})
 

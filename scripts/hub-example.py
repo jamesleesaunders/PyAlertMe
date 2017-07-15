@@ -25,7 +25,7 @@ formatter = logging.Formatter('%(asctime)s %(levelname)-3s %(module)-5s %(messag
 
 # Create console handler and set level to info
 sh = logging.StreamHandler()
-sh.setLevel(logging.ERROR)
+sh.setLevel(logging.INFO)
 sh.setFormatter(formatter)
 logger.addHandler(sh)
 
@@ -49,7 +49,7 @@ def callback(type, node_id, field, value):
         print("Node Update\n\tNode ID: " + node_id + "  Field: " + field + "  Value: " + str(value))
 
 # Create Hub Object
-hub_obj = ZigBeeHub(ser)
+hub_obj = ZBHub(ser)
 
 # Kick Off Discovery
 hub_obj.discovery()
@@ -68,7 +68,7 @@ while True:
             while True:
                 # Select Message
                 device_obj = hub_obj.devices[node_id]
-                pp.pprint(device_obj.list_messages())
+                pp.pprint(hub_obj.list_messages())
                 message_id = raw_input("Select Message:")
 
                 if message_id in messages.keys():
@@ -81,7 +81,7 @@ while True:
                             params = {param_name: param_value}
 
                     # Send Message
-                    message = get_message(message_id, params)
+                    message = hub_obj.get_message(message_id, params)
                     addresses = device_obj.addr_tuple
                     hub_obj.send_message(message, *addresses)
 

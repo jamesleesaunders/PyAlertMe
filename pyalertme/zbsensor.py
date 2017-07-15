@@ -1,12 +1,12 @@
 import logging
-from pyalertme.zigbee import *
-from pyalertme.zigbeenode import ZigBeeNode
+from pyalertme.zb import *
+from pyalertme.zbdevice import ZBDevice
 import struct
 import time
 import binascii
 import threading
 
-class ZigBeeSensor(ZigBeeNode):
+class ZBSensor(ZBDevice):
 
     def __init__(self, serial, callback=None):
         """
@@ -15,7 +15,7 @@ class ZigBeeSensor(ZigBeeNode):
         :param serial: Serial Object
         :param callback: Optional
         """
-        ZigBeeNode.__init__(self, serial, callback)
+        ZBDevice.__init__(self, serial, callback)
 
         # Type Info
         self.type = 'ZigBeeSensor'
@@ -36,7 +36,7 @@ class ZigBeeSensor(ZigBeeNode):
         :param message: Dict of message
         :return:
         """
-        super(ZigBeeSensor, self).process_message(message)
+        super(ZBSensor, self).process_message(message)
 
         # ZigBee Explicit Packets
         if message['id'] == 'rx_explicit':

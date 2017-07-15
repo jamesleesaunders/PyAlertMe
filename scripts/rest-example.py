@@ -39,7 +39,7 @@ XBEE_PORT = '/dev/tty.usbserial-DN018OI6' # MacBook Serial Port
 XBEE_BAUD = 9600
 ser = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
-hub_obj = ZigBeeHub()
+hub_obj = ZBHub()
 hub_obj.start(ser)
 
 app = Flask(__name__)

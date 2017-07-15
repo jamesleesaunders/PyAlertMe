@@ -112,7 +112,7 @@ if __name__ == '__main__':
     ser = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
     # Start hub
-    hub_obj = ZigBeeHub()
+    hub_obj = ZBHub()
     hub_obj.start(ser)
 
     # Start commander

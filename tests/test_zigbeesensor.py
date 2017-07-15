@@ -8,7 +8,7 @@ class TestZigBeeSensor(unittest.TestCase):
 
     def setUp(self):
         self.ser = Serial()
-        self.device_obj = ZigBeeSensor(self.ser)
+        self.device_obj = ZBSensor(self.ser)
 
     def tearDown(self):
         self.device_obj.halt()

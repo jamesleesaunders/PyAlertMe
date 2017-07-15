@@ -1,6 +1,6 @@
 import sys
 sys.path.insert(0, '../')
-from pyalertme.zigbee import *
+from pyalertme.zb import *
 import unittest
 
 class TestZigBee(unittest.TestCase):

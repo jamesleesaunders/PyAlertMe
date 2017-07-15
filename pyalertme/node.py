@@ -1,15 +1,15 @@
-import logging
-from pyalertme.zigbee import *
+from pyalertme.zb import *
 import binascii
 
 
 
-class Device(object):
+class Node(object):
     def __init__(self, callback=None):
         """
         Base Constructor
 
         :param callback: Optional
+
         """
         # Resources
         self._logger = logging.getLogger('pyalertme')
@@ -32,6 +32,9 @@ class Device(object):
 
         # Attributes
         self.attributes = {}
+
+    def __str__(self):
+        return self.type
 
     @property
     def id(self):
@@ -74,9 +77,6 @@ class Device(object):
 
         return ret
 
-    def __str__(self):
-        return self.type
-
     def _callback(self, type, node_id, field, value):
         if type == 'Attribute':
             print("Attribute Update [Node ID: " + node_id + "\tField: " + field + "\tValue: " + str(value) + "]")
@@ -92,7 +92,20 @@ class Device(object):
         :return:
         """
         self._logger.debug('Setting attribute: %s to value: %s', attribute, value)
-        self.attributes[attribute] = value
+        self.attributes[attribute] = value  # Not sure which yet - do both
+        setattr(self, attribute, value)     # Not sure which yet - do both
+
+
+    def set_attributes(self, attributes):
+        """
+        Save Multiple Node Attributes from dict
+        :param attributes:
+        :return:
+        """
+        for attributes_name, attributes_value in attributes.iteritems():
+            self.set_attribute(attributes_name, attributes_value)
+
+
 
     def set_type_info(self, type_info):
         """
@@ -106,12 +119,3 @@ class Device(object):
         self.version   = type_info['version']
         self.manu      = type_info['manu']
         self.manu_date = type_info['manu_date']
-
-    def list_messages(self):
-        """
-        List Messages
-
-        :param message: Dict of message
-        :return:
-        """
-        return list_messages()

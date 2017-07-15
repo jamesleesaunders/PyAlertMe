@@ -1,11 +1,11 @@
-from pyalertme.device import Device
+from pyalertme.node import Node
 
-from pyalertme.zigbeedevice import ZigBeeDevice
+from pyalertme.zbnode import ZBNode
 
-from pyalertme.zigbeehub import ZigBeeHub
-from pyalertme.zigbeenode import ZigBeeNode
+from pyalertme.zbhub import ZBHub
+from pyalertme.zbdevice import ZBDevice
 
-from pyalertme.zigbeesmartplug import ZigBeeSmartPlug
-from pyalertme.zigbeesensor import ZigBeeSensor
+from pyalertme.zbsmartplug import ZBSmartPlug
+from pyalertme.zbsensor import ZBSensor
 
-from pyalertme.zigbee import *
+from pyalertme.zb import *

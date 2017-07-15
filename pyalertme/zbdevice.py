@@ -1,13 +1,13 @@
 import logging
-from pyalertme.zigbee import *
-from pyalertme.zigbeedevice import ZigBeeDevice
+from pyalertme.zb import *
+from pyalertme.zbnode import ZBNode
 import struct
 import time
 import binascii
 import threading
 
 
-class ZigBeeNode(ZigBeeDevice):
+class ZBDevice(ZBNode):
 
     def __init__(self, serial, callback=None):
         """
@@ -16,7 +16,7 @@ class ZigBeeNode(ZigBeeDevice):
         :param serial: Serial Object
         :param callback: Optional
         """
-        ZigBeeDevice.__init__(self, serial, callback)
+        ZBNode.__init__(self, serial, callback)
 
         # Type Info
         self.type = 'ZigBeeNode'
@@ -42,7 +42,7 @@ class ZigBeeNode(ZigBeeDevice):
         :param message: Dict of message
         :return:
         """
-        super(ZigBeeNode, self).process_message(message)
+        super(ZBDevice, self).process_message(message)
 
         # ZigBee Explicit Packets
         if message['id'] == 'rx_explicit':
@@ -141,7 +141,7 @@ class ZigBeeNode(ZigBeeDevice):
         :return: Message of range value
         """
 
-        return get_message('range_info_update', {'rssi': self.rssi})
+        return get_message('range_info_update', {'rssi': self.attributes['rssi']})
 
     def generate_match_descriptor_request(self):
         """

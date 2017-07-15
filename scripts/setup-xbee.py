@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding: utf-8
 
-# Filename:    setup-xbee.py
+# Filename:    setup-_xbee.py
 # Description: Configure XBee
 # Author:      James Saunders [james@saunders-family.net]
 # Copyright:   Copyright (C) 2017 James Saunders
