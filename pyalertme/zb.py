@@ -555,7 +555,8 @@ class ZB():
                             # b'\x11\x00\xfa\x01\x01'
                             self._logger.info('Range Test Mode')
                             self.mode = 'RANGE'
-                            # TODO Setup thread loop to send regular range RSSI updates - for now just send one...
+                            # TODO Setup thread loop to send regular range RSSI updates
+                            # for now just send one...
                             reply = self.get_message('range_update')
 
                         elif modeCmd == b'\x02\x01':
@@ -585,7 +586,7 @@ class ZB():
                 self.send_message(reply, source_addr_long, source_addr_short)
 
             self._logger.info('Attributes: %r', attributes)
-
+            # rather than send the message at this point, we could return a list of attribute names which need returning by the calling function
             return attributes
 
     def halt(self):
