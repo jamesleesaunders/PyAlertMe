@@ -143,9 +143,6 @@ class ZBHub(ZBNode):
 
         return device_obj
 
-
-
-
     def receive_message(self, message):
 
         # ZigBee Explicit Packets
@@ -195,9 +192,6 @@ class ZBHub(ZBNode):
         message = self.get_message('mode_change_request', {'mode': mode})
         addresses = device_obj.addr_tuple
         self.send_message(message, *addresses)
-
-
-
 
     def call_device_command(self, device_id, command, value):
         """

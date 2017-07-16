@@ -35,24 +35,29 @@ class ZBDevice(ZBNode):
         self.rssi = 197
         self.mode = 'NORMAL'
 
-
     def receive_message(self, message):
-        hub_obj = Node
 
-        if not self.associated:
-            params = {
-                'sequence': 1,
-                'addr_short': BROADCAST_SHORT,
-                'profile_id': PROFILE_ID_ALERTME,
-                'in_cluster_list': b'',
-                'out_cluster_list': CLUSTER_ID_AM_STATUS
-            }
-            message = self.get_message('match_descriptor_request', params)
-            self.send_message(message, message['source_addr_long'], message['source_addr'])
+        attributes = {}
+        if message['id'] == 'rx_explicit':
+            if not self.hub_obj:
+                self.hub_obj = Node()
+                self.hub_obj.addr_long = message['source_addr_long']
+                self.hub_obj.addr_short = message['source_addr']
+                self.associated = True
+            # Not sure if we need the above and the below - they are doing similar things
+            if not self.associated:
+                params = {
+                    'sequence': 1,
+                    'addr_short': BROADCAST_SHORT,
+                    'profile_id': PROFILE_ID_ALERTME,
+                    'in_cluster_list': b'',
+                    'out_cluster_list': CLUSTER_ID_AM_STATUS
+                }
+                reply = self.get_message('match_descriptor_request', params)
+                self.send_message(reply, message['source_addr_long'], message['source_addr'])
 
-        attributes = super(ZBDevice, self).receive_message(message)
+            attributes = super(ZBDevice, self).receive_message(message)
 
-        if hub_obj:
-            hub_obj.set_attributes(attributes)
+            self.hub_obj.set_attributes(attributes)
 
         return attributes

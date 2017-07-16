@@ -91,7 +91,6 @@ class Node(object):
         self._logger.debug('Setting attribute: %s to value: %s', attribute, value)
         setattr(self, attribute, value)
 
-
     def set_attributes(self, attributes):
         """
         Save Multiple Node Attributes from dict
@@ -100,8 +99,6 @@ class Node(object):
         """
         for attributes_name, attributes_value in attributes.iteritems():
             self.set_attribute(attributes_name, attributes_value)
-
-
 
     def set_type_info(self, type_info):
         """

@@ -37,9 +37,8 @@ class ZBSmartPlug(ZBDevice):
         The _schedule_event function is called by the _schedule_loop() thread function called at regular intervals.
 
         """
-        message = self.generate_power_demand_update({'power_demand': self.power_demand})
-        self.send_message(message, self.hub_addr_long, self.hub_addr_short)
-
+        message = self.get_message('power_demand_update', {'power_demand': self.power_demand})
+        self.send_message(message, self.hub_obj.addr_long, self.hub_obj.addr_short)
 
     def set_relay_state(self, state):
         """
@@ -51,7 +50,7 @@ class ZBSmartPlug(ZBDevice):
         self._logger.debug('Switch Relay State Changed to: %s', self.relay_state)
         if self.associated:
             message = self.get_message('switch_state_request', {'relay_state': self.relay_state})
-            self.send_message(message, self.hub_addr_long, self.hub_addr_short)
+            self.send_message(message, self.hub_obj.addr_long, self.hub_obj.addr_short)
 
         # Temporary code while testing power code...
         # Randomly set the power usage value.
@@ -67,5 +66,5 @@ class ZBSmartPlug(ZBDevice):
         self.power_demand = power_demand
         self._logger.debug('Power Demand Changed to: %s', self.power_demand)
         if self.associated:
-            message = self.get_message('power_demand_update', {'PowerDemand': self.power_demand})
-            self.send_message(message, self.hub_addr_long, self.hub_addr_short)
+            message = self.get_message('power_demand_update', {'power_demand': self.power_demand})
+            self.send_message(message, self.hub_obj.addr_long, self.hub_obj.addr_short)
