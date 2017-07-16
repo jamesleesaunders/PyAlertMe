@@ -88,10 +88,9 @@ class ZBHub(ZBNode):
             devices[device_id] = {
                 'type': device_obj.type,
                 'manu': device_obj.manu,
-                'version': device_obj.version,
-                'last_update': device_obj.last_update
+                'version': device_obj.version
             }
-            # devices[device_id] = device_obj.__dict__
+            # devices[device_id] = node_obj.__dict__
 
         return devices
 

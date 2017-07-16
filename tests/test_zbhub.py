@@ -4,7 +4,7 @@ from pyalertme import *
 import unittest
 from mock_serial import Serial
 
-class TestZigBeeHub(unittest.TestCase):
+class TestZBHub(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff = None
@@ -38,14 +38,20 @@ class TestZigBeeHub(unittest.TestCase):
         expected = {
             '00:0d:6f:00:03:bb:b9:f8': {
                 'type': 'SmartPlug',
-                'manu': 'AlertMe.com',
-                'version': 20045
+                'version': 20045,
+                'manu': 'AlertMe.com'
             }
         }
         self.assertEqual(result, expected)
 
-        # Next, lets get the Device class to generate a Version message and send it into the Hub.
-        message = self.device_obj.generate_version_info_update()
+        # Next, lets get the class to generate a Version message and send it into the Hub.
+        params = {
+            'type': 'Generic',
+            'version': 12345,
+            'manu': 'PyAlertMe',
+            'manu_date': '2017-01-01'
+        }
+        message = self.device_obj.get_message('version_info_update', params)
         message['id'] = 'rx_explicit'
         message['source_addr'] = b'\x88\xfd'
         message['source_addr_long'] = b'\x00\x0d\x6f\x00\x00\x00\xff\xff'
@@ -55,16 +61,17 @@ class TestZigBeeHub(unittest.TestCase):
         expected = {
             '00:0d:6f:00:03:bb:b9:f8': {
                 'type': 'SmartPlug',
-                'manu': 'AlertMe.com',
-                'version': 20045
+                'version': 20045,
+                'manu': 'AlertMe.com'
             },
             '00:0d:6f:00:00:00:ff:ff': {
-                'type': 'ZigBeeNode',
-                'manu': 'PyAlertMe',
-                'version': 12345
+                'type': 'Generic',
+                'version': 12345,
+                'manu': 'PyAlertMe'
             }
         }
         self.assertEqual(result, expected)
+
 
     def test_mock_serial(self):
         message = {
