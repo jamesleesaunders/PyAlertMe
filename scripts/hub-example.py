@@ -66,7 +66,8 @@ while True:
             while True:
                 # Select Message
                 device_obj = hub_obj.devices[node_id]
-                pp.pprint(hub_obj.list_messages())
+                messages = hub_obj.list_messages()
+                pp.pprint(messages)
                 message_id = raw_input("Select Message:")
 
                 if message_id in messages.keys():

@@ -1,13 +1,10 @@
 import logging
-from pyalertme.zb import *
-from pyalertme.zbdevice import ZBDevice
-import struct
-import time
-import binascii
-import threading
+from pyalertme.zbdevice import *
+
+
+
 
 class ZBSmartPlug(ZBDevice):
-
     def __init__(self, serial, callback=None):
         """
         SmartPlug Constructor

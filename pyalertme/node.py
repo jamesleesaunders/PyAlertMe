@@ -1,6 +1,5 @@
-from pyalertme.zb import *
+import logging
 import binascii
-
 
 
 class Node(object):
@@ -17,6 +16,7 @@ class Node(object):
         # My addresses
         self.addr_long = None
         self.addr_short = None
+        self.associated = False # To check
 
         # Type Info
         self.type = None

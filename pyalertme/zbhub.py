@@ -1,11 +1,7 @@
 import logging
-from pyalertme.zb import *
-from pyalertme.zbnode import ZBNode
-import struct
+from pyalertme.zbnode import *
 import time
-import binascii
 import threading
-from pyalertme.zbnode import Node
 
 
 class ZBHub(ZBNode):
