@@ -2,8 +2,6 @@ import logging
 from pyalertme.zbdevice import *
 
 
-
-
 class ZBSmartPlug(ZBDevice):
     def __init__(self, serial, callback=None):
         """

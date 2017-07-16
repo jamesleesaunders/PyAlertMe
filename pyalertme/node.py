@@ -1,5 +1,6 @@
 import logging
 import binascii
+import time
 
 
 class Node(object):
@@ -16,13 +17,20 @@ class Node(object):
         # My addresses
         self.addr_long = None
         self.addr_short = None
-        self.associated = False # To check
+        self.associated = False
 
         # Type Info
         self.type = None
         self.version = None
         self.manu = None
         self.manu_date = None
+        self.last_update = None
+
+        # Other Attributes
+        self.relay_state = None
+        self.hub_addr_long = None
+        self.hub_addr_short = None
+        self.mode = None
 
         # Callback
         self._callback = callback if callback else self._callback
@@ -44,8 +52,6 @@ class Node(object):
         """
         Return a tuple of the 48-bit Long Address and 16-bit Short Address.
         This is typically used to pass addresses to send_message().
-
-        :param callback: Optional
         """
         return self.addr_long, self.addr_short
 
@@ -74,17 +80,18 @@ class Node(object):
     def _callback(self, field, value):
         print("Attribute Update [Node ID: " + self.id + "\tField: " + field + "\tValue: " + str(value) + "]")
 
-    def set_attribute(self, attribute, value):
+    def set_attribute(self, attr_name, attr_value):
         """
         Set Single Attribute
 
-        :param string: attribute
-        :param mixed: value
+        :param attr_name:
+        :param attr_value:
         :return:
         """
-        self._logger.debug('Setting attribute: %s to value: %s', attribute, value)
-        setattr(self, attribute, value)
-        self._callback(attribute, value)
+        self._logger.debug('Setting attribute: %s to value: %s', attr_name, attr_value)
+        self.__setattr__(attr_name, attr_value)
+        self.last_update = time.time()
+        self._callback(attr_name, attr_value)
 
     def set_attributes(self, attributes):
         """
@@ -93,18 +100,5 @@ class Node(object):
         :param attributes:
         :return:
         """
-        for attributes_name, attributes_value in attributes.iteritems():
-            self.set_attribute(attributes_name, attributes_value)
-
-    def set_type_info(self, type_info):
-        """
-        Set Type Info
-
-        :param type_info:
-        :return:
-        """
-        self._logger.debug('Setting type info: %s', type_info['type'])
-        self.type      = type_info['type']
-        self.version   = type_info['version']
-        self.manu      = type_info['manu']
-        self.manu_date = type_info['manu_date']
+        for attr_name, attr_value in attributes.iteritems():
+            self.set_attribute(attr_name, attr_value)

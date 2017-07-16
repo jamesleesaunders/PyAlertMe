@@ -2,8 +2,6 @@ import logging
 from pyalertme.zbnode import *
 
 
-
-
 class ZBDevice(ZBNode):
     def __init__(self, serial, callback=None):
         """

@@ -88,8 +88,10 @@ class ZBHub(ZBNode):
             devices[device_id] = {
                 'type': device_obj.type,
                 'manu': device_obj.manu,
-                'version': device_obj.version
+                'version': device_obj.version,
+                'last_update': device_obj.last_update
             }
+            # devices[device_id] = device_obj.__dict__
 
         return devices
 
@@ -134,6 +136,7 @@ class ZBHub(ZBNode):
                 device_obj = Node()
                 device_obj.addr_long = device_addr_long
                 device_obj.addr_short = device_addr_short
+                device_obj.associated = True
                 self.devices[device_id] = device_obj
                 self.send_type_request(device_obj)
 

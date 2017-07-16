@@ -268,7 +268,6 @@ messages = {
 }
 
 
-
 class ZBNode(Node):
     def __init__(self, serial, callback=None):
         """
@@ -287,8 +286,8 @@ class ZBNode(Node):
 
         # Start up Serial and ZigBee
         self._serial = serial
-        self._xbee = ZigBee(ser=self._serial, callback=self.receive_message, error_callback=self.xbee_error, escaped=True)
-
+        self._xbee = ZigBee(ser=self._serial, callback=self.receive_message,
+                            error_callback=self.xbee_error, escaped=True)
 
         # My addresses
         self.addr_long = None
@@ -342,8 +341,6 @@ class ZBNode(Node):
         self._xbee.halt()
         self._serial.close()
 
-
-
     def get_message(self, message_id, params=None):
         """
         Get message
@@ -391,8 +388,6 @@ class ZBNode(Node):
                 actions[message_id]['expected_params'] = message['expected_params']
 
         return actions
-
-
 
     def xbee_error(self, error):
         """
@@ -457,7 +452,6 @@ class ZBNode(Node):
             # If we have worked out both the High and Low addresses then calculate the full addr_long
             if self._addr_long_list[0] and self._addr_long_list[1]:
                 self.addr_long = b''.join(self._addr_long_list)
-
 
         # ZigBee Explicit Packets
         if message['id'] == 'rx_explicit':
@@ -543,8 +537,6 @@ class ZBNode(Node):
                 else:
                     self._logger.error('Unrecognised Cluster ID: %r', cluster_id)
 
-
-
             elif profile_id == PROFILE_ID_ALERTME:
                 # AlertMe Profile ID
                 self._logger.info('Received AlertMe Specific Profile Packet')
@@ -572,7 +564,6 @@ class ZBNode(Node):
 
                     else:
                         self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
-
 
                 elif cluster_id == CLUSTER_ID_AM_POWER:
                     if cluster_cmd == CLUSTER_CMD_AM_PWR_DEMAND:
@@ -611,6 +602,7 @@ class ZBNode(Node):
                 elif cluster_id == CLUSTER_ID_AM_DISCOVERY:
                     if cluster_cmd == CLUSTER_CMD_AM_RSSI:
                         self._logger.info('Received RSSI Range Test Update')
+                        attributes = self.parse_range_info_update(message['rf_data'])
 
                     elif cluster_cmd == CLUSTER_CMD_AM_VERSION_RESP:
                         self._logger.info('Received Version Information')
@@ -643,14 +635,14 @@ class ZBNode(Node):
                         # We are now fully associated
                         self.associated = True
 
-                        modeCmd = message['rf_data'][3] + message['rf_data'][4]
-                        if modeCmd == b'\x00\x01':
+                        mode_cmd = message['rf_data'][3] + message['rf_data'][4]
+                        if mode_cmd == b'\x00\x01':
                             # Normal
                             # b'\x11\x00\xfa\x00\x01'
                             self._logger.info('Normal Mode')
                             self.mode = 'NORMAL'
 
-                        elif modeCmd == b'\x01\x01':
+                        elif mode_cmd == b'\x01\x01':
                             # Range Test
                             # b'\x11\x00\xfa\x01\x01'
                             self._logger.info('Range Test Mode')
@@ -659,13 +651,13 @@ class ZBNode(Node):
                             # for now just send one...
                             reply = self.get_message('range_update')
 
-                        elif modeCmd == b'\x02\x01':
+                        elif mode_cmd == b'\x02\x01':
                             # Locked
                             # b'\x11\x00\xfa\x02\x01'
                             self._logger.info('Locked Mode')
                             self.mode = 'LOCKED'
 
-                        elif modeCmd == b'\x03\x01':
+                        elif mode_cmd == b'\x03\x01':
                             # Silent
                             # b'\x11\x00\xfa\x03\x01'
                             self._logger.info('Silent Mode')
@@ -681,20 +673,12 @@ class ZBNode(Node):
             else:
                 self._logger.error('Unrecognised Profile ID: %r', profile_id)
 
-
             if reply:
                 self.send_message(reply, source_addr_long, source_addr_short)
 
             self._logger.info('Attributes: %r', attributes)
 
             return attributes
-
-
-
-
-
-
-
 
     def generate_version_info_request(self, params=None):
         """
@@ -935,7 +919,6 @@ class ZBNode(Node):
         :param data: Message data
         :return: Parameter dictionary of usage stats
         """
-        ret = {}
         ret = dict(zip(
             ('cluster_cmd', 'power_consumption', 'up_time'),
             struct.unpack('< 2x s I I 1x', data)
@@ -1075,7 +1058,6 @@ class ZBNode(Node):
             return {'relay_state': 1}
         else:
             return {'relay_state': 0}
-
 
     def generate_button_press(self, params=None):
         """
@@ -1244,23 +1226,23 @@ class ZBNode(Node):
         :return: Parameter dictionary of state
         """
         ret = {}
-        type = data[3]
-        if type == b'\x1b':
+        _type = data[3]
+        if _type == b'\x1b':
             # Power Clamp
             # Unknown
             pass
 
-        elif type == b'\x1c':
+        elif _type == b'\x1c':
             # Power Switch
             # Unknown
             pass
 
-        elif type == b'\x1d':
+        elif _type == b'\x1d':
             # Key Fob
             ret['temperature'] = float(struct.unpack("<h", data[8:10])[0]) / 100.0 * 1.8 + 32
             ret['counter'] = struct.unpack('<I', data[4:8])[0]
 
-        elif type == b'\x1e' or type == b'\x1f':
+        elif _type == b'\x1e' or _type == b'\x1f':
             # Door Sensor
             ret['temperature'] = float(struct.unpack("<h", data[8:10])[0]) / 100.0 * 1.8 + 32
             if ord(data[-1]) & 0x01 == 1:
@@ -1274,7 +1256,7 @@ class ZBNode(Node):
                 ret['tamper_state'] = 0  # Closed
 
         else:
-            logging.error('Unrecognised Device Status %r  %r', type, data)
+            self._logger.info('Unrecognised Device Status %r  %r', _type, data)
 
         return ret
 

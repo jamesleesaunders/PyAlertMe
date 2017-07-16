@@ -7,3 +7,4 @@ from pyalertme.zbdevice import ZBDevice
 
 from pyalertme.zbsmartplug import ZBSmartPlug
 from pyalertme.zbsensor import ZBSensor
+
