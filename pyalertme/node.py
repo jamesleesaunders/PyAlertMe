@@ -24,9 +24,6 @@ class Node(object):
         self.manu = None
         self.manu_date = None
 
-        # Status Flags
-        self.associated = False
-
         # Callback
         self._callback = callback if callback else self._callback
 
@@ -74,15 +71,12 @@ class Node(object):
 
         return ret
 
-    def _callback(self, type, node_id, field, value):
-        if type == 'Attribute':
-            print("Attribute Update [Node ID: " + node_id + "\tField: " + field + "\tValue: " + str(value) + "]")
-        elif type == 'Property':
-            print("Property Update [Node ID: " + node_id + "\tField: " + field + "\tValue: " + str(value) + "]")
+    def _callback(self, field, value):
+        print("Attribute Update [Node ID: " + self.id + "\tField: " + field + "\tValue: " + str(value) + "]")
 
     def set_attribute(self, attribute, value):
         """
-        Set Associated
+        Set Single Attribute
 
         :param string: attribute
         :param mixed: value
@@ -90,10 +84,12 @@ class Node(object):
         """
         self._logger.debug('Setting attribute: %s to value: %s', attribute, value)
         setattr(self, attribute, value)
+        self.callback(attribute, value)
 
     def set_attributes(self, attributes):
         """
-        Save Multiple Node Attributes from dict
+        Set Multiple Attributes 
+        
         :param attributes:
         :return:
         """
