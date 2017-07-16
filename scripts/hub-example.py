@@ -25,7 +25,7 @@ formatter = logging.Formatter('%(asctime)s %(levelname)-3s %(module)-5s %(messag
 
 # Create console handler and set level to info
 sh = logging.StreamHandler()
-sh.setLevel(logging.INFO)
+sh.setLevel(logging.ERROR)
 sh.setFormatter(formatter)
 logger.addHandler(sh)
 
@@ -42,11 +42,9 @@ XBEE_PORT = '/dev/tty.usbserial-DN018OI6'
 XBEE_BAUD = 9600
 ser = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
-def callback(type, node_id, field, value):
-    if type == 'Attribute':
-        print("Attribute Update\n\tNode ID: " + node_id + "  Field: " + field + "  Value: " + str(value))
-    elif type == 'Node':
-        print("Node Update\n\tNode ID: " + node_id + "  Field: " + field + "  Value: " + str(value))
+
+def _callback(self, field, value):
+    print("Attribute Update [Node ID: " + self.id + "\tField: " + field + "\tValue: " + str(value) + "]")
 
 # Create Hub Object
 hub_obj = ZBHub(ser)

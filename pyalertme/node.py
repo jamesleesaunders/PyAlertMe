@@ -84,7 +84,7 @@ class Node(object):
         """
         self._logger.debug('Setting attribute: %s to value: %s', attribute, value)
         setattr(self, attribute, value)
-        self.callback(attribute, value)
+        self._callback(attribute, value)
 
     def set_attributes(self, attributes):
         """
