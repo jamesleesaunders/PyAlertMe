@@ -30,9 +30,6 @@ class Node(object):
         # Callback
         self._callback = callback if callback else self._callback
 
-        # Attributes
-        self.attributes = {}
-
     def __str__(self):
         return self.type
 
@@ -92,8 +89,7 @@ class Node(object):
         :return:
         """
         self._logger.debug('Setting attribute: %s to value: %s', attribute, value)
-        self.attributes[attribute] = value  # Not sure which yet - do both
-        setattr(self, attribute, value)     # Not sure which yet - do both
+        setattr(self, attribute, value)
 
 
     def set_attributes(self, attributes):

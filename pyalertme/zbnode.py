@@ -15,7 +15,7 @@ class ZBNode(Node, ZB):
         ZB.__init__(self, serial)
 
         # Type Info
-        self.type = 'ZigBeeDevice'
+        self.type = 'ZBNode'
         self.version = 12345
         self.manu = 'PyAlertMe'
         self.manu_date = '2017-01-01'

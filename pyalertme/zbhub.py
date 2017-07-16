@@ -1,11 +1,12 @@
 import logging
 from pyalertme.zb import *
 from pyalertme.zbnode import ZBNode
-from pyalertme.zbnode import Node
 import struct
 import time
 import binascii
 import threading
+from pyalertme.zbnode import Node
+
 
 class ZBHub(ZBNode):
     def __init__(self, serial, callback=None):
@@ -18,7 +19,7 @@ class ZBHub(ZBNode):
         ZBNode.__init__(self, serial, callback)
 
         # Type Info
-        self.type = 'ZigBeeHub'
+        self.type = 'ZBHub'
         self.version = 12345
         self.manu = 'PyAlertMe'
         self.manu_date = '2017-01-01'
@@ -150,21 +151,18 @@ class ZBHub(ZBNode):
         # ZigBee Explicit Packets
         device_obj = None
         if message['id'] == 'rx_explicit':
-            source_addr_long = message['source_addr_long']
-            source_addr_short = message['source_addr']
-
             # Load the device object from the known devices list which corresponds
             # to the originator of this message.
             # If this message has come from an as of yet unknown device then create
             # a new object entry for it in the known devices list.
-            device_obj = self.device_obj_from_addrs(source_addr_long, source_addr_short)
+            device_obj = self.device_obj_from_addrs(message['source_addr_long'], message['source_addr'])
 
         attributes = super(ZBHub, self).receive_message(message)
 
         if device_obj:
             device_obj.set_attributes(attributes)
 
-
+        return attributes
 
     def send_type_request(self, device_obj):
         """

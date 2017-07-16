@@ -18,21 +18,19 @@ class ZBSmartPlug(ZBDevice):
         ZBDevice.__init__(self, serial, callback)
 
         # Type Info
-        self.type = 'ZigBeeSmartPlug'
+        self.type = 'ZBSmartPlug'
         self.version = 12345
         self.manu = 'PyAlertMe'
         self.manu_date = '2017-01-01'
 
-        # Set continual updates to every 5 seconds
-        self._schedule_interval = 5
-
         # Attributes
         self.power_demand = 2
-        self.attributes = {
-            'relay_state': False,
-            'power_demand': 0,
-            'power_consumption': 0
-        }
+        self.relay_state = 0
+        self.power_demand = 0
+        self.power_consumption = 0
+
+        # Set continual updates to every 5 seconds
+        self._schedule_interval = 5
 
     def _schedule_event(self):
         """
@@ -42,48 +40,32 @@ class ZBSmartPlug(ZBDevice):
         message = self.generate_power_demand_update({'power_demand': self.power_demand})
         self.send_message(message, self.hub_addr_long, self.hub_addr_short)
 
-    def process_message(self, message):
-        """
-        Process incoming message
 
-        :param message: Dict of message
+    def set_relay_state(self, state):
+        """
+        This simulates the physical button being pressed
+        :param state:
         :return:
         """
-        super(ZBSmartPlug, self).process_message(message)
+        self.relay_state = state
+        self._logger.debug('Switch Relay State Changed to: %s', self.relay_state)
+        if self.associated:
+            message = self.get_message('switch_state_request', {'relay_state': self.relay_state})
+            self.send_message(message, self.hub_addr_long, self.hub_addr_short)
 
-        # ZigBee Explicit Packets
-        if message['id'] == 'rx_explicit':
-            profile_id = message['profile']
-            cluster_id = message['cluster']
-            source_addr_long = message['source_addr_long']
-            source_addr_short = message['source_addr']
+        # Temporary code while testing power code...
+        # Randomly set the power usage value.
+        from random import randint
+        self.set_power_demand(randint(0, 100))
 
-            if profile_id == PROFILE_ID_ALERTME:
-                # AlertMe Profile ID
-                cluster_cmd = message['rf_data'][2:3]
-
-                if cluster_id == CLUSTER_ID_AM_SWITCH:
-                    if cluster_cmd == CLUSTER_CMD_AM_STATE_REQ:
-                        # State Request
-                        # b'\x11\x00\x01\x01'
-                        self._logger.debug('Switch Relay State is: %s', self.attributes['relay_state'])
-                        self.send_message(self.generate_relay_state_update(), source_addr_long, source_addr_short)
-
-                    elif cluster_cmd == CLUSTER_CMD_AM_STATE_CHANGE:
-                        # Change State
-                        # b'\x11\x00\x02\x01\x01' On
-                        # b'\x11\x00\x02\x00\x01' Off
-                        params = self.parse_switch_state_request(message['rf_data'])
-                        self.relay_state = params['relay_state']
-                        self.send_message(self.generate_relay_state_update(), source_addr_long, source_addr_short)
-                        self._callback('Attribute', self.id, 'relay_state', 1)
-
-                    else:
-                        self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
-
-                # else:
-                    # self._logger.error('Unrecognised Cluster ID: %r', cluster_id)
-
-            # else:
-                # self._logger.error('Unrecognised Profile ID: %r', profile_id)
-
+    def set_power_demand(self, power_demand):
+        """
+        Set Power Demand
+        :param power_demand:
+        :return:
+        """
+        self.power_demand = power_demand
+        self._logger.debug('Power Demand Changed to: %s', self.power_demand)
+        if self.associated:
+            message = self.get_message('power_demand_update', {'PowerDemand': self.power_demand})
+            self.send_message(message, self.hub_addr_long, self.hub_addr_short)
