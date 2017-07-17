@@ -27,6 +27,8 @@ class ZBDevice(ZBNode):
         # Attributes
         self.rssi = 197
         self.mode = 'NORMAL'
+        self.power_demand = 0
+        self.power_consumption = 0
 
     def receive_message(self, message):
 
@@ -54,3 +56,28 @@ class ZBDevice(ZBNode):
             self.hub_obj.set_attributes(attributes)
 
         return attributes
+
+    def message_range_update(self):
+        params = {'rssi': self.rssi}
+        message = self.get_message('range_update', params)
+        return message
+
+    def message_version_info_update(self):
+        params = {
+            'type': self.type,
+            'version': self.version,
+            'manu': self.manu,
+            'manu_date': self.manu_date
+        }
+        message = self.get_message('version_info_update', params)
+        return message
+
+    def message_switch_state_update(self):
+        params = {'relay_state': self.relay_state}
+        message = self.get_message('switch_state_update', params)
+        return message
+
+    def message_power_demand_update(self):
+        params = {'power_demand': self.power_demand}
+        message = self.get_message('power_demand_update', params)
+        return message

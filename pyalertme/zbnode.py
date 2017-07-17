@@ -501,7 +501,7 @@ class ZBNode(Node):
                     # this controller as valid.
 
                     # First send the Match Descriptor Response
-                    sequence = message['rf_data'][0:1]
+                    sequence = 4   # message['rf_data'][0:1]
                     params = {
                         'sequence': sequence,
                         'addr_short': self.addr_short,

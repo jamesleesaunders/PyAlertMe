@@ -181,90 +181,90 @@ class TestZBNode(unittest.TestCase):
     def test_parse_version_info_update(self):
         result = self.node_obj.parse_version_info_update(b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\tSmartPlug\n2013-09-26')
         expected = {
+            'type': 'SmartPlug',
             'version': 20045,
             'manu': 'AlertMe.com',
-            'type': 'SmartPlug',
             'manu_date': '2013-09-26'
         }
         self.assertEqual(result, expected)
 
         result = self.node_obj.parse_version_info_update(b'\tp\xfebI\xb2\x8a\xc2\x00\x00o\r\x009\x10\r\x00\x03#\x01\x01\x0bAlertMe.com\x0bPower Clamp\n2010-05-19')
         expected = {
+            'type': 'Power Clamp',
             'version': 18786,
             'manu': 'AlertMe.com',
-            'type': 'Power Clamp',
             'manu_date': '2010-05-19'
         }
         self.assertEqual(result, expected)
 
         result = self.node_obj.parse_version_info_update(b'\tp\xfe+\xe8\xc0ax\x00\x00o\r\x009\x10\x01\x00\x01#\x00\x01\x0bAlertMe.com\rButton Device\n2010-11-15')
         expected = {
+            'type': 'Button Device',
             'version': 59435,
             'manu': 'AlertMe.com',
-            'type': 'Button Device',
             'manu_date': '2010-11-15'
         }
         self.assertEqual(result, expected)
 
         result = self.node_obj.parse_version_info_update(b'\tp\xfe\xb6\xb7x\x1dx\x00\x00o\r\x009\x10\x06\x00\x00#\x00\x02\x0bAlertMe.com\nPIR Device\n2010-11-24')
         expected = {
+            'type': 'PIR Device',
             'version': 47030,
             'manu': 'AlertMe.com',
-            'type': 'PIR Device',
             'manu_date': '2010-11-24'
         }
         self.assertEqual(result, expected)
 
         result = self.node_obj.parse_version_info_update(b'\t\x00\xfe\xad\xe3jj\x1b\x00\x00o\r\x009\x10\x05\x00\x06\x12\x00\x01\x0bAlertMe.com\x12Door/Window sensor\n2008-04-17')
         expected = {
+            'type': 'Door/Window sensor',
             'version': 58285,
             'manu': 'AlertMe.com',
-            'type': 'Door/Window sensor',
             'manu_date': '2008-04-17'
         }
         self.assertEqual(result, expected)
 
         result = self.node_obj.parse_version_info_update(b'\tp\xfe\x82@\xc1e\x1d\x00\x00o\r\x009\x10\x04\x00\x01#\x00\x01\x0bAlertMe.com\x0eAlarm Detector\n2010-11-24')
         expected = {
+            'type': 'Alarm Detector',
             'version': 16514,
             'manu': 'AlertMe.com',
-            'type': 'Alarm Detector',
             'manu_date': '2010-11-24'
         }
         self.assertEqual(result, expected)
 
         result = self.node_obj.parse_version_info_update(b'\t0\xfe3B\x08BI\x00\x00o\r\x009\x10\x03\x00\x03#\x00\x01\x0bAlertMe.com\rKeyfob Device\n2010-11-10')
         expected = {
+            'type': 'Keyfob Device',
             'version': 16947,
             'manu': 'AlertMe.com',
-            'type': 'Keyfob Device',
             'manu_date': '2010-11-10'
         }
         self.assertEqual(result, expected)
 
         result = self.node_obj.parse_version_info_update(b'\t\x00\xfe\x1b\x15V_\x1b\x00\x00o\r\x009\x10\x02\x00\x07\x12\x00\x02\x0bAlertMe.com\x06Beacon\n2008-07-08')
         expected = {
+            'type': 'Beacon',
             'version': 5403,
             'manu': 'AlertMe.com',
-            'type': 'Beacon',
             'manu_date': '2008-07-08'
         }
         self.assertEqual(result, expected)
 
         result = self.node_obj.parse_version_info_update(b'\t\x00\xfe\xde\xa4\xeav\x1b\x00\x00o\r\x009\x10\x02\x00\x06\x12\x01\x01\x0bAlertMe.com\x04Lamp\n2008-04-17')
         expected = {
+            'type': 'Lamp',
             'version': 42206,
             'manu': 'AlertMe.com',
-            'type': 'Lamp',
             'manu_date': '2008-04-17'
         }
         self.assertEqual(result, expected)
 
     def test_generate_version_info_update(self):
         params = {
+            'type': 'Generic',
             'version': 12345,
             'manu': 'PyAlertMe',
-            'type': 'Generic',
             'manu_date': '2017-01-01'
         }
         result = self.node_obj.generate_version_info_update(params)

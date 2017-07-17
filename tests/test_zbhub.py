@@ -72,7 +72,6 @@ class TestZBHub(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-
     def test_mock_serial(self):
         message = {
             'source_addr': b'\x88\x9f',
@@ -81,102 +80,13 @@ class TestZBHub(unittest.TestCase):
             'profile': b'\x00\x00',
             'cluster': b'\x00\x06',
             'dest_endpoint': b'\x00',
-            'rf_data': b'',
+            'rf_data': b'\x04',
             'id': 'rx_explicit',
             'options': b'\x01',
         }
         self.hub_obj.receive_message(message)
         result = self.hub_ser.get_data_written()
         expected = b'~\x00\x19}1\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x02\x02\x00\xf0\xc2\x16\x00\x00}1\x00\xfa\x00\x01\x04'
-        self.assertEqual(result, expected)
-
-    def test_generate_state_request(self):
-        result = self.hub_obj.generate_relay_state_request(1)
-        expected = {
-            'profile': b'\xc2\x16',
-            'cluster': b'\x00\xee',
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
-            'data': b'\x11\x00\x02\x01\x01'
-        }
-        self.assertEqual(result, expected)
-
-        result = self.hub_obj.generate_relay_state_request(0)
-        expected = {
-            'profile': b'\xc2\x16',
-            'cluster': b'\x00\xee',
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
-            'data': b'\x11\x00\x02\x00\x01'
-        }
-        self.assertEqual(result, expected)
-
-    def test_generate_mode_change_request(self):
-        result = self.hub_obj.generate_mode_change_request('Normal')
-        expected = {
-            'profile': b'\xc2\x16',
-            'cluster': b'\x00\xf0',
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
-            'data': b'\x11\x00\xfa\x00\x01'
-        }
-        self.assertEqual(result, expected)
-
-        result = self.hub_obj.generate_mode_change_request('RangeTest')
-        expected = {
-            'profile': b'\xc2\x16',
-            'cluster': b'\x00\xf0',
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
-            'data': b'\x11\x00\xfa\x01\x01'
-        }
-        self.assertEqual(result, expected)
-
-    def test_generate_version_info_request(self):
-        result = self.hub_obj.generate_version_info_request()
-        expected = {
-            'profile': b'\xc2\x16',
-            'cluster': b'\x00\xf6',
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
-            'data': b'\x11\x00\xfc'
-        }
-        self.assertEqual(result, expected)
-
-    def test_generate_active_endpoints_request(self):
-        source_addr_short = b'\x88\x9f'
-        result = self.hub_obj.generate_active_endpoints_request(source_addr_short)
-        expected = {
-            'profile': b'\x00\x00',
-            'cluster': b'\x00\x05',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x00',
-            'data': b'\xaa\x9f\x88'
-        }
-        self.assertEqual(result, expected)
-
-    def test_generate_match_descriptor_response(self):
-        sequence = b'\x03'
-        self.hub_obj.addr_short = b'\x00\x00'
-        result = self.hub_obj.generate_match_descriptor_response(sequence)
-        expected = {
-            'profile': b'\x00\x00',
-            'cluster': b'\x80\x06',
-            'src_endpoint': b'\x00',
-            'dest_endpoint': b'\x00',
-            'data': b'\x03\x00\x00\x00\x01\x02'
-        }
-        self.assertEqual(result, expected)
-
-    def test_generate_security_init(self):
-        result = self.hub_obj.generate_security_init()
-        expected = {
-            'profile': b'\xc2\x16',
-            'cluster': b'\x05\x00',
-            'src_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
-            'data': b'\x11\x80\x00\x00\x05'
-        }
         self.assertEqual(result, expected)
 
 if __name__ == '__main__':
