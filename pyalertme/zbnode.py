@@ -424,7 +424,7 @@ class ZBNode(Node):
         message['dest_addr_long'] = dest_addr_long
         message['dest_addr'] = dest_addr_short
 
-        self._logger.info('Sending Message: %s', message)
+        self._logger.debug('Sending Message: %s', message)
         self._xbee.send('tx_explicit', **message)
 
     def receive_message(self, message):
@@ -462,27 +462,27 @@ class ZBNode(Node):
 
             if profile_id == PROFILE_ID_ZDP:
                 # ZigBee Device Profile ID
-                self._logger.info('Received ZigBee Device Profile Packet')
+                self._logger.debug('Received ZigBee Device Profile Packet')
 
                 if cluster_id == CLUSTER_ID_ZDO_NWK_ADDR_REQ:
                     # Network (16-bit) Address Request
-                    self._logger.info('Received Network (16-bit) Address Request')
+                    self._logger.debug('Received Network (16-bit) Address Request')
 
                 elif cluster_id == CLUSTER_ID_ZDO_NWK_ADDR_RSP:
                     # Network (16-bit) Address Response.
-                    self._logger.info('Received Network (16-bit) Address Response')
+                    self._logger.debug('Received Network (16-bit) Address Response')
 
                 elif cluster_id == CLUSTER_ID_ZDO_MGMT_RTG_RSP:
                     # Management Routing Response
-                    self._logger.info('Received Management Routing Response')
+                    self._logger.debug('Received Management Routing Response')
 
                 elif cluster_id == CLUSTER_ID_ZDO_SIMPLE_DESC_REQ:
                     # Simple Descriptor Request.
-                    self._logger.info('Received Simple Descriptor Request')
+                    self._logger.debug('Received Simple Descriptor Request')
 
                 elif cluster_id == CLUSTER_ID_ZDO_ACTIVE_EP_REQ:
                     # Active Endpoint Request.
-                    self._logger.info('Received Active Endpoint Request')
+                    self._logger.debug('Received Active Endpoint Request')
 
                 elif cluster_id == CLUSTER_ID_ZDO_ACTIVE_EP_RSP:
                     # Active Endpoints Response
@@ -490,11 +490,11 @@ class ZBNode(Node):
                     # constructed correctly to match what the switch can do according
                     # to the spec. This is another message that gets it's response
                     # after we receive the Match Descriptor below.
-                    self._logger.info('Received Active Endpoint Response')
+                    self._logger.debug('Received Active Endpoint Response')
 
                 elif cluster_id == CLUSTER_ID_ZDO_MATCH_DESC_REQ:
                     # Match Descriptor Request
-                    self._logger.info('Received Match Descriptor Request')
+                    self._logger.debug('Received Match Descriptor Request')
                     # This is the point where we finally respond to the switch.
                     # A couple of messages are sent to cause the switch to join with
                     # the controller at a network level and to cause it to regard
@@ -525,39 +525,39 @@ class ZBNode(Node):
 
                 elif cluster_id == CLUSTER_ID_ZDO_END_DEVICE_ANNCE:
                     # Device Announce Message
-                    self._logger.info('Received Device Announce Message')
+                    self._logger.debug('Received Device Announce Message')
                     # This will tell me the address of the new thing
                     # so we're going to send an active endpoint request
                     reply = self.get_message('active_endpoints_request', {'sequence': 1, 'mode': source_addr_short})
 
                 elif cluster_id == CLUSTER_ID_ZDO_MGMT_NETWORK_UPDATE:
                     # Management Network Update Notify.
-                    self._logger.info('Received Management Network Update Notify')
+                    self._logger.debug('Received Management Network Update Notify')
 
                 else:
                     self._logger.error('Unrecognised Cluster ID: %r', cluster_id)
 
             elif profile_id == PROFILE_ID_ALERTME:
                 # AlertMe Profile ID
-                self._logger.info('Received AlertMe Specific Profile Packet')
+                self._logger.debug('Received AlertMe Specific Profile Packet')
                 cluster_cmd = message['rf_data'][2:3]
 
                 if cluster_id == CLUSTER_ID_AM_SWITCH:
                     if cluster_cmd == CLUSTER_CMD_AM_STATE_RESP:
-                        self._logger.info('Received Switch Status Update')
+                        self._logger.deug('Received Switch Status Update')
                         attributes = self.parse_switch_state_update(message['rf_data'])
 
                     elif cluster_cmd == CLUSTER_CMD_AM_STATE_REQ:
                         # State Request
                         # b'\x11\x00\x01\x01'
-                        self._logger.info('Switch Relay State is: %s', self.relay_state)
+                        self._logger.debug('Switch Relay State is: %s', self.relay_state)
                         reply = self.get_message('switch_state_update', {'relay_state': self.relay_state})
 
                     elif cluster_cmd == CLUSTER_CMD_AM_STATE_CHANGE:
                         # Change State
                         # b'\x11\x00\x02\x01\x01' On
                         # b'\x11\x00\x02\x00\x01' Off
-                        self._logger.info('Received Change State')
+                        self._logger.debug('Received Change State')
                         attributes = self.parse_switch_state_request(message['rf_data'])
                         self.relay_state = attributes['relay_state']
                         reply = self.get_message('switch_state_update', {'relay_state': self.relay_state})
@@ -567,30 +567,30 @@ class ZBNode(Node):
 
                 elif cluster_id == CLUSTER_ID_AM_POWER:
                     if cluster_cmd == CLUSTER_CMD_AM_PWR_DEMAND:
-                        self._logger.info('Received Power Demand Update')
+                        self._logger.debug('Received Power Demand Update')
                         attributes = self.parse_power_demand(message['rf_data'])
 
                     elif cluster_cmd == CLUSTER_CMD_AM_PWR_CONSUMPTION:
-                        self._logger.info('Received Power Consumption & Uptime Update')
+                        self._logger.debug('Received Power Consumption & Uptime Update')
                         attributes = self.parse_power_consumption(message['rf_data'])
 
                     elif cluster_cmd == CLUSTER_CMD_AM_PWR_UNKNOWN:
-                        self._logger.info('Unknown Power Update')
+                        self._logger.debug('Unknown Power Update')
                         attributes = self.parse_power_unknown(message['rf_data'])
 
                     else:
                         self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
                 elif cluster_id == CLUSTER_ID_AM_TAMPER:
-                    self._logger.info('Received Tamper Switch Changed Update')
+                    self._logger.debug('Received Tamper Switch Changed Update')
                     attributes = self.parse_tamper_state(message['rf_data'])
 
                 elif cluster_id == CLUSTER_ID_AM_BUTTON:
-                    self._logger.info('Received Button Press Update')
+                    self._logger.debug('Received Button Press Update')
                     attributes = self.parse_button_press(message['rf_data'])
 
                 elif cluster_id == CLUSTER_ID_AM_SECURITY:
-                    self._logger.info('Received Security Event')
+                    self._logger.debug('Received Security Event')
                     # Security Cluster
                     # When the device first connects, it comes up in a state that
                     # needs initialization, this command seems to take care of that.
@@ -601,16 +601,16 @@ class ZBNode(Node):
 
                 elif cluster_id == CLUSTER_ID_AM_DISCOVERY:
                     if cluster_cmd == CLUSTER_CMD_AM_RSSI:
-                        self._logger.info('Received RSSI Range Test Update')
+                        self._logger.debug('Received RSSI Range Test Update')
                         attributes = self.parse_range_info_update(message['rf_data'])
 
                     elif cluster_cmd == CLUSTER_CMD_AM_VERSION_RESP:
-                        self._logger.info('Received Version Information')
+                        self._logger.debug('Received Version Information')
                         attributes = self.parse_version_info_update(message['rf_data'])
 
                     elif cluster_cmd == CLUSTER_CMD_AM_VERSION_REQ:
                         # b'\x11\x00\xfc\x00\x01'
-                        self._logger.info('Received Version Request')
+                        self._logger.debug('Received Version Request')
                         params = {
                             'type': self.type,
                             'version': self.version,
@@ -624,11 +624,11 @@ class ZBNode(Node):
 
                 elif cluster_id == CLUSTER_ID_AM_STATUS:
                     if cluster_cmd == CLUSTER_CMD_AM_STATUS:
-                        self._logger.info('Received Status Update')
+                        self._logger.debug('Received Status Update')
                         attributes = self.parse_status_update(message['rf_data'])
 
                     elif cluster_cmd == CLUSTER_CMD_AM_MODE_REQ:
-                        self._logger.info('Received Mode Change Request')
+                        self._logger.debug('Received Mode Change Request')
                         # Take note of hub address
                         self.hub_addr_long = source_addr_long
                         self.hub_addr_short = source_addr_short
@@ -639,13 +639,13 @@ class ZBNode(Node):
                         if mode_cmd == b'\x00\x01':
                             # Normal
                             # b'\x11\x00\xfa\x00\x01'
-                            self._logger.info('Normal Mode')
+                            self._logger.debug('Normal Mode')
                             self.mode = 'NORMAL'
 
                         elif mode_cmd == b'\x01\x01':
                             # Range Test
                             # b'\x11\x00\xfa\x01\x01'
-                            self._logger.info('Range Test Mode')
+                            self._logger.debug('Range Test Mode')
                             self.mode = 'RANGE'
                             # TODO Setup thread loop to send regular range RSSI updates
                             # for now just send one...
@@ -654,13 +654,13 @@ class ZBNode(Node):
                         elif mode_cmd == b'\x02\x01':
                             # Locked
                             # b'\x11\x00\xfa\x02\x01'
-                            self._logger.info('Locked Mode')
+                            self._logger.debug('Locked Mode')
                             self.mode = 'LOCKED'
 
                         elif mode_cmd == b'\x03\x01':
                             # Silent
                             # b'\x11\x00\xfa\x03\x01'
-                            self._logger.info('Silent Mode')
+                            self._logger.debug('Silent Mode')
                             self.mode = 'SILENT'
 
                     else:
@@ -675,8 +675,6 @@ class ZBNode(Node):
 
             if reply:
                 self.send_message(reply, source_addr_long, source_addr_short)
-
-            self._logger.info('Attributes: %r', attributes)
 
             return attributes
 
@@ -1257,7 +1255,7 @@ class ZBNode(Node):
                 ret['tamper_state'] = 0  # Closed
 
         else:
-            self._logger.info('Unrecognised Device Status %r  %r', _type, data)
+            self._logger.error('Unrecognised Device Status %r  %r', _type, data)
 
         return ret
 
