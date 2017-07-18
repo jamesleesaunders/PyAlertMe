@@ -142,7 +142,7 @@ messages = {
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda self, params: self.generate_switch_state_request(params)
         },
-        'expected_params': ['relay_state']
+        'expected_params': ['switch_state']
     },
     'switch_state_update': {
         'name': 'Relay State Update',
@@ -223,7 +223,8 @@ messages = {
             'src_endpoint': ENDPOINT_ZDO,
             'dest_endpoint': ENDPOINT_ZDO,
             'data': lambda self, params: self.generate_active_endpoints_request(params)
-        }
+        },
+        'expected_params': ['sequence', 'addr_short']
     },
     'match_descriptor_request': {
         'name': 'Match Descriptor Request',
@@ -233,7 +234,8 @@ messages = {
             'src_endpoint': ENDPOINT_ZDO,
             'dest_endpoint': ENDPOINT_ZDO,
             'data': lambda self, params: self.generate_match_descriptor_request(params)
-        }
+        },
+        'expected_params': ['sequence', 'addr_short', 'profile_id', 'in_cluster_list', 'out_cluster_list']
     },
     'match_descriptor_response': {
         'name': 'Match Descriptor Response',
@@ -243,7 +245,8 @@ messages = {
             'src_endpoint': ENDPOINT_ZDO,
             'dest_endpoint': ENDPOINT_ZDO,
             'data': lambda self, params: self.generate_match_descriptor_response(params)
-        }
+        },
+        'expected_params': ['sequence', 'addr_short', 'endpoint_list']
     },
     'routing_table_request': {
         'name': 'Management Routing Table Request',
@@ -300,7 +303,7 @@ class ZBNode(Node):
         # Scheduler Thread
         self._started = True
         self._schedule_thread = threading.Thread(target=self._schedule_loop)
-        self._schedule_interval = 2
+        self._schedule_interval = 30
         self._schedule_thread.start()
 
         # ZDO Sequence
@@ -528,7 +531,8 @@ class ZBNode(Node):
                     self._logger.debug('Received Device Announce Message')
                     # This will tell me the address of the new thing
                     # so we're going to send an active endpoint request
-                    reply = self.get_message('active_endpoints_request', {'sequence': 1, 'mode': source_addr_short})
+                    sequence = 4   # message['rf_data'][0:1]
+                    reply = self.get_message('active_endpoints_request', {'sequence': sequence, 'mode': source_addr_short})
 
                 elif cluster_id == CLUSTER_ID_ZDO_MGMT_NETWORK_UPDATE:
                     # Management Network Update Notify.
@@ -544,14 +548,14 @@ class ZBNode(Node):
 
                 if cluster_id == CLUSTER_ID_AM_SWITCH:
                     if cluster_cmd == CLUSTER_CMD_AM_STATE_RESP:
-                        self._logger.deug('Received Switch Status Update')
+                        self._logger.debug('Received Switch Status Update')
                         attributes = self.parse_switch_state_update(message['rf_data'])
 
                     elif cluster_cmd == CLUSTER_CMD_AM_STATE_REQ:
                         # State Request
                         # b'\x11\x00\x01\x01'
-                        self._logger.debug('Switch Relay State is: %s', self.relay_state)
-                        reply = self.get_message('switch_state_update', {'relay_state': self.relay_state})
+                        self._logger.debug('Switch Relay State is: %s', self.switch_state)
+                        reply = self.get_message('switch_state_update', {'switch_state': self.switch_state})
 
                     elif cluster_cmd == CLUSTER_CMD_AM_STATE_CHANGE:
                         # Change State
@@ -559,8 +563,8 @@ class ZBNode(Node):
                         # b'\x11\x00\x02\x00\x01' Off
                         self._logger.debug('Received Change State')
                         attributes = self.parse_switch_state_request(message['rf_data'])
-                        self.relay_state = attributes['relay_state']
-                        reply = self.get_message('switch_state_update', {'relay_state': self.relay_state})
+                        self.switch_state = attributes['switch_state']
+                        reply = self.get_message('switch_state_update', {'switch_state': self.switch_state})
 
                     else:
                         self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
@@ -971,14 +975,14 @@ class ZBNode(Node):
         Requested Relay State      2*         b'\x01' = Check Only, b'\x01\x01' = On, b'\x00\x01' = Off
                                               * Size = 1 if check only
 
-        :param params: Parameter dictionary of relay state
+        :param params: Parameter dictionary of switch relay state
         :return: Message data
         """
         preamble = b'\x11\x00'
 
-        if params['relay_state'] != '':
+        if params['switch_state'] != '':
             cluster_cmd = CLUSTER_CMD_AM_STATE_CHANGE
-            if int(params['relay_state']) == 1:
+            if int(params['switch_state']) == 1:
                 payload = b'\x01\x01'  # On
             else:
                 payload = b'\x00\x01'  # Off
@@ -992,7 +996,7 @@ class ZBNode(Node):
 
     def parse_switch_state_request(self, data):
         """
-        Process message, parse for relay state change request.
+        Process message, parse for switch relay state change request.
         This message is sent FROM the Hub TO the SmartPlug requesting state change.
 
         Field Name                 Size       Description
@@ -1002,13 +1006,13 @@ class ZBNode(Node):
         Requested Relay State      2          b'\x01\x01' = On, b'\x00\x01' = Off
 
         :param data: Message data
-        :return: Parameter dictionary of relay state
+        :return: Parameter dictionary of switch relay state
         """
         # Parse Switch State Request
         if data == b'\x11\x00\x02\x01\x01':
-            return {'relay_state': 1}
+            return {'switch_state': 1}
         elif data == b'\x11\x00\x02\x00\x01':
-            return {'relay_state': 0}
+            return {'switch_state': 0}
         else:
             self._logger.error('Unknown State Request')
 
@@ -1023,12 +1027,12 @@ class ZBNode(Node):
         Cluster Command            1          Cluster Command - Switch Status Update (b'\x80')
         Relay State                2          b'\x07\x01' = On, b'\x06\x00' = Off
 
-        :param params: Parameter dictionary of relay state
+        :param params: Parameter dictionary of switch relay state
         :return: Message data
         """
         preamble = b'\x09\x68'  # b'\th'
         cluster_cmd = CLUSTER_CMD_AM_STATE_RESP
-        payload = b'\x07\x01' if params['relay_state'] else b'\x06\x00'
+        payload = b'\x07\x01' if params['switch_state'] else b'\x06\x00'
 
         data = preamble + cluster_cmd + payload
         return data
@@ -1054,9 +1058,9 @@ class ZBNode(Node):
         values = struct.unpack('< 2x b b b', data)
 
         if values[2] & 0x01:
-            return {'relay_state': 1}
+            return {'switch_state': 1}
         else:
-            return {'relay_state': 0}
+            return {'switch_state': 0}
 
     def generate_button_press(self, params=None):
         """
@@ -1339,8 +1343,7 @@ class ZBNode(Node):
         num_input_clusters = struct.pack('B', len(params['in_cluster_list']) / 2)  # b'\x00'
         input_cluster_list = params['in_cluster_list']  # b''
         num_output_clusters = struct.pack('B', len(params['out_cluster_list']) / 2)  # b'\x01'
-        output_cluster_list = params['out_cluster_list'][1] + params['out_cluster_list'][
-            0]  # b'\xf0\x00'  CLUSTER_ID_AM_STATUS (reversed)
+        output_cluster_list = params['out_cluster_list'][1] + params['out_cluster_list'][0]  # b'\xf0\x00'  CLUSTER_ID_AM_STATUS (reversed)
         # TODO Finish this off! At the moment this does not support multiple clusters, it just supports one!
 
         data = sequence + net_addr + profile_id + num_input_clusters + input_cluster_list + num_output_clusters + output_cluster_list

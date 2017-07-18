@@ -19,7 +19,7 @@ class ZBSmartPlug(ZBDevice):
         self.manu_date = '2017-01-01'
 
         # Attributes
-        self.relay_state = 0
+        self.switch_state = 0
         self.power_demand = 0
         self.power_consumption = 0
 
@@ -34,16 +34,16 @@ class ZBSmartPlug(ZBDevice):
         message = self.get_message('power_demand_update', {'power_demand': self.power_demand})
         self.send_message(message, self.hub_obj.addr_long, self.hub_obj.addr_short)
 
-    def set_relay_state(self, state):
+    def set_switch_state(self, state):
         """
         This simulates the physical button being pressed
         :param state:
         :return:
         """
-        self.relay_state = state
-        self._logger.debug('Switch Relay State Changed to: %s', self.relay_state)
+        self.switch_state = state
+        self._logger.debug('Switch Relay State Changed to: %s', self.switch_state)
         if self.associated:
-            message = self.get_message('switch_state_request', {'relay_state': self.relay_state})
+            message = self.get_message('switch_state_request', {'switch_state': self.switch_state})
             self.send_message(message, self.hub_obj.addr_long, self.hub_obj.addr_short)
 
         # Temporary code while testing power code...

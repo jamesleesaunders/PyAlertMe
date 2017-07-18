@@ -38,7 +38,7 @@ class TestZBSmartPlug(unittest.TestCase):
             'src_endpoint': b'\x02'
         }
         self.device_obj.receive_message(message_on)
-        self.assertEqual(self.device_obj.relay_state, True)
+        self.assertEqual(self.device_obj.switch_state, True)
 
         message_off = {
             'cluster': b'\x00\xee',
@@ -52,7 +52,7 @@ class TestZBSmartPlug(unittest.TestCase):
             'src_endpoint': b'\x02'
         }
         self.device_obj.receive_message(message_off)
-        self.assertEqual(self.device_obj.relay_state, False)
+        self.assertEqual(self.device_obj.switch_state, False)
 
     def test_send_message(self):
         message = {
@@ -72,7 +72,7 @@ class TestZBSmartPlug(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_message_switch_state_update(self):
-        self.device_obj.relay_state = 1
+        self.device_obj.switch_state = 1
         result = self.device_obj.message_switch_state_update()
         expected = {
             'profile': b'\xc2\x16',
@@ -82,7 +82,7 @@ class TestZBSmartPlug(unittest.TestCase):
             'dest_endpoint': b'\x02'
         }
         self.assertEqual(result, expected)
-        self.device_obj.relay_state = 0
+        self.device_obj.switch_state = 0
         result = self.device_obj.message_switch_state_update()
         expected = {
             'profile': b'\xc2\x16',

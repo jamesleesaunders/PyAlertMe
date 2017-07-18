@@ -25,14 +25,16 @@ class Node(object):
         self.manu_date = None
         self.last_update = None
 
-        # Attributes
-        # self.attributes = {}    # Alternate attributes option
+        # Hub Info
         self.hub_addr_long = b''
         self.hub_addr_short = b''
         self.associated = False
+
+        # Attributes
+        # self.attributes = {}    # Alternate attributes option
         self.rssi = None
         self.mode = None
-        self.relay_state = 0
+        self.switch_state = 0
         self.power_demand = 0
         self.power_consumption = 0
         self.tamper_state = 0

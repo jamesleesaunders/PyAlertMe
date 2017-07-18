@@ -25,7 +25,7 @@ formatter = logging.Formatter('%(asctime)s %(levelname)-3s %(module)-5s %(messag
 
 # Create console handler and set level to info
 sh = logging.StreamHandler()
-sh.setLevel(logging.ERROR)
+sh.setLevel(logging.DEBUG)
 sh.setFormatter(formatter)
 logger.addHandler(sh)
 
@@ -54,7 +54,7 @@ while True:
     try:
         time.sleep(0.001)
         state = int(raw_input(""))
-        device_obj.set_relay_state(state)
+        device_obj.set_switch_state(state)
 
     except IndexError:
         print("No Command")

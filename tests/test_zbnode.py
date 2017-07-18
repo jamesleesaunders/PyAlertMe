@@ -120,26 +120,26 @@ class TestZBNode(unittest.TestCase):
 
     def test_parse_switch_state_request(self):
         result = self.node_obj.parse_switch_state_request(b'\x11\x00\x02\x01\x01')
-        self.assertEqual(result, {'relay_state': 1})
+        self.assertEqual(result, {'switch_state': 1})
 
         result = self.node_obj.parse_switch_state_request(b'\x11\x00\x02\x00\x01')
-        self.assertEqual(result, {'relay_state': 0})
+        self.assertEqual(result, {'switch_state': 0})
 
     def test_parse_switch_state_update(self):
         result = self.node_obj.parse_switch_state_update(b'\th\x80\x07\x01')
-        expected = {'relay_state': 1}
+        expected = {'switch_state': 1}
         self.assertEqual(result, expected)
 
         result = self.node_obj.parse_switch_state_update(b'\th\x80\x06\x00')
-        expected = {'relay_state': 0}
+        expected = {'switch_state': 0}
         self.assertEqual(result, expected)
 
     def test_generate_switch_state_response(self):
-        result = self.node_obj.generate_switch_state_update({'relay_state': 1})
+        result = self.node_obj.generate_switch_state_update({'switch_state': 1})
         expected = b'\th\x80\x07\x01'
         self.assertEqual(result, expected)
 
-        result = self.node_obj.generate_switch_state_update({'relay_state': 0})
+        result = self.node_obj.generate_switch_state_update({'switch_state': 0})
         expected = b'\th\x80\x06\x00'
         self.assertEqual(result, expected)
 
@@ -163,15 +163,15 @@ class TestZBNode(unittest.TestCase):
     def test_generate_switch_state_request(self):
         # Test On Request
         expected = b'\x11\x00\x02\x01\x01'
-        self.assertEqual(self.node_obj.generate_switch_state_request({'relay_state': 1}), expected)
+        self.assertEqual(self.node_obj.generate_switch_state_request({'switch_state': 1}), expected)
 
         # Test Off Request
         expected = b'\x11\x00\x02\x00\x01'
-        self.assertEqual(self.node_obj.generate_switch_state_request({'relay_state': 0}), expected)
+        self.assertEqual(self.node_obj.generate_switch_state_request({'switch_state': 0}), expected)
 
         # Test Check Only
         expected = b'\x11\x00\x01\x01'
-        self.assertEqual(self.node_obj.generate_switch_state_request({'relay_state': ''}), expected)
+        self.assertEqual(self.node_obj.generate_switch_state_request({'switch_state': ''}), expected)
 
     def test_generate_version_info_request(self):
         result = self.node_obj.generate_version_info_request()

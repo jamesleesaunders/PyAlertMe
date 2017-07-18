@@ -21,6 +21,7 @@ class ZBDevice(ZBNode):
         # Addresses of the hub we are associated with
         self.hub_addr_long = None
         self.hub_addr_short = None
+
         self.hub_obj = None
         self.associated = False
 
@@ -34,13 +35,11 @@ class ZBDevice(ZBNode):
 
         attributes = {}
         if message['id'] == 'rx_explicit':
-            if not self.hub_obj:
+            if not self.associated:
                 self.hub_obj = Node()
                 self.hub_obj.addr_long = message['source_addr_long']
                 self.hub_obj.addr_short = message['source_addr']
-                self.associated = True
-            # Not sure if we need the above and the below - they are doing similar things
-            if not self.associated:
+
                 params = {
                     'sequence': 1,
                     'addr_short': BROADCAST_SHORT,
@@ -50,6 +49,8 @@ class ZBDevice(ZBNode):
                 }
                 reply = self.get_message('match_descriptor_request', params)
                 self.send_message(reply, message['source_addr_long'], message['source_addr'])
+
+                self.associated = True
 
             attributes = super(ZBDevice, self).receive_message(message)
 
@@ -73,7 +74,7 @@ class ZBDevice(ZBNode):
         return message
 
     def message_switch_state_update(self):
-        params = {'relay_state': self.relay_state}
+        params = {'switch_state': self.switch_state}
         message = self.get_message('switch_state_update', params)
         return message
 

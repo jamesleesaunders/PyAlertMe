@@ -29,9 +29,9 @@ class TestNode(unittest.TestCase):
         self.assertEqual(self.node_obj.manu_date, '2017-01-01')
 
     def test_set_get_attribute(self):
-        self.node_obj.set_attribute('relay_state', 1)
-        self.assertEqual(self.node_obj.relay_state, 1)
-        self.assertEqual(self.node_obj.get_attribute('relay_state'), 1)
+        self.node_obj.set_attribute('switch_state', 1)
+        self.assertEqual(self.node_obj.switch_state, 1)
+        self.assertEqual(self.node_obj.get_attribute('switch_state'), 1)
 
         self.node_obj.set_attribute('addr_short', b'\x00\x01')
         self.assertEqual(self.node_obj.addr_short, b'\x00\x01')

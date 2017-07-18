@@ -169,14 +169,14 @@ class ZBHub(ZBNode):
         addresses = device_obj.addr_tuple
         self.send_message(message, *addresses)
 
-    def send_relay_state_request(self, device_obj, state):
+    def send_switch_state_request(self, device_obj, state):
         """
         Send Relay State Request
 
         :param device_obj:
         :param state:
         """
-        message = self.get_message('switch_state_request', {'relay_state': state})
+        message = self.get_message('switch_state_request', {'switch_state': state})
         addresses = device_obj.addr_tuple
         self.send_message(message, *addresses)
 
@@ -200,8 +200,8 @@ class ZBHub(ZBNode):
         :param command: Parameter or command to be sent
         :param value: Value, State, Mode
         """
-        if command == 'relay_state':
-            self.send_relay_state_request(device_id, value)
+        if command == 'switch_state':
+            self.send_switch_state_request(device_id, value)
         elif command == 'mode':
             self.send_mode_request(device_id, value)
         else:
