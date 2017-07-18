@@ -42,15 +42,12 @@ XBEE_PORT = '/dev/tty.usbserial-DN018OI6'
 XBEE_BAUD = 9600
 ser = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
-def callback(type, node_id, field, value):
-    if type == 'Attribute':
-        print("Attribute Update\n\tNode ID: " + node_id + "  Field: " + field + "  Value: " + str(value))
-    elif type == 'Node':
-        print("Node Update\n\tNode ID: " + node_id + "  Field: " + field + "  Value: " + str(value))
+
+def _callback(self, field, value):
+    print("Attribute Update [Node ID: " + self.id + "\tField: " + field + "\tValue: " + str(value) + "]")
 
 # Create Hub Object
-hub_obj = Hub()
-hub_obj.start(ser)
+hub_obj = ZBHub(ser)
 
 # Kick Off Discovery
 hub_obj.discovery()
@@ -60,46 +57,42 @@ while True:
     try:
         time.sleep(0.001)
 
-        nodes = hub_obj.get_nodes()
-        pp.pprint(nodes)
-        print("Select Device:\n")
-        node_id = raw_input("")
+        # List Devices
+        device_list = hub_obj.list_devices()
+        pp.pprint(device_list)
+        node_id = raw_input("Select Device:")
 
-        while True:
-            messages = list_messages()
-            pp.pprint(messages)
+        if node_id in device_list.keys():
+            while True:
+                # Select Message
+                device_obj = hub_obj.devices[node_id]
+                messages = hub_obj.list_messages()
+                pp.pprint(messages)
+                message_id = raw_input("Select Message:")
 
-            # Select Message
-            message_id = raw_input("Select Message: ")
-            message = messages[message_id]
+                if message_id in messages.keys():
+                    # Select Parameters
+                    params = {}
+                    if 'expected_params' in messages[message_id].keys():
+                        print("Message Parameters:")
+                        for param_name in messages[message_id]['expected_params']:
+                            param_value = raw_input("   %s: " % param_name)
+                            params = {param_name: param_value}
 
-            # Select Parameters
-            params = {}
-            if 'expected_params' in message.keys():
-                print("Message Parameters:")
-                for param_name in message['expected_params']:
-                    param_value = raw_input("   %s: " % param_name)
-                    params = {param_name: param_value}
+                    # Send Message
+                    message = hub_obj.get_message(message_id, params)
+                    addresses = device_obj.addr_tuple
+                    hub_obj.send_message(message, *addresses)
 
-            # Send Message
-            message = get_message(message_id, params)
-            addresses = hub_obj.node_id_to_addrs(node_id)
-            hub_obj.send_message(message, *addresses)
-
-    except IndexError:
-        print("No Command")
+                else:
+                    break
 
     except KeyboardInterrupt:
         print("Keyboard Interrupt")
         break
 
-    except NameError as e:
-        print("Name Error:")
-        print(e.message.split("'")[1])
-
     except:
         print("Unexpected Error:", sys.exc_info()[0], sys.exc_info()[1])
-
 
 # Close up shop
 print("Closing Serial Port")

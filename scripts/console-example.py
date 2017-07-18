@@ -32,7 +32,7 @@ class TestCmd(Command):
             # Construct a lise of nodes
             output = "List of Nodes: \n"
 
-            nodes = hub_obj.get_nodes()
+            nodes = hub_obj.list_devices()
             for id, node in nodes.iteritems():
                 output += str(id) + " " + str(node) + "\n"
 
@@ -52,12 +52,12 @@ class TestCmd(Command):
 
             if args[1] == "state":
                 value = args[2]
-                hub_obj.call_node_command(node_id, 'State', value)
+                hub_obj.call_device_command(node_id, 'State', value)
                 return 'Node: ' + str(node_id) + ' State Changed: ' + value
 
             if args[1] == "mode":
                 value = args[2]
-                hub_obj.call_node_command(node_id, 'Mode', value)
+                hub_obj.call_device_command(node_id, 'Mode', value)
                 return 'Node: ' + str(node_id) + ' Mode: ' + value
 
             if args[1] == "attributes":
@@ -66,11 +66,11 @@ class TestCmd(Command):
 
             if args[1] == "type":
                 message = hub_obj.generate_type_request_message()
-                hub_obj.send_message(message, *hub_obj.node_id_to_addrs(node_id))
+                hub_obj.send_message(message, *hub_obj.device_id_to_addrs(node_id))
                 return 'Type Request Sent'
 
             if args[1] == "detail":
-                return hub_obj.get_node(node_id)
+                return hub_obj.device_obj_from_id(node_id)
 
         return 'Unknown Argument'
 
@@ -112,7 +112,7 @@ if __name__ == '__main__':
     ser = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
     # Start hub
-    hub_obj = Hub()
+    hub_obj = ZBHub()
     hub_obj.start(ser)
 
     # Start commander

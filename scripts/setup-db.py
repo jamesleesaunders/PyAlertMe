@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # Filename:    setup-db.py
-# Description: Sets up DB used by hub.py
+# Description: Sets up DB used by zigbeehub.py
 # Author:      James Saunders [james@saunders-family.net]
 # Copyright:   Copyright (C) 2017 James Saunders
 # License:     MIT
