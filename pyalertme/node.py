@@ -26,6 +26,7 @@ class Node(object):
         self.last_update = None
 
         # Attributes
+        # self.attributes = {}    # Alternate attributes option
         self.hub_addr_long = b''
         self.hub_addr_short = b''
         self.associated = False
@@ -85,6 +86,16 @@ class Node(object):
     def _callback(self, field, value):
         print("Attribute Update [Node ID: " + self.id + "\tField: " + field + "\tValue: " + str(value) + "]")
 
+    def set_attributes(self, attributes):
+        """
+        Set Multiple Attributes
+
+        :param attributes:
+        :return:
+        """
+        for attr_name, attr_value in attributes.iteritems():
+            self.set_attribute(attr_name, attr_value)
+
     def set_attribute(self, attr_name, attr_value):
         """
         Set Single Attribute
@@ -95,15 +106,18 @@ class Node(object):
         """
         self._logger.debug('Setting attribute: %s to value: %s', attr_name, attr_value)
         self.__setattr__(attr_name, attr_value)
+        # self.attributes[attr_name] = attr_value    # Alternate attributes option
         self.last_update = time.time()
         self._callback(attr_name, attr_value)
 
-    def set_attributes(self, attributes):
+    def get_attribute(self, attr_name):
         """
-        Set Multiple Attributes 
-        
-        :param attributes:
+        Get Single Attributes
+
+        :param attr_name:
         :return:
         """
-        for attr_name, attr_value in attributes.iteritems():
-            self.set_attribute(attr_name, attr_value)
+        attr_value = self.__getattribute__(attr_name)
+        # attr_value = self.attributes[attr_name]    # Alternate attributes option
+
+        return attr_value

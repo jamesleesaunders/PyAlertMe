@@ -43,10 +43,10 @@ class ZBDevice(ZBNode):
             if not self.associated:
                 params = {
                     'sequence': 1,
-                    'addr_short': self.BROADCAST_SHORT,
-                    'profile_id': self.PROFILE_ID_ALERTME,
+                    'addr_short': BROADCAST_SHORT,
+                    'profile_id': PROFILE_ID_ALERTME,
                     'in_cluster_list': b'',
-                    'out_cluster_list': self.CLUSTER_ID_AM_STATUS
+                    'out_cluster_list': CLUSTER_ID_AM_STATUS
                 }
                 reply = self.get_message('match_descriptor_request', params)
                 self.send_message(reply, message['source_addr_long'], message['source_addr'])
