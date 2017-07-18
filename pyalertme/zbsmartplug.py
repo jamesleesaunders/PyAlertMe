@@ -19,7 +19,6 @@ class ZBSmartPlug(ZBDevice):
         self.manu_date = '2017-01-01'
 
         # Attributes
-        self.power_demand = 2
         self.relay_state = 0
         self.power_demand = 0
         self.power_consumption = 0

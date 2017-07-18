@@ -15,9 +15,8 @@ class Node(object):
         self._logger = logging.getLogger('pyalertme')
 
         # My addresses
-        self.addr_long = None
-        self.addr_short = None
-        self.associated = False
+        self.addr_long = b''
+        self.addr_short = b''
 
         # Type Info
         self.type = None
@@ -26,11 +25,17 @@ class Node(object):
         self.manu_date = None
         self.last_update = None
 
-        # Other Attributes
-        self.relay_state = None
-        self.hub_addr_long = None
-        self.hub_addr_short = None
+        # Attributes
+        self.hub_addr_long = b''
+        self.hub_addr_short = b''
+        self.associated = False
+        self.rssi = None
         self.mode = None
+        self.relay_state = 0
+        self.power_demand = 0
+        self.power_consumption = 0
+        self.tamper_state = 0
+        self.triggered = 0
 
         # Callback
         self._callback = callback if callback else self._callback
@@ -63,7 +68,7 @@ class Node(object):
         I was struggling to get this to work for both Python2 and Python3.
         I am sure this could be simplified... but for now - this works!
 
-        # MAC Address Manufacturers
+        # MAC Address Manufacturers:
         #   00:0d:6f:00:03:bb:b9:f8 = Ember Corporation
         #   00:13:a2:00:40:a2:3b:09 = MaxStream, Inc
         #   00:1E:5E:09:02:14:C5:AB = Computime Ltd.

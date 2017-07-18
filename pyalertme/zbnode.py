@@ -744,7 +744,8 @@ class ZBNode(Node):
         :return: Parameter dictionary of version info
         """
         # The version string is variable length.
-        # We therefore have to calculate the length of the string which we then use in the unpack.
+        # We therefore have to calculate the length of the string 
+        # which we then use in the unpack.
         l = len(data) - 22
         ret = dict(zip(
             ('cluster_cmd', 'version', 'manu_string'),
