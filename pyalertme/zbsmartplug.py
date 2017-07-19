@@ -34,14 +34,14 @@ class ZBSmartPlug(ZBDevice):
         message = self.get_message('power_demand_update', {'power_demand': self.power_demand})
         self.send_message(message, self.hub_obj.addr_long, self.hub_obj.addr_short)
 
-    def set_switch_state(self, state):
+    def set_switch_state(self, switch_state):
         """
         This simulates the physical button being pressed
-        :param state:
+        :param switch_state:
         :return:
         """
-        self.set_attribute('state', state)
-        self._logger.debug('Switch State Changed to: %s', self.switch_state)
+        # self.set_attribute('switch_state', switch_state)
+        self.switch_state = switch_state
         if self.associated:
             message = self.get_message('switch_state_request', {'switch_state': self.switch_state})
             self.send_message(message, self.hub_obj.addr_long, self.hub_obj.addr_short)
@@ -57,8 +57,9 @@ class ZBSmartPlug(ZBDevice):
         :param power_demand:
         :return:
         """
-        self.set_attribute('power_demand', power_demand)
-        self._logger.debug('Power Demand Changed to: %s', self.power_demand)
+        # self.set_attribute('power_demand', power_demand)
+        # 2017-07-19 01:14:43,298 ERROR zbnode Unrecognised Cluster ID: '\x80\x06'
+        self.power_demand = power_demand
         if self.associated:
             message = self.get_message('power_demand_update', {'power_demand': self.power_demand})
             self.send_message(message, self.hub_obj.addr_long, self.hub_obj.addr_short)

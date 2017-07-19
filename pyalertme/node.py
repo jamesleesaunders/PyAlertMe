@@ -106,7 +106,7 @@ class Node(object):
         :param attr_value:
         :return:
         """
-        self._logger.debug('Setting attribute: %s to value: %s', attr_name, attr_value)
+        self._logger.debug('Setting attribute: %s value: %s', attr_name, attr_value)
         self.__setattr__(attr_name, attr_value)
         # self.attributes[attr_name] = attr_value    # Alternate attributes option
         self.last_update = time.time()
