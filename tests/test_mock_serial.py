@@ -44,3 +44,30 @@ class TestFakeSerialRead(unittest.TestCase):
         """
         self.device.write("Hello World")
         self.assertEqual(self.device.get_data_written(), "Hello World")
+
+    def test_open(self):
+        """
+        Test open(), close() and isOpen() functions.
+        """
+        self.device.open()
+        self.assertEqual(self.device.isOpen(), True)
+        self.device.close()
+        self.assertEqual(self.device.isOpen(), False)
+
+    def test_get_settings_dict(self):
+        """
+        Test getSettingsDict() function returns dictionary of settings.
+        """
+        expected = {
+            'timeout': 1,
+            'parity': 'N',
+            'baudrate': 19200,
+            'bytesize': 8,
+            'stopbits': 1,
+            'xonxoff': 0,
+            'rtscts': 0
+        }
+        self.assertEqual(self.device.getSettingsDict(), expected)
+
+    if __name__ == '__main__':
+        unittest.main(verbosity=2)
