@@ -303,7 +303,7 @@ class ZBNode(Node):
         # Scheduler Thread
         self._started = True
         self._schedule_thread = threading.Thread(target=self._schedule_loop)
-        self._schedule_interval = 30
+        self._schedule_interval = 2
         self._schedule_thread.start()
 
         # ZDO Sequence
@@ -475,6 +475,10 @@ class ZBNode(Node):
                     # Network (16-bit) Address Response.
                     self._logger.debug('Received Network (16-bit) Address Response')
 
+                elif cluster_id == CLUSTER_ID_ZDO_MGMT_RTG_REQ:
+                    # Management Routing Table Request
+                    self._logger.debug('Received Management Routing Table Request')
+
                 elif cluster_id == CLUSTER_ID_ZDO_MGMT_RTG_RSP:
                     # Management Routing Response
                     self._logger.debug('Received Management Routing Response')
@@ -525,6 +529,10 @@ class ZBNode(Node):
 
                     # We are fully associated!
                     self._logger.debug('New Device Fully Associated')
+
+                elif cluster_id == CLUSTER_ID_ZDO_MATCH_DESC_RSP:
+                    # Match Descriptor Response
+                    self._logger.debug('Received Match Descriptor Response')
 
                 elif cluster_id == CLUSTER_ID_ZDO_END_DEVICE_ANNCE:
                     # Device Announce Message

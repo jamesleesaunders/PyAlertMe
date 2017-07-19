@@ -58,7 +58,6 @@ class ZBSmartPlug(ZBDevice):
         :return:
         """
         # self.set_attribute('power_demand', power_demand)
-        # 2017-07-19 01:14:43,298 ERROR zbnode Unrecognised Cluster ID: '\x80\x06'
         self.power_demand = power_demand
         if self.associated:
             message = self.get_message('power_demand_update', {'power_demand': self.power_demand})
