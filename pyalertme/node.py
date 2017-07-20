@@ -85,8 +85,8 @@ class Node(object):
 
         return ret
 
-    def _callback(self, field, value):
-        print("Attribute Update [Node ID: " + self.id + "\tField: " + field + "\tValue: " + str(value) + "]")
+    def _callback(self, attr_name, attr_value):
+        print("Attribute Update [Node ID: " + self.id + "\tField: " + attr_name + "\tValue: " + str(attr_value) + "]")
 
     def set_attributes(self, attributes):
         """
@@ -95,8 +95,9 @@ class Node(object):
         :param attributes:
         :return:
         """
-        for attr_name, attr_value in attributes.iteritems():
-            self.set_attribute(attr_name, attr_value)
+        if attributes:
+            for attr_name, attr_value in attributes.iteritems():
+                self.set_attribute(attr_name, attr_value)
 
     def set_attribute(self, attr_name, attr_value):
         """
@@ -106,7 +107,7 @@ class Node(object):
         :param attr_value:
         :return:
         """
-        self._logger.debug('Setting attribute: %s value: %s', attr_name, attr_value)
+        self._logger.debug('Attribute Update [NodeID: %s Field: %s Value: %s]', self.id, attr_name, attr_value)
         self.__setattr__(attr_name, attr_value)
         # self.attributes[attr_name] = attr_value    # Alternate attributes option
         self.last_update = time.time()

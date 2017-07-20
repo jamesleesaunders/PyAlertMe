@@ -43,8 +43,8 @@ XBEE_BAUD = 9600
 ser = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
 
-def _callback(self, field, value):
-    print("Attribute Update [Node ID: " + self.id + "\tField: " + field + "\tValue: " + str(value) + "]")
+def callback(self, attr_name, attr_value):
+    print("Attribute Update [Node ID: " + self.id + "\tField: " + attr_name + "\tValue: " + str(attr_value) + "]")
 
 # Create Hub Object
 device_obj = ZBSmartPlug(ser)

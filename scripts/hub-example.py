@@ -42,10 +42,6 @@ XBEE_PORT = '/dev/tty.usbserial-DN018OI6'
 XBEE_BAUD = 9600
 ser = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
-
-def _callback(self, field, value):
-    print("Attribute Update [Node ID: " + self.id + "\tField: " + field + "\tValue: " + str(value) + "]")
-
 # Create Hub Object
 hub_obj = ZBHub(ser)
 

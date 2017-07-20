@@ -40,8 +40,7 @@ class ZBSmartPlug(ZBDevice):
         :param switch_state:
         :return:
         """
-        # self.set_attribute('switch_state', switch_state)
-        self.switch_state = switch_state
+        self.set_attribute('switch_state', switch_state)
         if self.associated:
             message = self.get_message('switch_state_request', {'switch_state': self.switch_state})
             self.send_message(message, self.hub_obj.addr_long, self.hub_obj.addr_short)
@@ -57,8 +56,7 @@ class ZBSmartPlug(ZBDevice):
         :param power_demand:
         :return:
         """
-        # self.set_attribute('power_demand', power_demand)
-        self.power_demand = power_demand
+        self.set_attribute('power_demand', power_demand)
         if self.associated:
             message = self.get_message('power_demand_update', {'power_demand': self.power_demand})
             self.send_message(message, self.hub_obj.addr_long, self.hub_obj.addr_short)

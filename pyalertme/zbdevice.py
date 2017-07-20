@@ -32,13 +32,17 @@ class ZBDevice(ZBNode):
         self.power_consumption = 0
 
     def receive_message(self, message):
+        attributes = super(ZBDevice, self).receive_message(message)
+        self.set_attributes(attributes)
 
-        attributes = {}
+        # If we are not associated at this point try and invoke an association
+        # by sending a Match Descriptor Request.
         if message['id'] == 'rx_explicit':
             if not self.associated:
                 self.hub_obj = Node()
                 self.hub_obj.addr_long = message['source_addr_long']
                 self.hub_obj.addr_short = message['source_addr']
+                self.associated = True
 
                 params = {
                     'sequence': 1,
@@ -49,12 +53,6 @@ class ZBDevice(ZBNode):
                 }
                 reply = self.get_message('match_descriptor_request', params)
                 self.send_message(reply, message['source_addr_long'], message['source_addr'])
-
-                self.associated = True
-
-            attributes = super(ZBDevice, self).receive_message(message)
-
-            self.hub_obj.set_attributes(attributes)
 
         return attributes
 
