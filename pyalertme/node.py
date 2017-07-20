@@ -85,8 +85,17 @@ class Node(object):
 
         return ret
 
-    def _callback(self, attr_name, attr_value):
-        print("Attribute Update [Node ID: " + self.id + "\tField: " + attr_name + "\tValue: " + str(attr_value) + "]")
+    def get_attribute(self, attr_name):
+        """
+        Get Single Attributes
+
+        :param attr_name:
+        :return:
+        """
+        attr_value = self.__getattribute__(attr_name)
+        # attr_value = self.attributes[attr_name]    # Alternate attributes option
+
+        return attr_value
 
     def set_attributes(self, attributes):
         """
@@ -113,14 +122,12 @@ class Node(object):
         self.last_update = time.time()
         self._callback(attr_name, attr_value)
 
-    def get_attribute(self, attr_name):
+    def _callback(self, attr_name, attr_value):
         """
-        Get Single Attributes
+        Callback when attributes are updated
 
         :param attr_name:
+        :param attr_value:
         :return:
         """
-        attr_value = self.__getattribute__(attr_name)
-        # attr_value = self.attributes[attr_name]    # Alternate attributes option
-
-        return attr_value
+        print("Attribute Update [Node ID: " + self.id + "\tField: " + attr_name + "\tValue: " + str(attr_value) + "]")
