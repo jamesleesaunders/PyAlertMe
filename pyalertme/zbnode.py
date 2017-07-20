@@ -558,21 +558,21 @@ class ZBNode(Node):
                 cluster_cmd = message['rf_data'][2:3]
 
                 if cluster_id == CLUSTER_ID_AM_SWITCH:
-                    if cluster_cmd == CLUSTER_CMD_AM_STATE_RESP:
-                        self._logger.debug('Received Switch Status Update')
-                        attributes = self.parse_switch_state_update(message['rf_data'])
-
-                    elif cluster_cmd == CLUSTER_CMD_AM_STATE_REQ:
-                        # State Request
+                    if cluster_cmd == CLUSTER_CMD_AM_STATE_REQ:
+                        # Switch State Request
                         # b'\x11\x00\x01\x01'
-                        self._logger.debug('Switch Relay State is: %s', self.switch_state)
+                        self._logger.debug('Received Switch State Request')
                         reply = self.get_message('switch_state_update', {'switch_state': self.switch_state})
 
+                    elif cluster_cmd == CLUSTER_CMD_AM_STATE_RESP:
+                        self._logger.debug('Received Switch State Update')
+                        attributes = self.parse_switch_state_update(message['rf_data'])
+
                     elif cluster_cmd == CLUSTER_CMD_AM_STATE_CHANGE:
-                        # Change State
+                        # Switch Change State
                         # b'\x11\x00\x02\x01\x01' On
                         # b'\x11\x00\x02\x00\x01' Off
-                        self._logger.debug('Received Change State')
+                        self._logger.debug('Received Switch State Change')
                         attributes = self.parse_switch_state_request(message['rf_data'])
                         self.switch_state = attributes['switch_state']
 
