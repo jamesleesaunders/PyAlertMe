@@ -183,7 +183,8 @@ messages = {
             'src_endpoint': ENDPOINT_ALERTME,
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda self, params: self.generate_power_demand_update(params)
-        }
+        },
+        'expected_params': ['power_demand']
     },
     'power_consumption_update': {
         'name': 'Power Consumption Update',
@@ -193,7 +194,8 @@ messages = {
             'src_endpoint': ENDPOINT_ALERTME,
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda self, params: self.generate_power_consumption_update(params)
-        }
+        },
+        'expected_params': ['power_consumption', 'up_time']
     },
     'button_press': {
         'name': 'Button Press',
@@ -203,7 +205,8 @@ messages = {
             'src_endpoint': ENDPOINT_ALERTME,
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda self, params: self.generate_button_press(params)
-        }
+        },
+        'params': ['button_state', 'counter']
     },
     'security_init': {
         'name': 'Security Initialization',
@@ -572,7 +575,6 @@ class ZBNode(Node):
                         self._logger.debug('Received Change State')
                         attributes = self.parse_switch_state_request(message['rf_data'])
                         self.switch_state = attributes['switch_state']
-                        reply = self.get_message('switch_state_update', {'switch_state': self.switch_state})
 
                     else:
                         self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)

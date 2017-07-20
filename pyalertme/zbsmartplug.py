@@ -1,6 +1,6 @@
 import logging
 from pyalertme.zbdevice import *
-
+from random import randint
 
 class ZBSmartPlug(ZBDevice):
     def __init__(self, serial, callback=None):
@@ -31,7 +31,8 @@ class ZBSmartPlug(ZBDevice):
         The _schedule_event function is called by the _schedule_loop() thread function called at regular intervals.
 
         """
-        message = self.get_message('power_demand_update', {'power_demand': self.power_demand})
+        self.rssi = randint(0, 100)
+        message = self.get_message('range_update', {'rssi': self.rssi})
         self.send_message(message, self.hub_obj.addr_long, self.hub_obj.addr_short)
 
     def set_switch_state(self, switch_state):
@@ -47,7 +48,6 @@ class ZBSmartPlug(ZBDevice):
 
         # Temporary code while testing power code...
         # Randomly set the power usage value.
-        from random import randint
         self.set_power_demand(randint(0, 100))
 
     def set_power_demand(self, power_demand):
