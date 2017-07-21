@@ -7,7 +7,7 @@ import threading
 class ZBHub(ZBNode):
     def __init__(self, serial, callback=None):
         """
-        Hub Constructor
+        Hub Constructor.
 
         :param serial: Serial Object
         :param callback: Optional
@@ -29,12 +29,12 @@ class ZBHub(ZBNode):
         Start Discovery Mode - Start discovery thread.
 
         """
-        self._logger.debug('Discovery Mode Started')
+        self._logger.info('Discovery Mode Started')
         self._discovery_thread.start()
 
     def _discovery(self):
         """
-        Discovery Thread
+        Discovery Thread.
 
         """
         # First, send out a broadcast every 2 seconds for 30 seconds
@@ -52,38 +52,11 @@ class ZBHub(ZBNode):
             self.send_type_request(device_obj)
             time.sleep(1.00)
 
-    def set_device_attributes(self, device_obj, attributes):
-        """
-        Save Multiple Device Attributes
-        Not currently used?
-
-        :param device_obj: Device Object
-        :param attributes: Attributes Dict
-        :return:
-        """
-        for attrib_name, value in attributes.iteritems():
-            self.set_device_attribute(device_obj, attrib_name, value)
-
-    def set_device_attribute(self, device_obj, attrib_name, attrib_value):
-        """
-        Save Single Device Attribute
-        Not currently used?
-
-        :param device_obj: Device Object
-        :param attrib_name: Attribute Name
-        :param attrib_value: Attribute Value
-        :return:
-        """
-        self._logger.debug('Updating Node Attribute: %s Value: %s', attrib_name, attrib_value)
-        device_obj.set_attribute(attrib_name, attrib_value)
-        device_id = device_obj.id
-        self._callback('Attribute', device_id, attrib_name, attrib_value)
-
     def list_devices(self):
         """
-        Return list of known devices.
+        Return list of associated devices.
 
-        :return: Dictionary of Associated Devices
+        :return: Dictionary of Devices
         """
         devices = {}
         for (device_id, device_obj) in self.devices.items():
@@ -97,10 +70,10 @@ class ZBHub(ZBNode):
 
     def get_device(self, device_id):
         """
-        Return single Associated Device
+        Return single associated device.
 
         :param device_id: Dotted MAC Address
-        :return: Dictionary of Node Record
+        :return: Dictionary of Node Attributes
         """
         device_obj = self.devices[device_id]
 
@@ -144,6 +117,7 @@ class ZBHub(ZBNode):
             device_obj = self.device_obj_from_id(device_id)
 
             if not device_obj:
+                self._logger.info('Discovered New Device')
                 device_obj = Node()
                 device_obj.addr_long = device_addr_long
                 device_obj.addr_short = device_addr_short
@@ -168,7 +142,7 @@ class ZBHub(ZBNode):
 
     def send_type_request(self, device_obj):
         """
-        Send Type Request
+        Send Type Request.
 
         :param device_obj:
         """
@@ -178,7 +152,7 @@ class ZBHub(ZBNode):
 
     def send_switch_state_request(self, device_obj, state):
         """
-        Send Relay State Request
+        Send Relay State Request.
 
         :param device_obj:
         :param state:
@@ -189,7 +163,7 @@ class ZBHub(ZBNode):
 
     def send_mode_request(self, device_obj, mode):
         """
-        Send Mode Request
+        Send Mode Request.
 
         :param device_obj:
         :param mode:

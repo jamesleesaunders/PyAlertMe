@@ -5,7 +5,7 @@ from pyalertme.zbnode import *
 class ZBDevice(ZBNode):
     def __init__(self, serial, callback=None):
         """
-        Device Constructor
+        Device Constructor.
 
         :param serial: Serial Object
         :param callback: Optional
@@ -47,7 +47,6 @@ class ZBDevice(ZBNode):
             self.hub_obj = Node()
             self.hub_obj.addr_long = addr_long
             self.hub_obj.addr_short = addr_short
-            self.associated = True
             params = {
                 'sequence': 1,
                 'addr_short': BROADCAST_SHORT,
@@ -58,6 +57,8 @@ class ZBDevice(ZBNode):
 
             reply = self.generate_message('match_descriptor_request', params)
             self.send_message(reply, self.hub_obj.addr_long, self.hub_obj.addr_short)
+            self.associated = True
+            self._logger.info('Device Associated')
 
     def message_range_update(self):
         params = {'rssi': self.rssi}

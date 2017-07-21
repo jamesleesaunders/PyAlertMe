@@ -277,7 +277,7 @@ messages = {
 class ZBNode(Node):
     def __init__(self, serial, callback=None):
         """
-        Base Constructor
+        ZigBee Node Constructor.
 
         :param serial: Serial Object
         :param callback: Optional
@@ -313,7 +313,8 @@ class ZBNode(Node):
 
     def _schedule_loop(self):
         """
-        Continual Updates Thread calls the _updates() function every at intervals set in self._schedule_interval.
+        Continual Updates Thread calls the _updates() function every at 
+        intervals set in self._schedule_interval.
 
         """
         while self._started:
@@ -330,15 +331,17 @@ class ZBNode(Node):
 
     def _schedule_event(self):
         """
-        The _schedule_event() function is called by the _schedule_loop() thread function called at regular intervals.
+        The _schedule_event() function is called by the _schedule_loop() 
+        thread function called at regular intervals.
+        Stub, to be overwritten by ZBHub or ZBDevice.
 
         """
-        self._logger.debug('Continual Update')
+        self._logger.debug('[STUB] schedule_event: Continual Update')
 
     def halt(self):
         """
-        Halt Device
-        Close XBee and Serial
+        Halt Device.
+        Close XBee and Serial.
 
         :return:
         """
@@ -349,7 +352,7 @@ class ZBNode(Node):
 
     def generate_message(self, message_id, params=None):
         """
-        Generate message
+        Generate message.
 
         :param message_id: Message ID
         :param params: Optional
@@ -383,7 +386,7 @@ class ZBNode(Node):
 
     def list_messages(self):
         """
-        List messages
+        List messages.
 
         :return:
         """
@@ -397,7 +400,7 @@ class ZBNode(Node):
 
     def xbee_error(self, error):
         """
-        On XBee error this function is called
+        On XBee error this function is called.
 
         :param error:
         :return:
@@ -406,7 +409,7 @@ class ZBNode(Node):
 
     def read_addresses(self):
         """
-        Work out own address
+        Work out own address.
 
         """
         self._logger.debug('Requesting own addresses')
@@ -419,7 +422,7 @@ class ZBNode(Node):
 
     def send_message(self, message, dest_addr_long, dest_addr_short):
         """
-        Send message to XBee
+        Send message to XBee.
 
         :param message: Dict message
         :param dest_addr_long: 48-bits Long Address
@@ -456,9 +459,9 @@ class ZBNode(Node):
 
     def parse_message(self, message):
         """
-        Receive message from XBee
-        Calls process message
-        Process incoming message
+        Receive message from XBee.
+        Calls process message.
+        Process incoming message.
 
         :param message: Dict of message
         :return:
@@ -703,11 +706,7 @@ class ZBNode(Node):
             else:
                 self._logger.error('Unrecognised Profile ID: %r', profile_id)
 
-            ret = {
-                'attributes': attributes,
-                'replies': replies
-            }
-            return ret
+            return {'attributes': attributes, 'replies': replies}
 
     def process_message(self, addr_long, addr_short, attributes):
         """
@@ -718,11 +717,11 @@ class ZBNode(Node):
         :param attributes: Dict of message
         :return:
         """
-        self._logger.debug('Address: %s Process Message: %s', addr_long, attributes)
+        self._logger.debug('[STUB] process_message: %s', attributes)
 
     def generate_version_info_request(self, params=None):
         """
-        Generate Version Info Request
+        Generate Version Info Request.
         This message is sent FROM the Hub TO the SmartPlug requesting version information.
 
         Field Name                 Size       Description
@@ -742,7 +741,7 @@ class ZBNode(Node):
 
     def generate_version_info_update(self, params):
         """
-        Generate Version Info Update
+        Generate Version Info Update.
         This message is sent TO the Hub FROM the SmartPlug advertising version information.
 
         Field Name                 Size       Description
@@ -812,7 +811,7 @@ class ZBNode(Node):
 
     def generate_range_update(self, params):
         """
-        Generate range message
+        Generate range message.
 
         Field Name                 Size       Description
         ----------                 ----       -----------

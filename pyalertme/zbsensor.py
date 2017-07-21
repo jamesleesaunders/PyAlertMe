@@ -5,7 +5,7 @@ from pyalertme.zbdevice import *
 class ZBSensor(ZBDevice):
     def __init__(self, serial, callback=None):
         """
-        Sensor Constructor
+        Sensor Constructor.
 
         :param serial: Serial Object
         :param callback: Optional

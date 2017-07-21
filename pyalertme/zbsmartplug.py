@@ -5,7 +5,7 @@ from random import randint
 class ZBSmartPlug(ZBDevice):
     def __init__(self, serial, callback=None):
         """
-        SmartPlug Constructor
+        SmartPlug Constructor.
 
         :param serial: Serial Object
         :param callback: Optional
@@ -52,7 +52,8 @@ class ZBSmartPlug(ZBDevice):
 
     def set_power_demand(self, power_demand):
         """
-        Set Power Demand
+        Set Power Demand.
+
         :param power_demand:
         :return:
         """
