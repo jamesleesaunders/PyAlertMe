@@ -321,14 +321,13 @@ class ZBNode(Node):
             if self.associated:
                 self._schedule_event()
 
-                # The following for loop is being used in place of a simple
-                # time.sleep(self._schedule_interval)
-                # This is done so we can interrupt the thread quicker.
-                for i in range(self._schedule_interval * 10):
-                    if self._started:
-                        time.sleep(0.1)
-            else:
-                time.sleep(1)
+            # The following for loop is being used in place of a simple:
+            #   time.sleep(self._schedule_interval)
+            # This is done so we can interrupt the thread quicker and
+            # Unit tests finish faster.
+            for i in range(self._schedule_interval * 10):
+                if self._started:
+                    time.sleep(0.1)
 
     def _schedule_event(self):
         """
