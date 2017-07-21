@@ -48,7 +48,6 @@ class ZBDevice(ZBNode):
             self.hub_obj.addr_long = addr_long
             self.hub_obj.addr_short = addr_short
             self.associated = True
-
             params = {
                 'sequence': 1,
                 'addr_short': BROADCAST_SHORT,
@@ -56,6 +55,7 @@ class ZBDevice(ZBNode):
                 'in_cluster_list': b'',
                 'out_cluster_list': CLUSTER_ID_AM_STATUS
             }
+
             reply = self.generate_message('match_descriptor_request', params)
             self.send_message(reply, self.hub_obj.addr_long, self.hub_obj.addr_short)
 

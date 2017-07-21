@@ -442,12 +442,17 @@ class ZBNode(Node):
         :param message: Dict of message
         :return:
         """
-        attributes = self.parse_message(message)
+        ret = self.parse_message(message)
 
         if message['id'] == 'rx_explicit':
             source_addr_long = message['source_addr_long']
             source_addr_short = message['source_addr']
-            self.process_message(source_addr_long, source_addr_short, attributes)
+
+            self.process_message(source_addr_long, source_addr_short, ret['attributes'])
+
+            for reply in ret['replies']:
+                self.send_message(reply, source_addr_long, source_addr_short)
+                time.sleep(0.5)
 
     def parse_message(self, message):
         """
@@ -461,7 +466,7 @@ class ZBNode(Node):
         self._logger.debug('Received Message: %s', message)
 
         attributes = {}
-        reply = {}
+        replies = []
 
         # AT Packets
         if message['id'] == 'at_response':
@@ -533,18 +538,13 @@ class ZBNode(Node):
                         'addr_short': self.addr_short,
                         'endpoint_list': ENDPOINT_ALERTME
                     }
-                    reply1 = self.generate_message('match_descriptor_response', params)
-                    self.send_message(reply1, source_addr_long, source_addr_short)
+                    replies.append(self.generate_message('match_descriptor_response', params))
 
                     # The next messages are directed at the hardware code (rather
                     # than the network code). The device has to receive these two
                     # messages to stay joined.
-                    time.sleep(2)
-                    reply2 = self.generate_message('version_info_request')
-                    self.send_message(reply2, source_addr_long, source_addr_short)
-                    time.sleep(2)
-                    reply3 = self.generate_message('mode_change_request', {'mode': 'Normal'})
-                    self.send_message(reply3, source_addr_long, source_addr_short)
+                    replies.append(self.generate_message('version_info_request'))
+                    replies.append(self.generate_message('mode_change_request', {'mode': 'Normal'}))
 
                     # We are fully associated!
                     self._logger.debug('New Device Fully Associated')
@@ -559,7 +559,7 @@ class ZBNode(Node):
                     # This will tell me the address of the new thing
                     # so we're going to send an active endpoint request
                     sequence = 4   # message['rf_data'][0:1]
-                    reply = self.generate_message('active_endpoints_request', {'sequence': sequence, 'mode': source_addr_short})
+                    replies.append(self.generate_message('active_endpoints_request', {'sequence': sequence, 'mode': source_addr_short}))
 
                 elif cluster_id == CLUSTER_ID_ZDO_MGMT_NETWORK_UPDATE:
                     # Management Network Update Notify.
@@ -578,7 +578,7 @@ class ZBNode(Node):
                         # Switch State Request
                         # b'\x11\x00\x01\x01'
                         self._logger.debug('Received Switch State Request')
-                        reply = self.generate_message('switch_state_update', {'switch_state': self.switch_state})
+                        replies.append(self.generate_message('switch_state_update', {'switch_state': self.switch_state}))
 
                     elif cluster_cmd == CLUSTER_CMD_AM_STATE_RESP:
                         self._logger.debug('Received Switch State Update')
@@ -626,7 +626,7 @@ class ZBNode(Node):
                     # needs initialization, this command seems to take care of that.
                     # So, look at the value of the data and send the command.
                     if message['rf_data'][3:7] == b'\x15\x00\x39\x10':
-                        reply = self.generate_message('security_init')
+                        replies.append(self.generate_message('security_init'))
                     attributes = self.parse_security_state(message['rf_data'])
 
                 elif cluster_id == CLUSTER_ID_AM_DISCOVERY:
@@ -647,7 +647,7 @@ class ZBNode(Node):
                             'manu': self.manu,
                             'manu_date': self.manu_date
                         }
-                        reply = self.generate_message('version_info_update', params)
+                        replies.append(self.generate_message('version_info_update', params))
 
                     else:
                         self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
@@ -679,7 +679,7 @@ class ZBNode(Node):
                             self.mode = 'RANGE'
                             # TODO Setup thread loop to send regular range RSSI updates
                             # for now just send one...
-                            reply = self.generate_message('range_update')
+                            replies.append(self.generate_message('range_update'))
 
                         elif mode_cmd == b'\x02\x01':
                             # Locked
@@ -703,10 +703,11 @@ class ZBNode(Node):
             else:
                 self._logger.error('Unrecognised Profile ID: %r', profile_id)
 
-            if reply:
-                self.send_message(reply, source_addr_long, source_addr_short)
-
-            return attributes
+            ret = {
+                'attributes': attributes,
+                'replies': replies
+            }
+            return ret
 
     def process_message(self, addr_long, addr_short, attributes):
         """
