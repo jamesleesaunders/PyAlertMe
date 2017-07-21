@@ -54,23 +54,6 @@ class TestZBSmartPlug(unittest.TestCase):
         self.device_obj.receive_message(message_off)
         self.assertEqual(self.device_obj.switch_state, False)
 
-    def test_send_message(self):
-        message = {
-            'source_addr_long': b'\x00\ro\x00\x03\xbb\xb9\xf8',
-            'source_addr': b'\x88\x9f',
-            'cluster': b'\x00\xee',
-            'rf_data': b'\x11\x00\x01\x01',
-            'dest_endpoint': b'\x02',
-            'id': 'rx_explicit',
-            'options': b'\x01',
-            'profile': b'\xc2\x16',
-            'src_endpoint': b'\x02'
-        }
-        self.device_obj.receive_message(message)
-        result = self.ser.get_data_written()
-        expected = b'~\x00\x19}1\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x02\x02\x00\xee\xc2\x16\x00\x00\th\x80\x06\x00\x1b'
-        self.assertEqual(result, expected)
-
     def test_message_switch_state_update(self):
         self.device_obj.switch_state = 1
         result = self.device_obj.message_switch_state_update()

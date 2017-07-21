@@ -21,7 +21,6 @@ class ZBDevice(ZBNode):
         # Addresses of the hub we are associated with
         self.hub_addr_long = None
         self.hub_addr_short = None
-
         self.hub_obj = None
         self.associated = False
 
