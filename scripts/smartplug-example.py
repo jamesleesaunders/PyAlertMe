@@ -21,7 +21,7 @@ logger = logging.getLogger('pyalertme')
 logger.setLevel(logging.DEBUG)
 
 # Specify log message format
-formatter = logging.Formatter('%(asctime)s %(levelname)-3s %(module)-5s %(message)s')
+formatter = logging.Formatter('%(asctime)s %(levelname)-3s %(module)-5s %(lineno)-3s %(message)s')
 
 # Create console handler and set level to info
 sh = logging.StreamHandler()

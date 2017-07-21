@@ -30,30 +30,34 @@ class ZBDevice(ZBNode):
         self.power_demand = 0
         self.power_consumption = 0
 
-    def receive_message(self, message):
-        attributes = super(ZBDevice, self).receive_message(message)
+    def process_message(self, addr_long, addr_short, attributes):
+        """
+        Process after message received.
+
+        :param addr_long: Short Address
+        :param addr_short: Long Address
+        :param attributes: Dict of message
+        :return:
+        """
         self.set_attributes(attributes)
 
-        # If we are not associated at this point try and invoke an association
-        # by sending a Match Descriptor Request.
-        if message['id'] == 'rx_explicit':
-            if not self.associated:
-                self.hub_obj = Node()
-                self.hub_obj.addr_long = message['source_addr_long']
-                self.hub_obj.addr_short = message['source_addr']
-                self.associated = True
+        if not self.associated:
+            # If we are not associated at this point try and invoke an association
+            # by sending a Match Descriptor Request.
+            self.hub_obj = Node()
+            self.hub_obj.addr_long = addr_long
+            self.hub_obj.addr_short = addr_short
+            self.associated = True
 
-                params = {
-                    'sequence': 1,
-                    'addr_short': BROADCAST_SHORT,
-                    'profile_id': PROFILE_ID_ALERTME,
-                    'in_cluster_list': b'',
-                    'out_cluster_list': CLUSTER_ID_AM_STATUS
-                }
-                reply = self.get_message('match_descriptor_request', params)
-                self.send_message(reply, message['source_addr_long'], message['source_addr'])
-
-        return attributes
+            params = {
+                'sequence': 1,
+                'addr_short': BROADCAST_SHORT,
+                'profile_id': PROFILE_ID_ALERTME,
+                'in_cluster_list': b'',
+                'out_cluster_list': CLUSTER_ID_AM_STATUS
+            }
+            reply = self.get_message('match_descriptor_request', params)
+            self.send_message(reply, self.hub_obj.addr_long, self.hub_obj.addr_short)
 
     def message_range_update(self):
         params = {'rssi': self.rssi}

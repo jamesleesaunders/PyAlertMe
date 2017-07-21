@@ -68,7 +68,7 @@ CLUSTER_CMD_AM_VERSION_RESP = b'\xfe'  # Version Information Response
 
 # At the moment I am not sure what/if the following dictionary will be used?
 # It is here to describe the relationship between Cluster ID and Cmd.
-# One day this may be used by the process_message() function and link with the parse_xxxxx() functions?
+# One day this may be used by the parse_message() function and link with the parse_xxxxx() functions?
 alertme_cluster_cmds = {
     CLUSTER_ID_AM_SWITCH: {
         CLUSTER_CMD_AM_STATE_REQ: "Relay State Request (SmartPlug)",
@@ -292,8 +292,7 @@ class ZBNode(Node):
 
         # Start up Serial and ZigBee
         self._serial = serial
-        self._xbee = ZigBee(ser=self._serial, callback=self.receive_message,
-                            error_callback=self.xbee_error, escaped=True)
+        self._xbee = ZigBee(ser=self._serial, callback=self.receive_message, error_callback=self.xbee_error, escaped=True)
 
         # My addresses
         self.addr_long = None
@@ -435,6 +434,22 @@ class ZBNode(Node):
         self._xbee.send('tx_explicit', **message)
 
     def receive_message(self, message):
+        """
+        Receive message from XBee.
+        Parse incoming message.
+        Process parsed result.
+
+        :param message: Dict of message
+        :return:
+        """
+        attributes = self.parse_message(message)
+
+        if message['id'] == 'rx_explicit':
+            source_addr_long = message['source_addr_long']
+            source_addr_short = message['source_addr']
+            self.process_message(source_addr_long, source_addr_short, attributes)
+
+    def parse_message(self, message):
         """
         Receive message from XBee
         Calls process message
@@ -692,6 +707,17 @@ class ZBNode(Node):
                 self.send_message(reply, source_addr_long, source_addr_short)
 
             return attributes
+
+    def process_message(self, addr_long, addr_short, attributes):
+        """
+        Process after message received. Stub, to be overwritten by ZBHub or ZBDevice.
+
+        :param addr_long: Short Address
+        :param addr_short: Long Address
+        :param attributes: Dict of message
+        :return:
+        """
+        self._logger.debug('Address: %s Process Message: %s', addr_long, attributes)
 
     def generate_version_info_request(self, params=None):
         """

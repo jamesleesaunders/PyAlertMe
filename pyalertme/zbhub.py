@@ -55,6 +55,7 @@ class ZBHub(ZBNode):
     def set_device_attributes(self, device_obj, attributes):
         """
         Save Multiple Device Attributes
+        Not currently used?
 
         :param device_obj: Device Object
         :param attributes: Attributes Dict
@@ -66,6 +67,7 @@ class ZBHub(ZBNode):
     def set_device_attribute(self, device_obj, attrib_name, attrib_value):
         """
         Save Single Device Attribute
+        Not currently used?
 
         :param device_obj: Device Object
         :param attrib_name: Attribute Name
@@ -151,23 +153,18 @@ class ZBHub(ZBNode):
 
         return device_obj
 
-    def receive_message(self, message):
+    def process_message(self, addr_long, addr_short, attributes):
+        """
+        Process after message received.
 
-        # ZigBee Explicit Packets
-        device_obj = None
-        if message['id'] == 'rx_explicit':
-            # Load the device object from the known devices list which corresponds
-            # to the originator of this message.
-            # If this message has come from an as of yet unknown device then create
-            # a new object entry for it in the known devices list.
-            device_obj = self.device_obj_from_addrs(message['source_addr_long'], message['source_addr'])
-
-        attributes = super(ZBHub, self).receive_message(message)
-
+        :param addr_long: Short Address
+        :param addr_short: Long Address
+        :param attributes: Dict of message
+        :return:
+        """
+        device_obj = self.device_obj_from_addrs(addr_long, addr_short)
         if device_obj:
             device_obj.set_attributes(attributes)
-
-        return attributes
 
     def send_type_request(self, device_obj):
         """
