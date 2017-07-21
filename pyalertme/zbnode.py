@@ -327,6 +327,8 @@ class ZBNode(Node):
                 for i in range(self._schedule_interval * 10):
                     if self._started:
                         time.sleep(0.1)
+            else:
+                time.sleep(1)
 
     def _schedule_event(self):
         """
