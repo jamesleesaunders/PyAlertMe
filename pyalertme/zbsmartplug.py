@@ -32,7 +32,7 @@ class ZBSmartPlug(ZBDevice):
 
         """
         self.rssi = randint(0, 100)
-        message = self.get_message('range_update', {'rssi': self.rssi})
+        message = self.generate_message('range_update', {'rssi': self.rssi})
         self.send_message(message, self.hub_obj.addr_long, self.hub_obj.addr_short)
 
     def set_switch_state(self, switch_state):
@@ -43,7 +43,7 @@ class ZBSmartPlug(ZBDevice):
         """
         self.set_attribute('switch_state', switch_state)
         if self.associated:
-            message = self.get_message('switch_state_request', {'switch_state': self.switch_state})
+            message = self.generate_message('switch_state_request', {'switch_state': self.switch_state})
             self.send_message(message, self.hub_obj.addr_long, self.hub_obj.addr_short)
 
         # Temporary code while testing power code...
@@ -58,5 +58,5 @@ class ZBSmartPlug(ZBDevice):
         """
         self.set_attribute('power_demand', power_demand)
         if self.associated:
-            message = self.get_message('power_demand_update', {'power_demand': self.power_demand})
+            message = self.generate_message('power_demand_update', {'power_demand': self.power_demand})
             self.send_message(message, self.hub_obj.addr_long, self.hub_obj.addr_short)

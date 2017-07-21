@@ -25,33 +25,33 @@ class TestZBNode(unittest.TestCase):
 
     def test_get_message(self):
         # Test providing all the appropriate parameters
-        result = self.node_obj.get_message('version_info_update', {'version': 20045, 'manu': 'AlertMe.com', 'type': 'SmartPlug', 'manu_date': '2013-09-26'})
+        result = self.node_obj.generate_message('version_info_update', {'version': 20045, 'manu': 'AlertMe.com', 'type': 'SmartPlug', 'manu_date': '2013-09-26'})
         expected = {'profile': b'\xc2\x16', 'cluster': '\x00\xf6', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x02', 'data': b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\nSmartPlug\n2013-09-26'}
         self.assertEqual(result, expected)
 
         # Test providing a couple of parameters missing
         # Should throw exception detailing the parameters which are missing
         with self.assertRaises(Exception) as context:
-            self.node_obj.get_message('version_info_update', {'manu': 'AlertMe.com', 'type': 'SmartPlug'})
+            self.node_obj.generate_message('version_info_update', {'manu': 'AlertMe.com', 'type': 'SmartPlug'})
         self.assertTrue("Missing Parameters: ['manu_date', 'version']" in context.exception)
 
         # Test providing no parameters
         with self.assertRaises(Exception) as context:
-            self.node_obj.get_message('version_info_update', {})
+            self.node_obj.generate_message('version_info_update', {})
         self.assertTrue("Missing Parameters: ['manu', 'manu_date', 'type', 'version']" in context.exception)
         with self.assertRaises(Exception) as context:
-            self.node_obj.get_message('version_info_update')
+            self.node_obj.generate_message('version_info_update')
         self.assertTrue("Missing Parameters: ['manu', 'manu_date', 'type', 'version']" in context.exception)
 
         # Test message without data lambda
-        result = self.node_obj.get_message('permit_join_request')
+        result = self.node_obj.generate_message('permit_join_request')
         expected = {'profile': b'\x00\x00', 'cluster': b'\x00\x36', 'dest_endpoint': b'\x00', 'src_endpoint': b'\x00', 'data': b'\xff\x00'}
         self.assertEqual(result, expected)
 
         # Test calling for a message which does not exist
         # Should throws exception that message does not exist
         with self.assertRaises(Exception) as context:
-            self.node_obj.get_message('foo_lorem_ipsum')
+            self.node_obj.generate_message('foo_lorem_ipsum')
         self.assertTrue("Message 'foo_lorem_ipsum' does not exist" in context.exception)
 
     def test_list_messages(self):
@@ -105,7 +105,7 @@ class TestZBNode(unittest.TestCase):
             'power_consumption': 19973,
             'up_time': 33207
         }
-        message = self.node_obj.get_message('power_consumption_update', params)
+        message = self.node_obj.generate_message('power_consumption_update', params)
         result = message['data']
         expected = b'\tn\x82\x05N\x00\x00\xb7\x81\x00\x00\x01'
         self.assertEqual(result, expected)
@@ -328,7 +328,7 @@ class TestZBNode(unittest.TestCase):
             'sequence':  170,
             'addr_short': b'\x88\x9f'
         }
-        message = self.node_obj.get_message('active_endpoints_request', params)
+        message = self.node_obj.generate_message('active_endpoints_request', params)
         result = message['data']
         expected = b'\xaa\x9f\x88'
         self.assertEqual(result, expected)
@@ -341,7 +341,7 @@ class TestZBNode(unittest.TestCase):
             'in_cluster_list': b'',
             'out_cluster_list': b'\x00\xf0'
         }
-        message = self.node_obj.get_message('match_descriptor_request', params)
+        message = self.node_obj.generate_message('match_descriptor_request', params)
         result = message['data']
         expected = b'\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00'
         self.assertEqual(result, expected)
@@ -352,7 +352,7 @@ class TestZBNode(unittest.TestCase):
             'temperature': 106.574,
             'tamper_state': 1
         }
-        message = self.node_obj.get_message('status_update', params)
+        message = self.node_obj.generate_message('status_update', params)
         result = message['data']
         expected = b'\t\r\xfb\x1f<\xf1\x08\x02/\x10D\x02\xcf\xff\x01\x00'
         self.assertEqual(result, expected)
@@ -363,19 +363,19 @@ class TestZBNode(unittest.TestCase):
             'addr_short': b'\xe1\x00',
             'endpoint_list': b'\x00\x02'
         }
-        message = self.node_obj.get_message('match_descriptor_response', params)
+        message = self.node_obj.generate_message('match_descriptor_response', params)
         result = message['data']
         expected = b'\x03\x00\x00\xe1\x02\x00\x02'
         self.assertEqual(result, expected)
 
     def test_generate_routing_table_request(self):
-        message = self.node_obj.get_message('routing_table_request')
+        message = self.node_obj.generate_message('routing_table_request')
         result = message['data']
         expected = b'\x12\x01'
         self.assertEqual(result, expected)
 
     def test_permit_join_request(self):
-        message = self.node_obj.get_message('permit_join_request')
+        message = self.node_obj.generate_message('permit_join_request')
         result = message['data']
         expected = b'\xff\x00'
         self.assertEqual(result, expected)

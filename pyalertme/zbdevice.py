@@ -56,12 +56,12 @@ class ZBDevice(ZBNode):
                 'in_cluster_list': b'',
                 'out_cluster_list': CLUSTER_ID_AM_STATUS
             }
-            reply = self.get_message('match_descriptor_request', params)
+            reply = self.generate_message('match_descriptor_request', params)
             self.send_message(reply, self.hub_obj.addr_long, self.hub_obj.addr_short)
 
     def message_range_update(self):
         params = {'rssi': self.rssi}
-        message = self.get_message('range_update', params)
+        message = self.generate_message('range_update', params)
         return message
 
     def message_version_info_update(self):
@@ -71,15 +71,15 @@ class ZBDevice(ZBNode):
             'manu': self.manu,
             'manu_date': self.manu_date
         }
-        message = self.get_message('version_info_update', params)
+        message = self.generate_message('version_info_update', params)
         return message
 
     def message_switch_state_update(self):
         params = {'switch_state': self.switch_state}
-        message = self.get_message('switch_state_update', params)
+        message = self.generate_message('switch_state_update', params)
         return message
 
     def message_power_demand_update(self):
         params = {'power_demand': self.power_demand}
-        message = self.get_message('power_demand_update', params)
+        message = self.generate_message('power_demand_update', params)
         return message

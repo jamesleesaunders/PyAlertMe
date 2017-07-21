@@ -51,7 +51,7 @@ class TestZBHub(unittest.TestCase):
             'manu': 'PyAlertMe',
             'manu_date': '2017-01-01'
         }
-        message = self.device_obj.get_message('version_info_update', params)
+        message = self.device_obj.generate_message('version_info_update', params)
         message['id'] = 'rx_explicit'
         message['source_addr'] = b'\x88\xfd'
         message['source_addr_long'] = b'\x00\x0d\x6f\x00\x00\x00\xff\xff'

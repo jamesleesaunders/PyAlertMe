@@ -42,7 +42,7 @@ class ZBHub(ZBNode):
         i = 1
         while time.time() < timeout:
             self._logger.debug('Sending Discovery Request #%s', i)
-            message = self.get_message('routing_table_request')
+            message = self.generate_message('routing_table_request')
             self.send_message(message, BROADCAST_LONG, BROADCAST_SHORT)
             i += 1
             time.sleep(2.00)
@@ -172,7 +172,7 @@ class ZBHub(ZBNode):
 
         :param device_obj:
         """
-        message = self.get_message('version_info_request')
+        message = self.generate_message('version_info_request')
         addresses = device_obj.addr_tuple
         self.send_message(message, *addresses)
 
@@ -183,7 +183,7 @@ class ZBHub(ZBNode):
         :param device_obj:
         :param state:
         """
-        message = self.get_message('switch_state_request', {'switch_state': state})
+        message = self.generate_message('switch_state_request', {'switch_state': state})
         addresses = device_obj.addr_tuple
         self.send_message(message, *addresses)
 
@@ -194,7 +194,7 @@ class ZBHub(ZBNode):
         :param device_obj:
         :param mode:
         """
-        message = self.get_message('mode_change_request', {'mode': mode})
+        message = self.generate_message('mode_change_request', {'mode': mode})
         addresses = device_obj.addr_tuple
         self.send_message(message, *addresses)
 

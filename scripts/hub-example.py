@@ -76,7 +76,7 @@ while True:
                             params = {param_name: param_value}
 
                     # Send Message
-                    message = hub_obj.get_message(message_id, params)
+                    message = hub_obj.generate_message(message_id, params)
                     addresses = device_obj.addr_tuple
                     hub_obj.send_message(message, *addresses)
 
