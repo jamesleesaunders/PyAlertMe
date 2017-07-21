@@ -72,6 +72,11 @@ class TestZBHub(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
+        # Test get device
+        result = self.hub_obj.get_device('00:0d:6f:00:03:bb:b9:f8')
+        self.assertTrue(result['type'] == 'SmartPlug')
+        self.assertTrue(result['version'] == 20045)
+
     def test_mock_serial(self):
         message = {
             'source_addr': b'\x88\x9f',

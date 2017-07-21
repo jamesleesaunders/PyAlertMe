@@ -54,7 +54,7 @@ class ZBHub(ZBNode):
 
     def set_device_attributes(self, device_obj, attributes):
         """
-        Save Multiple Node Attributes
+        Save Multiple Device Attributes
 
         :param device_obj: Device Object
         :param attributes: Attributes Dict
@@ -63,25 +63,25 @@ class ZBHub(ZBNode):
         for attrib_name, value in attributes.iteritems():
             self.set_device_attribute(device_obj, attrib_name, value)
 
-    def set_device_attribute(self, device_obj, attrib_name, value):
+    def set_device_attribute(self, device_obj, attrib_name, attrib_value):
         """
-        Save Single Node Attribute
+        Save Single Device Attribute
 
         :param device_obj: Device Object
         :param attrib_name: Attribute Name
-        :param value: Attribute Value
+        :param attrib_value: Attribute Value
         :return:
         """
-        self._logger.debug('Updating Node Attribute: %s Value: %s', attrib_name, value)
-        device_obj.set_attribute(attrib_name, value)
+        self._logger.debug('Updating Node Attribute: %s Value: %s', attrib_name, attrib_value)
+        device_obj.set_attribute(attrib_name, attrib_value)
         device_id = device_obj.id
-        self._callback('Attribute', device_id, attrib_name, value)
+        self._callback('Attribute', device_id, attrib_name, attrib_value)
 
     def list_devices(self):
         """
         Return list of known devices.
 
-        :return: Dictionary of Nodes
+        :return: Dictionary of Associated Devices
         """
         devices = {}
         for (device_id, device_obj) in self.devices.items():
@@ -90,9 +90,19 @@ class ZBHub(ZBNode):
                 'manu': device_obj.manu,
                 'version': device_obj.version
             }
-            # devices[device_id] = node_obj.__dict__
 
         return devices
+
+    def get_device(self, device_id):
+        """
+        Return single Associated Device
+
+        :param device_id: Dotted MAC Address
+        :return: Dictionary of Node Record
+        """
+        device_obj = self.devices[device_id]
+
+        return device_obj.__dict__
 
     def device_obj_from_id(self, device_id):
         """
