@@ -5,6 +5,7 @@ from xbee import ZigBee
 import copy
 import struct
 
+
 # ZigBee Addressing
 BROADCAST_LONG = b'\x00\x00\x00\x00\x00\x00\xff\xff'
 BROADCAST_SHORT = b'\xff\xfd'
@@ -276,6 +277,9 @@ messages = {
 
 
 class ZBNode(Node):
+    """
+    ZigBee Node object.
+    """
     def __init__(self, serial, callback=None):
         """
         ZigBee Node Constructor.

@@ -17,7 +17,6 @@ class TestNode(unittest.TestCase):
     """
     Test PyAlertMe Node Class.
     """
-
     def setUp(self):
         """
         Create a node object for each test.

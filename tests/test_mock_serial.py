@@ -15,7 +15,6 @@ class TestFakeSerialRead(unittest.TestCase):
     """
     Fake Serial class should work as intended to emulate reading from a serial port.
     """
-
     def setUp(self):
         """
         Create a fake read device for each test.

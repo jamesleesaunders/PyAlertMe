@@ -3,6 +3,9 @@ from pyalertme.zbdevice import *
 
 
 class ZBSensor(ZBDevice):
+    """
+    ZigBee Sensor object.
+    """
     def __init__(self, serial, callback=None):
         """
         Sensor Constructor.

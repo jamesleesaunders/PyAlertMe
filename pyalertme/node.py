@@ -4,6 +4,9 @@ import time
 
 
 class Node(object):
+    """
+    Node object.
+    """
     def __init__(self, callback=None):
         """
         Base Constructor

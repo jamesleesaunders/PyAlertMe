@@ -17,7 +17,6 @@ class TestZBNode(unittest.TestCase):
     """
     Test PyAlertMe ZBNode Class.
     """
-
     def setUp(self):
         """
         Create a node object for each test.

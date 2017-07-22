@@ -3,6 +3,9 @@ from pyalertme.zbnode import *
 
 
 class ZBDevice(ZBNode):
+    """
+    ZigBee Device object.
+    """
     def __init__(self, serial, callback=None):
         """
         Device Constructor.

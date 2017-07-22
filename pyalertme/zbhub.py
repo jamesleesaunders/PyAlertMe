@@ -5,6 +5,9 @@ import threading
 
 
 class ZBHub(ZBNode):
+    """
+    ZigBee Hub object.
+    """
     def __init__(self, serial, callback=None):
         """
         Hub Constructor.

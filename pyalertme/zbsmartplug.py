@@ -2,7 +2,11 @@ import logging
 from pyalertme.zbdevice import *
 from random import randint
 
+
 class ZBSmartPlug(ZBDevice):
+    """
+    ZigBee SmartPlug object.
+    """
     def __init__(self, serial, callback=None):
         """
         SmartPlug Constructor.
