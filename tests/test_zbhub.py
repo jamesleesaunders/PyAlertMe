@@ -23,15 +23,15 @@ class TestZBHub(unittest.TestCase):
     def test_receive_message(self):
         # First, lets manually construct a Version message and send it into the Hub.
         message = {
-            'cluster': b'\x00\xf6',
+            'source_addr_long': b'\x00\ro\x00\x03\xbb\xb9\xf8',
+            'source_addr': b'\x88\x9f',
+            'source_endpoint': b'\x02',
             'dest_endpoint': b'\x02',
+            'profile': b'\xc2\x16',
+            'cluster': b'\x00\xf6',
             'id': 'rx_explicit',
             'options': b'\x01',
-            'profile': b'\xc2\x16',
-            'rf_data': b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\tSmartPlug\n2013-09-26',
-            'source_addr': b'\x88\x9f',
-            'source_addr_long': b'\x00\ro\x00\x03\xbb\xb9\xf8',
-            'src_endpoint': b'\x02'
+            'rf_data': b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\tSmartPlug\n2013-09-26'
         }
         self.hub_obj.receive_message(message)
         result = self.hub_obj.list_devices()
@@ -78,20 +78,21 @@ class TestZBHub(unittest.TestCase):
         self.assertTrue(result['version'] == 20045)
 
     def test_mock_serial(self):
+        # Match Descriptor Request
         message = {
-            'source_addr': b'\x88\x9f',
-            'source_addr_long': b'\x00\ro\x00\x03\xbb\xb9\xf8',
-            'src_endpoint': b'\x00',
-            'profile': b'\x00\x00',
-            'cluster': b'\x00\x06',
-            'dest_endpoint': b'\x00',
-            'rf_data': b'\x04',
+            'source_addr_long': '\x00\x13\xa2\x00@\xa2;\t',
+            'source_addr': 'RK',
+            'source_endpoint': '\x00',
+            'dest_endpoint': '\x00',
+            'profile': '\x00\x00',
+            'cluster': '\x00\x06',
             'id': 'rx_explicit',
-            'options': b'\x01',
+            'options': '\x01',
+            'rf_data': '\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00'
         }
         self.hub_obj.receive_message(message)
         result = self.hub_ser.get_data_written()
-        expected = b'~\x00\x19}1\x00\x00\ro\x00\x03\xbb\xb9\xf8\x88\x9f\x02\x02\x00\xf0\xc2\x16\x00\x00}1\x00\xfa\x00\x01\x04'
+        expected = '~\x00\x19}1\x00\x00}3\xa2\x00@\xa2;\tRK\x02\x02\x00\xf0\xc2\x16\x00\x00}1\x00\xfa\x00\x01\x9e'
         self.assertEqual(result, expected)
 
 if __name__ == '__main__':

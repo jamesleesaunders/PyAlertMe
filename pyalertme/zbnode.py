@@ -459,9 +459,7 @@ class ZBNode(Node):
 
     def parse_message(self, message):
         """
-        Receive message from XBee.
-        Calls process message.
-        Process incoming message.
+        Parse ZigBee message. Work out any attribute changes and reply messages.
 
         :param message: Dict of message
         :return:
@@ -832,7 +830,7 @@ class ZBNode(Node):
 
     def parse_range_info_update(self, data):
         """
-        Process message, parse for RSSI range test value
+        Process message, parse for RSSI range test value.
 
         Field Name                 Size       Description
         ----------                 ----       -----------
@@ -853,7 +851,7 @@ class ZBNode(Node):
 
     def generate_power_demand_update(self, params):
         """
-        Generate Power Demand Update message data
+        Generate Power Demand Update message data.
 
         Field Name                 Size       Description
         ----------                 ----       -----------
@@ -873,7 +871,7 @@ class ZBNode(Node):
 
     def generate_power_consumption_update(self, params):
         """
-        Power Consumption & Uptime Update
+        Power Consumption & Uptime Update.
 
         Field Name                 Size       Description
         ----------                 ----       -----------
@@ -924,7 +922,7 @@ class ZBNode(Node):
     def parse_power_unknown(self, data):
         """
         Parse unknown power message seen from British Gas (AlertMe) power monitor.
-        Could this be the same or merged with parse_power_demand() or parse_power_consumption() ?
+        Could this be the same or merged with parse_power_demand() or parse_power_consumption()?
 
         Field Name                 Size       Description
         ----------                 ----       -----------
@@ -969,7 +967,7 @@ class ZBNode(Node):
 
     def generate_mode_change_request(self, params):
         """
-        Generate Mode Change Request
+        Generate Mode Change Request.
         Available Modes: 'Normal', 'RangeTest', 'Locked', 'Silent'
 
         Field Name                 Size       Description
@@ -1101,7 +1099,7 @@ class ZBNode(Node):
 
     def generate_button_press(self, params=None):
         """
-        Button Press Update
+        Button Press Update.
 
         Field Name                 Size       Description
         ----------                 ----       -----------
@@ -1158,7 +1156,7 @@ class ZBNode(Node):
 
     def parse_tamper_state(self, data):
         """
-        Process message, parse for Tamper Switch State Change
+        Process message, parse for Tamper Switch State Change.
 
         Field Name                 Size       Description
         ----------                 ----       -----------
@@ -1227,7 +1225,8 @@ class ZBNode(Node):
 
     def generate_security_init(self, params=None):
         """
-        Generate Security Initialisation. Keeps security devices joined?
+        Generate Security Initialisation.
+        Keeps security devices joined?
 
         Field Name                 Size       Description
         ----------                 ----       -----------
@@ -1247,7 +1246,7 @@ class ZBNode(Node):
 
     def parse_status_update(self, data):
         """
-        Process message, parse for status update
+        Process message, parse for status update.
 
         Field Name                 Size       Description
         ----------                 ----       -----------
@@ -1328,7 +1327,7 @@ class ZBNode(Node):
 
     def generate_active_endpoints_request(self, params):
         """
-        Generate Active Endpoints Request
+        Generate Active Endpoints Request.
         The active endpoint request needs the short address of the device
         in the payload. Remember, it needs to be little endian (backwards)
         The first byte in the payload is simply a number to identify the message
@@ -1353,7 +1352,7 @@ class ZBNode(Node):
 
     def generate_match_descriptor_request(self, params):
         """
-        Generate Match Descriptor Request
+        Generate Match Descriptor Request.
         Broadcast or unicast transmission used to discover the device(s) that supports
         a specified profile ID and/or clusters.
 
@@ -1388,7 +1387,7 @@ class ZBNode(Node):
 
     def generate_match_descriptor_response(self, params):
         """
-        Generate Match Descriptor Response
+        Generate Match Descriptor Response.
         If a descriptor match is found on the device, this response contains a list of endpoints that
         support the request criteria.
 

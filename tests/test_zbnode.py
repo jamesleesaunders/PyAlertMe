@@ -13,6 +13,58 @@ class TestZBNode(unittest.TestCase):
     def tearDown(self):
         self.node_obj.halt()
 
+    def test_parse_message(self):
+        self.maxDiff = None
+        self.node_obj.addr_short = b'\x00\x00'
+
+        # Match Descriptor Request
+        message = {
+            'source_addr_long': '\x00\x13\xa2\x00@\xa2;\t',
+            'source_addr': 'RK',
+            'source_endpoint': '\x00',
+            'dest_endpoint': '\x00',
+            'profile': '\x00\x00',
+            'cluster': '\x00\x06',
+            'id': 'rx_explicit',
+            'options': '\x01',
+            'rf_data': '\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00'
+        }
+
+        result = self.node_obj.parse_message(message)
+        expected = {
+            'attributes': {},
+            'replies': [
+                {'cluster': '\x80\x06', 'data': '\x04\x00\x00\x00\x01\x02', 'dest_endpoint': '\x00', 'profile': '\x00\x00', 'src_endpoint': '\x00'},
+                {'cluster': '\x00\xf6', 'data': '\x11\x00\xfc', 'dest_endpoint': '\x02', 'profile': '\xc2\x16', 'src_endpoint': '\x02'},
+                {'cluster': '\x00\xf0', 'data': '\x11\x00\xfa\x00\x01', 'dest_endpoint': '\x02', 'profile': '\xc2\x16', 'src_endpoint': '\x02'}
+            ]
+        }
+        self.assertEqual(result, expected)
+
+        # Version Information Response
+        message = {
+            'source_addr_long': b'\x00\ro\x00\x03\xbb\xb9\xf8',
+            'source_addr': b'\x88\x9f',
+            'source_endpoint': b'\x02',
+            'dest_endpoint': b'\x02',
+            'profile': b'\xc2\x16',
+            'cluster': b'\x00\xf6',
+            'id': 'rx_explicit',
+            'options': b'\x01',
+            'rf_data': b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\tSmartPlug\n2013-09-26'
+        }
+        result = self.node_obj.parse_message(message)
+        expected = {
+            'attributes': {
+                'manu': 'AlertMe.com',
+                'manu_date': '2013-09-26',
+                'type': 'SmartPlug',
+                'version': 20045
+            },
+            'replies': []
+        }
+        self.assertEqual(result, expected)
+
     def test_get_addresses(self):
         self.node_obj.receive_message({'status': b'\x00', 'frame_id': b'\x01', 'parameter': b'\x88\x9f', 'command': 'MY', 'id': 'at_response'})
         self.assertEqual(self.node_obj.addr_short, b'\x88\x9f')
