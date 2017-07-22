@@ -43,9 +43,6 @@ class Node(object):
         # Callback
         self._callback = callback if callback else self._callback
 
-    def __str__(self):
-        return self.type
-
     @property
     def id(self):
         """

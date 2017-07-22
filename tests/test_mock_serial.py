@@ -1,6 +1,6 @@
 #! /usr/bin/python
 """
-test_fake.py
+test_mock_serial.py
 
 By Paul Malmsten, 2010
 pmalmsten@gmail.com
@@ -10,9 +10,10 @@ Tests fake device objects for proper functionality.
 import unittest
 from mock_serial import Serial
 
+
 class TestFakeSerialRead(unittest.TestCase):
     """
-    Fake Serial class should work as intended to emluate reading from a serial port.
+    Fake Serial class should work as intended to emulate reading from a serial port.
     """
 
     def setUp(self):

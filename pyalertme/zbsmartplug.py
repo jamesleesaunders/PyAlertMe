@@ -32,18 +32,19 @@ class ZBSmartPlug(ZBDevice):
 
         """
         self.rssi = randint(0, 100)
-        message = self.generate_message('range_update', {'rssi': self.rssi})
+        message = self.message_range_update()
         self.send_message(message, self.hub_obj.addr_long, self.hub_obj.addr_short)
 
     def set_switch_state(self, switch_state):
         """
-        This simulates the physical button being pressed
+        This simulates the physical button being pressed.
+
         :param switch_state:
         :return:
         """
         self.set_attribute('switch_state', switch_state)
         if self.associated:
-            message = self.generate_message('switch_state_request', {'switch_state': self.switch_state})
+            message = self.message_switch_state_update()
             self.send_message(message, self.hub_obj.addr_long, self.hub_obj.addr_short)
 
         # Temporary code while testing power code...
@@ -59,5 +60,25 @@ class ZBSmartPlug(ZBDevice):
         """
         self.set_attribute('power_demand', power_demand)
         if self.associated:
-            message = self.generate_message('power_demand_update', {'power_demand': self.power_demand})
+            message = self.message_power_demand_update()
             self.send_message(message, self.hub_obj.addr_long, self.hub_obj.addr_short)
+
+    def message_switch_state_update(self):
+        """
+        Generate Switch State Update Message.
+
+        :return: Message
+        """
+        params = {'switch_state': self.switch_state}
+        message = self.generate_message('switch_state_update', params)
+        return message
+
+    def message_power_demand_update(self):
+        """
+        Generat Power Demand Update Message.
+
+        :return: Message
+        """
+        params = {'power_demand': self.power_demand}
+        message = self.generate_message('power_demand_update', params)
+        return message

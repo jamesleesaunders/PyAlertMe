@@ -61,11 +61,21 @@ class ZBDevice(ZBNode):
             self._logger.info('Device Associated')
 
     def message_range_update(self):
+        """
+        Generate Range Update Message.
+
+        :return: Message
+        """
         params = {'rssi': self.rssi}
         message = self.generate_message('range_update', params)
         return message
 
     def message_version_info_update(self):
+        """
+        Generate Version update Message.
+
+        :return: Message
+        """
         params = {
             'type': self.type,
             'version': self.version,
@@ -73,14 +83,4 @@ class ZBDevice(ZBNode):
             'manu_date': self.manu_date
         }
         message = self.generate_message('version_info_update', params)
-        return message
-
-    def message_switch_state_update(self):
-        params = {'switch_state': self.switch_state}
-        message = self.generate_message('switch_state_update', params)
-        return message
-
-    def message_power_demand_update(self):
-        params = {'power_demand': self.power_demand}
-        message = self.generate_message('power_demand_update', params)
         return message

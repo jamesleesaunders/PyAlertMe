@@ -1,19 +1,40 @@
+#! /usr/bin/python
+"""
+test_zbsensor.py
+
+By James Saunders, 2017
+
+Tests PyAlertMe Module.
+"""
 import sys
 sys.path.insert(0, '../')
 from pyalertme import *
 import unittest
 from mock_serial import Serial
 
+
 class TestZBSensor(unittest.TestCase):
+    """
+    Test PyAlertMe ZBSensor Class.
+    """
 
     def setUp(self):
+        """
+        Create a node object for each test.
+        """
         self.ser = Serial()
         self.device_obj = ZBSensor(self.ser)
 
     def tearDown(self):
+        """
+        Teardown node object.
+        """
         self.device_obj.halt()
 
     def test_generate_type_update(self):
+        """
+        Test Generate Type Update.
+        """
         result = self.device_obj.message_version_info_update()
         expected = {
             'src_endpoint': b'\x02',

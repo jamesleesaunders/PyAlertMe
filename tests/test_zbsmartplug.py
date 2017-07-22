@@ -1,20 +1,41 @@
+#! /usr/bin/python
+"""
+test_zbsmartplug.py
+
+By James Saunders, 2017
+
+Tests PyAlertMe Module.
+"""
 import sys
 sys.path.insert(0, '../')
 from pyalertme import *
 import unittest
 from mock_serial import Serial
 
+
 class TestZBSmartPlug(unittest.TestCase):
+    """
+    Test PyAlertMe ZBSmartPlug Class.
+    """
 
     def setUp(self):
+        """
+        Create a node object for each test.
+        """
         self.ser = Serial()
         self.device_obj = ZBSmartPlug(self.ser)
         self.device_obj.addr_long = b'\x00\x1e\x5e\x09\x02\x14\xc5\xab'
 
     def tearDown(self):
+        """
+        Teardown node object.
+        """
         self.device_obj.halt()
 
     def test_generate_version_info_update(self):
+        """
+        Test Generate Version Information Update.
+        """
         result = self.device_obj.message_version_info_update()
         expected = {
             'src_endpoint': b'\x02',
@@ -26,6 +47,9 @@ class TestZBSmartPlug(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_state_change(self):
+        """
+        Test State Change.
+        """
         message_on = {
             'cluster': b'\x00\xee',
             'dest_endpoint': b'\x02',
@@ -55,6 +79,9 @@ class TestZBSmartPlug(unittest.TestCase):
         self.assertEqual(self.device_obj.switch_state, False)
 
     def test_message_switch_state_update(self):
+        """
+        Test State Change Message Generate.
+        """
         self.device_obj.switch_state = 1
         result = self.device_obj.message_switch_state_update()
         expected = {
@@ -77,6 +104,9 @@ class TestZBSmartPlug(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_message_power_demand_update(self):
+        """
+        Test Power Domand Update Message Generate.
+        """
         self.device_obj.power_demand = 0
         result = self.device_obj.message_power_demand_update()
         expected = {

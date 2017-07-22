@@ -152,7 +152,8 @@ messages = {
             'src_endpoint': ENDPOINT_ALERTME,
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda self, params: self.generate_switch_state_update(params)
-        }
+        },
+        'expected_params': ['switch_state']
     },
     'mode_change_request': {
         'name': 'Mode Change Request',
@@ -591,7 +592,7 @@ class ZBNode(Node):
                         # b'\x11\x00\x02\x00\x01' Off
                         self._logger.debug('Received Switch State Change')
                         attributes = self.parse_switch_state_request(message['rf_data'])
-                        self.switch_state = attributes['switch_state']
+                        replies.append(self.generate_message('switch_state_update', {'switch_state': self.switch_state}))
 
                     else:
                         self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)

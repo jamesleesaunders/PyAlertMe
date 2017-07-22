@@ -1,19 +1,40 @@
+#! /usr/bin/python
+"""
+test_zbnode.py
+
+By James Saunders, 2017
+
+Tests PyAlertMe Module.
+"""
 import sys
 sys.path.insert(0, '../')
 from pyalertme.zbnode import *
 import unittest
 from mock_serial import Serial
 
+
 class TestZBNode(unittest.TestCase):
+    """
+    Test PyAlertMe ZBNode Class.
+    """
 
     def setUp(self):
+        """
+        Create a node object for each test.
+        """
         self.ser = Serial()
         self.node_obj = ZBNode(self.ser)
 
     def tearDown(self):
+        """
+        Teardown node object.
+        """
         self.node_obj.halt()
 
     def test_parse_message(self):
+        """
+        Test Parse Message.
+        """
         self.maxDiff = None
         self.node_obj.addr_short = b'\x00\x00'
 
@@ -66,6 +87,9 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_get_addresses(self):
+        """
+        Test Get Addresses.
+        """
         self.node_obj.receive_message({'status': b'\x00', 'frame_id': b'\x01', 'parameter': b'\x88\x9f', 'command': 'MY', 'id': 'at_response'})
         self.assertEqual(self.node_obj.addr_short, b'\x88\x9f')
 
@@ -76,6 +100,9 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(self.node_obj.id, '00:13:a2:00:40:e9:a4:c0')
 
     def test_get_message(self):
+        """
+        Test Get Message.
+        """
         # Test providing all the appropriate parameters
         result = self.node_obj.generate_message('version_info_update', {'version': 20045, 'manu': 'AlertMe.com', 'type': 'SmartPlug', 'manu_date': '2013-09-26'})
         expected = {'profile': b'\xc2\x16', 'cluster': '\x00\xf6', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x02', 'data': b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\nSmartPlug\n2013-09-26'}
@@ -107,6 +134,9 @@ class TestZBNode(unittest.TestCase):
         self.assertTrue("Message 'foo_lorem_ipsum' does not exist" in context.exception)
 
     def test_list_messages(self):
+        """
+        Test List Messages.
+        """
         # Test the resulting dict is in the expected structure.
         # We don't test the entire dict matches but check one message.
         messages = self.node_obj.list_messages()
@@ -118,6 +148,9 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(message, expected)
 
     def test_parse_tamper_state(self):
+        """
+        Test Parse Tamper.
+        """
         result = self.node_obj.parse_tamper_state(b'\t\x00\x00\x02\xe8\xa6\x00\x00')
         expected = {'counter': 42728, 'tamper_state': 1}
         self.assertEqual(result, expected)
@@ -127,6 +160,9 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_parse_power_demand(self):
+        """
+        Test Parse Power Demand.
+        """
         result = self.node_obj.parse_power_demand(b'\tj\x81\x00\x00')
         expected = {'power_demand': 0}
         self.assertEqual(result, expected)
@@ -140,6 +176,9 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_power_demand_update(self):
+        """
+        Test Generate Power Demand Update.
+        """
         result = self.node_obj.generate_power_demand_update({'power_demand': 0})
         expected = b'\tj\x81\x00\x00'
         self.assertEqual(result, expected)
@@ -153,6 +192,9 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_power_consumption_update(self):
+        """
+        Test Generate Power Consumption Update.
+        """
         params = {
             'power_consumption': 19973,
             'up_time': 33207
@@ -163,6 +205,9 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_parse_power_consumption(self):
+        """
+        Test Parse Power Consumption.
+        """
         result = self.node_obj.parse_power_consumption(b'\t\x00\x82Z\xbb\x04\x00\xdf\x86\x04\x00\x00')
         expected = {
             'power_consumption': 310106,
@@ -171,6 +216,9 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_parse_switch_state_request(self):
+        """
+        Test Parse Switch State Request.
+        """
         result = self.node_obj.parse_switch_state_request(b'\x11\x00\x02\x01\x01')
         self.assertEqual(result, {'switch_state': 1})
 
@@ -178,6 +226,9 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(result, {'switch_state': 0})
 
     def test_parse_switch_state_update(self):
+        """
+        Test Parse Switch State Update.
+        """
         result = self.node_obj.parse_switch_state_update(b'\th\x80\x07\x01')
         expected = {'switch_state': 1}
         self.assertEqual(result, expected)
@@ -187,6 +238,9 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_switch_state_response(self):
+        """
+        Test Generate Switch State Response.
+        """
         result = self.node_obj.generate_switch_state_update({'switch_state': 1})
         expected = b'\th\x80\x07\x01'
         self.assertEqual(result, expected)
@@ -196,6 +250,9 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_mode_change_request(self):
+        """
+        Test Generate Mode Change Request.
+        """
         result = self.node_obj.generate_mode_change_request({'mode': 'Normal'})
         expected = b'\x11\x00\xfa\x00\x01'
         self.assertEqual(result, expected)
@@ -213,6 +270,9 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_switch_state_request(self):
+        """
+        Test Generate Switch State Request.
+        """
         # Test On Request
         expected = b'\x11\x00\x02\x01\x01'
         self.assertEqual(self.node_obj.generate_switch_state_request({'switch_state': 1}), expected)
@@ -226,11 +286,17 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(self.node_obj.generate_switch_state_request({'switch_state': ''}), expected)
 
     def test_generate_version_info_request(self):
+        """
+        Test Generate Version Information Request.
+        """
         result = self.node_obj.generate_version_info_request()
         expected = b'\x11\x00\xfc'
         self.assertEqual(result, expected)
 
     def test_parse_version_info_update(self):
+        """
+        Test Parse Version Information Update.
+        """
         result = self.node_obj.parse_version_info_update(b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\tSmartPlug\n2013-09-26')
         expected = {
             'type': 'SmartPlug',
@@ -325,22 +391,34 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_parse_range_info_update(self):
+        """
+        Test Parse Range Information Update.
+        """
         result = self.node_obj.parse_range_info_update(b'\t+\xfd\xc5w')
         expected = {'rssi': 197}
         self.assertEqual(result, expected)
 
     def test_generate_range_update(self):
+        """
+        Test Generate Range Update.
+        """
         result = self.node_obj.generate_range_update({'rssi': 197})
         expected = b'\t+\xfd\xc5\x00'
         self.assertEqual(result, expected)
 
     def test_generate_button_press(self):
+        """
+        Test Generate Button Press.
+        """
         params = {'state': 1, 'counter': 62552}
         result = self.node_obj.generate_button_press(params)
         expected = b'\t\x00\x01\x00\x01X\xf4\x00\x00'
         self.assertEqual(result, expected)
 
     def test_parse_button_press(self):
+        """
+        Test Parse Button Press.
+        """
         result = self.node_obj.parse_button_press(b'\t\x00\x00\x00\x02\xbf\xc3\x00\x00')
         expected = {'counter': 50111, 'button_state': 0}
         self.assertEqual(result, expected, "State OFF, Counter 50111")
@@ -350,6 +428,9 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(result, expected, "State ON, Counter 51730")
 
     def test_parse_status_update(self):
+        """
+        Test Parse Status Update.
+        """
         result = self.node_obj.parse_status_update(b'\t\x89\xfb\x1d\xdb2\x00\x00\xf0\x0bna\xd3\xff\x03\x00')
         expected = {'temperature': 87.008, 'counter': 13019}
         self.assertEqual(result, expected)
@@ -359,6 +440,9 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_parse_security_state(self):
+        """
+        Test Parse Security State.
+        """
         result = self.node_obj.parse_security_state('\t\x00\x00\x05\x00\x00')
         expected = {'trigger_state': 1, 'tamper_state': 1}
         self.assertEqual(result, expected)
@@ -376,6 +460,9 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_active_endpoints_request(self):
+        """
+        Test Generate Active Endpoints Request.
+        """
         params = {
             'sequence':  170,
             'addr_short': b'\x88\x9f'
@@ -386,6 +473,9 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_match_descriptor_request(self):
+        """
+        Test Generate Match Descriptor Request.
+        """
         params = {
             'sequence': 1,
             'addr_short': b'\xff\xfd',
@@ -399,6 +489,9 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_status_update(self):
+        """
+        Test Status Update.
+        """
         params = {
             'trigger_state': 0,
             'temperature': 106.574,
@@ -410,6 +503,9 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_match_descriptor_response(self):
+        """
+        Test Generate Match Descriptor Response.
+        """
         params = {
             'sequence': 3,
             'addr_short': b'\xe1\x00',
@@ -421,12 +517,18 @@ class TestZBNode(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_routing_table_request(self):
+        """
+        Test Generate Routing Table Request.
+        """
         message = self.node_obj.generate_message('routing_table_request')
         result = message['data']
         expected = b'\x12\x01'
         self.assertEqual(result, expected)
 
     def test_permit_join_request(self):
+        """
+        Test Permit Join Request.
+        """
         message = self.node_obj.generate_message('permit_join_request')
         result = message['data']
         expected = b'\xff\x00'

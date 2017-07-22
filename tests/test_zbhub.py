@@ -1,12 +1,27 @@
+#! /usr/bin/python
+"""
+test_zbhub.py
+
+By James Saunders, 2017
+
+Tests PyAlertMe Module.
+"""
 import sys
 sys.path.insert(0, '../')
 from pyalertme import *
 import unittest
 from mock_serial import Serial
 
+
 class TestZBHub(unittest.TestCase):
+    """
+    Test PyAlertMe ZBHub Class.
+    """
 
     def setUp(self):
+        """
+        Create a node object for each test.
+        """
         self.maxDiff = None
         self.hub_ser = Serial()
         self.hub_obj = ZBHub(self.hub_ser)
@@ -17,10 +32,16 @@ class TestZBHub(unittest.TestCase):
         self.device_obj = ZBDevice(self.device_ser)
 
     def tearDown(self):
+        """
+        Teardown node object.
+        """
         self.hub_obj.halt()
         self.device_obj.halt()
 
     def test_receive_message(self):
+        """
+        Test Receive Message.
+        """
         # First, lets manually construct a Version message and send it into the Hub.
         message = {
             'source_addr_long': b'\x00\ro\x00\x03\xbb\xb9\xf8',
@@ -78,6 +99,9 @@ class TestZBHub(unittest.TestCase):
         self.assertTrue(result['version'] == 20045)
 
     def test_mock_serial(self):
+        """
+        Test Mock Serial
+        """
         # Match Descriptor Request
         message = {
             'source_addr_long': '\x00\x13\xa2\x00@\xa2;\t',
