@@ -555,7 +555,7 @@ class ZBNode(Node):
                     sequence = 4   # message['rf_data'][0:1]
                     params = {
                         'sequence': sequence,
-                        'addr_short': self.addr_short,
+                        'addr_short': source_addr_short,
                         'endpoint_list': ENDPOINT_ALERTME
                     }
                     replies.append({'message_id': 'match_descriptor_response', 'params': params})
@@ -677,29 +677,33 @@ class ZBNode(Node):
                     elif cluster_cmd == CLUSTER_CMD_AM_MODE_REQ:
                         self._logger.debug('Received Mode Change Request')
                         mode_cmd = message['rf_data'][3] + message['rf_data'][4]
+                        mode = 'normal'
+
                         if mode_cmd == b'\x00\x01':
                             # Normal
                             # b'\x11\x00\xfa\x00\x01'
                             self._logger.debug('Normal Mode')
-                            attributes = {'mode': 'normal'}
+                            mode = 'normal'
 
                         elif mode_cmd == b'\x01\x01':
                             # Range Test
                             # b'\x11\x00\xfa\x01\x01'
                             self._logger.debug('Range Test Mode')
-                            attributes = {'mode': 'range'}
+                            mode = 'range'
 
                         elif mode_cmd == b'\x02\x01':
                             # Locked
                             # b'\x11\x00\xfa\x02\x01'
                             self._logger.debug('Locked Mode')
-                            attributes = {'mode': 'locked'}
+                            mode = 'locked'
 
                         elif mode_cmd == b'\x03\x01':
                             # Silent
                             # b'\x11\x00\xfa\x03\x01'
                             self._logger.debug('Silent Mode')
-                            attributes = {'mode': 'silent'}
+                            mode = 'silent'
+
+                        attributes = {'mode': mode}
 
                     else:
                         self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
