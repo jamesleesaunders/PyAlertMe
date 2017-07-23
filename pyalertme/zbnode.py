@@ -462,6 +462,9 @@ class ZBNode(Node):
             source_addr_long = message['source_addr_long']
             source_addr_short = message['source_addr']
 
+            # Update any attributes which may need updating
+            self.process_message(source_addr_long, source_addr_short, ret['attributes'])
+
             # Send any replies which may need sending
             for reply in ret['replies']:
                 message_id = reply['message_id']
@@ -472,9 +475,6 @@ class ZBNode(Node):
                 reply = self.generate_message(message_id, params)
                 self.send_message(reply, source_addr_long, source_addr_short)
                 time.sleep(0.5)
-
-            # Update any attributes which may need updating
-            self.process_message(source_addr_long, source_addr_short, ret['attributes'])
 
     def parse_message(self, message):
         """
@@ -681,25 +681,25 @@ class ZBNode(Node):
                             # Normal
                             # b'\x11\x00\xfa\x00\x01'
                             self._logger.debug('Normal Mode')
-                            attributes = {'mode': 'NORMAL'}
+                            attributes = {'mode': 'normal'}
 
                         elif mode_cmd == b'\x01\x01':
                             # Range Test
                             # b'\x11\x00\xfa\x01\x01'
                             self._logger.debug('Range Test Mode')
-                            attributes = {'mode': 'RANGE'}
+                            attributes = {'mode': 'range'}
 
                         elif mode_cmd == b'\x02\x01':
                             # Locked
                             # b'\x11\x00\xfa\x02\x01'
                             self._logger.debug('Locked Mode')
-                            attributes = {'mode': 'LOCKED'}
+                            attributes = {'mode': 'locked'}
 
                         elif mode_cmd == b'\x03\x01':
                             # Silent
                             # b'\x11\x00\xfa\x03\x01'
                             self._logger.debug('Silent Mode')
-                            attributes = {'mode': 'SILENT'}
+                            attributes = {'mode': 'silent'}
 
                     else:
                         self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
@@ -991,13 +991,13 @@ class ZBNode(Node):
         payload = b'\x00\x01'  # Default normal if no mode
 
         mode = params['mode']
-        if mode == 'Normal':
+        if mode == 'normal':
             payload = b'\x00\x01'
-        elif mode == 'RangeTest':
+        elif mode == 'range':
             payload = b'\x01\x01'
-        elif mode == 'Locked':
+        elif mode == 'locked':
             payload = b'\x02\x01'
-        elif mode == 'Silent':
+        elif mode == 'silent':
             payload = b'\x03\x01'
         else:
             self._logger.error('Invalid mode request %s', mode)
