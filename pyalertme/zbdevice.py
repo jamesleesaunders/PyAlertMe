@@ -69,8 +69,7 @@ class ZBDevice(ZBNode):
 
         :return: Message
         """
-        params = {'rssi': self.rssi}
-        message = self.generate_message('range_update', params)
+        message = self.generate_message('range_update')
         return message
 
     def message_version_info_update(self):
@@ -79,11 +78,5 @@ class ZBDevice(ZBNode):
 
         :return: Message
         """
-        params = {
-            'type': self.type,
-            'version': self.version,
-            'manu': self.manu,
-            'manu_date': self.manu_date
-        }
-        message = self.generate_message('version_info_update', params)
+        message = self.generate_message('version_info_update')
         return message
