@@ -54,9 +54,9 @@ class TestZBNode(unittest.TestCase):
         expected = {
             'attributes': {},
             'replies': [
-                {'cluster': '\x80\x06', 'data': '\x04\x00\x00\x00\x01\x02', 'dest_endpoint': '\x00', 'profile': '\x00\x00', 'src_endpoint': '\x00'},
-                {'cluster': '\x00\xf6', 'data': '\x11\x00\xfc', 'dest_endpoint': '\x02', 'profile': '\xc2\x16', 'src_endpoint': '\x02'},
-                {'cluster': '\x00\xf0', 'data': '\x11\x00\xfa\x00\x01', 'dest_endpoint': '\x02', 'profile': '\xc2\x16', 'src_endpoint': '\x02'}
+                {'message_id': 'match_descriptor_response', 'params': {'addr_short': '\x00\x00', 'endpoint_list': '\x02', 'sequence': 4}},
+                {'message_id': 'version_info_request'},
+                {'message_id': 'mode_change_request', 'params': {'mode': 'Normal'}}
             ]
         }
         self.assertEqual(result, expected)
@@ -107,19 +107,16 @@ class TestZBNode(unittest.TestCase):
         expected = {'profile': b'\xc2\x16', 'cluster': '\x00\xf6', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x02', 'data': b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\nSmartPlug\n2013-09-26'}
         self.assertEqual(result, expected)
 
+        # Test providing no parameters (should get from object attributes)
+        result = self.node_obj.generate_message('version_info_update')
+        expected = {'profile': b'\xc2\x16', 'cluster': '\x00\xf6', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x02', 'data': b'\tq\xfe90\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bPyAlertMe\nZBNode\n2017-01-01'}
+        self.assertEqual(result, expected)
+
         # Test providing a couple of parameters missing
         # Should throw exception detailing the parameters which are missing
         with self.assertRaises(Exception) as context:
             self.node_obj.generate_message('version_info_update', {'manu': 'AlertMe.com', 'type': 'SmartPlug'})
         self.assertTrue("Missing Parameters: ['manu_date', 'version']" in context.exception)
-
-        # Test providing no parameters
-        with self.assertRaises(Exception) as context:
-            self.node_obj.generate_message('version_info_update', {})
-        self.assertTrue("Missing Parameters: ['manu', 'manu_date', 'type', 'version']" in context.exception)
-        with self.assertRaises(Exception) as context:
-            self.node_obj.generate_message('version_info_update')
-        self.assertTrue("Missing Parameters: ['manu', 'manu_date', 'type', 'version']" in context.exception)
 
         # Test message without data lambda
         result = self.node_obj.generate_message('permit_join_request')

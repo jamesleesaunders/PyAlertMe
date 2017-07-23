@@ -73,8 +73,7 @@ class ZBSmartPlug(ZBDevice):
 
         :return: Message
         """
-        params = {'switch_state': self.switch_state}
-        message = self.generate_message('switch_state_update', params)
+        message = self.generate_message('switch_state_update')
         return message
 
     def message_power_demand_update(self):
@@ -83,6 +82,5 @@ class ZBSmartPlug(ZBDevice):
 
         :return: Message
         """
-        params = {'power_demand': self.power_demand}
-        message = self.generate_message('power_demand_update', params)
+        message = self.generate_message('power_demand_update')
         return message
