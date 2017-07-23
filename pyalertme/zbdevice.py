@@ -29,7 +29,7 @@ class ZBDevice(ZBNode):
 
         # Attributes
         self.rssi = 197
-        self.mode = 'NORMAL'
+        self.mode = 'normal'
         self.power_demand = 0
         self.power_consumption = 0
 
