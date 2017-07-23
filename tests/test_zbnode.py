@@ -39,22 +39,22 @@ class TestZBNode(unittest.TestCase):
 
         # Match Descriptor Request
         message = {
-            'source_addr_long': '\x00\x13\xa2\x00@\xa2;\t',
-            'source_addr': 'RK',
-            'source_endpoint': '\x00',
-            'dest_endpoint': '\x00',
-            'profile': '\x00\x00',
-            'cluster': '\x00\x06',
+            'source_addr_long': b'\x00\x13\xa2\x00@\xa2;\t',
+            'source_addr': b'RK',
+            'source_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'profile': b'\x00\x00',
+            'cluster': b'\x00\x06',
             'id': 'rx_explicit',
-            'options': '\x01',
-            'rf_data': '\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00'
+            'options': b'\x01',
+            'rf_data': b'\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00'
         }
 
         result = self.node_obj.parse_message(message)
         expected = {
             'attributes': {},
             'replies': [
-                {'message_id': 'match_descriptor_response', 'params': {'addr_short': '\x00\x00', 'endpoint_list': '\x02', 'sequence': 4}},
+                {'message_id': 'match_descriptor_response', 'params': {'addr_short': b'RK', 'endpoint_list': b'\x02', 'sequence': 4}},
                 {'message_id': 'version_info_request'},
                 {'message_id': 'mode_change_request', 'params': {'mode': 'Normal'}}
             ]
@@ -249,19 +249,19 @@ class TestZBNode(unittest.TestCase):
         """
         Test Generate Mode Change Request.
         """
-        result = self.node_obj.generate_mode_change_request({'mode': 'Normal'})
+        result = self.node_obj.generate_mode_change_request({'mode': 'normal'})
         expected = b'\x11\x00\xfa\x00\x01'
         self.assertEqual(result, expected)
 
-        result = self.node_obj.generate_mode_change_request({'mode': 'RangeTest'})
+        result = self.node_obj.generate_mode_change_request({'mode': 'range'})
         expected = b'\x11\x00\xfa\x01\x01'
         self.assertEqual(result, expected)
 
-        result = self.node_obj.generate_mode_change_request({'mode': 'Locked'})
+        result = self.node_obj.generate_mode_change_request({'mode': 'locked'})
         expected = b'\x11\x00\xfa\x02\x01'
         self.assertEqual(result, expected)
 
-        result = self.node_obj.generate_mode_change_request({'mode': 'Silent'})
+        result = self.node_obj.generate_mode_change_request({'mode': 'silent'})
         expected = b'\x11\x00\xfa\x03\x01'
         self.assertEqual(result, expected)
 

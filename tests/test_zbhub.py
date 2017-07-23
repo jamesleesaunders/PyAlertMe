@@ -115,7 +115,7 @@ class TestZBHub(unittest.TestCase):
         }
         self.hub_obj.receive_message(message)
         result = self.hub_ser.get_data_written()
-        expected = b'~\x00\x17}1\x00\x00}3\xa2\x00@\xa2;\tRK\x02\x02\x00\xf6\xc2\x16\x00\x00}1\x00\xfc\x97'
+        expected = b'~\x00\x19}1\x00\x00}3\xa2\x00@\xa2;\tRK\x02\x02\x00\xf0\xc2\x16\x00\x00}1\x00\xfa\x00\x01\x9e'
         self.assertEqual(result, expected)
 
 if __name__ == '__main__':
