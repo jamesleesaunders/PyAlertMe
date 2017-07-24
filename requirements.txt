@@ -1,2 +1,2 @@
-pyserial==3.3
+pyserial==3.4
 xbee==2.3.1
