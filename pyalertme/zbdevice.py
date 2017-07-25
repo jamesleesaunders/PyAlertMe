@@ -51,7 +51,7 @@ class ZBDevice(ZBNode):
             self.hub_obj.addr_long = addr_long
             self.hub_obj.addr_short = addr_short
             params = {
-                'sequence': 1,
+                'zdo_sequence': b'\x01',
                 'addr_short': BROADCAST_SHORT,
                 'profile_id': PROFILE_ID_ALERTME,
                 'in_cluster_list': b'',
