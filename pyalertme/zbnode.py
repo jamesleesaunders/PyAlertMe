@@ -229,7 +229,7 @@ messages = {
             'dest_endpoint': ENDPOINT_ZDO,
             'data': lambda self, params: self.generate_active_endpoints_request(params)
         },
-        'expected_params': ['sequence', 'addr_short']
+        'expected_params': ['zdo_sequence', 'addr_short']
     },
     'match_descriptor_request': {
         'name': 'Match Descriptor Request',
@@ -240,7 +240,7 @@ messages = {
             'dest_endpoint': ENDPOINT_ZDO,
             'data': lambda self, params: self.generate_match_descriptor_request(params)
         },
-        'expected_params': ['sequence', 'addr_short', 'profile_id', 'in_cluster_list', 'out_cluster_list']
+        'expected_params': ['zdo_sequence', 'addr_short', 'profile_id', 'in_cluster_list', 'out_cluster_list']
     },
     'match_descriptor_response': {
         'name': 'Match Descriptor Response',
@@ -251,7 +251,7 @@ messages = {
             'dest_endpoint': ENDPOINT_ZDO,
             'data': lambda self, params: self.generate_match_descriptor_response(params)
         },
-        'expected_params': ['sequence', 'addr_short', 'endpoint_list']
+        'expected_params': ['zdo_sequence', 'addr_short', 'endpoint_list']
     },
     'routing_table_request': {
         'name': 'Management Routing Table Request',
@@ -552,9 +552,9 @@ class ZBNode(Node):
                     # this controller as valid.
 
                     # First send the Match Descriptor Response
-                    sequence = 4   # message['rf_data'][0:1]
+                    zdo_sequence = 4   # message['rf_data'][0:1]
                     params = {
-                        'sequence': sequence,
+                        'zdo_sequence': zdo_sequence,
                         'addr_short': source_addr_short,
                         'endpoint_list': ENDPOINT_ALERTME
                     }
@@ -577,9 +577,9 @@ class ZBNode(Node):
                     self._logger.debug('Received Device Announce Message')
                     # This will tell me the address of the new thing,
                     # so we're going to send an Active Endpoint Request.
-                    sequence = 4   # message['rf_data'][0:1]
+                    zdo_sequence = 4   # message['rf_data'][0:1]
                     params = {
-                        'sequence': sequence,
+                        'zdo_sequence': zdo_sequence,
                         'addr_short': source_addr_short
                     }
                     replies.append({'message_id': 'active_endpoints_request', 'params': params})
@@ -635,11 +635,11 @@ class ZBNode(Node):
                         self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
                 elif cluster_id == CLUSTER_ID_AM_TAMPER:
-                    self._logger.debug('Received Tamper Switch Changed Update')
+                    self._logger.debug('Received Tamper Switch Triggered')
                     attributes = self.parse_tamper_state(message['rf_data'])
 
                 elif cluster_id == CLUSTER_ID_AM_BUTTON:
-                    self._logger.debug('Received Button Press Update')
+                    self._logger.debug('Received Button Pressed')
                     attributes = self.parse_button_press(message['rf_data'])
 
                 elif cluster_id == CLUSTER_ID_AM_SECURITY:
@@ -654,7 +654,7 @@ class ZBNode(Node):
 
                 elif cluster_id == CLUSTER_ID_AM_DISCOVERY:
                     if cluster_cmd == CLUSTER_CMD_AM_RSSI:
-                        self._logger.debug('Received RSSI Range Test Update')
+                        self._logger.debug('Received RSSI Range Update')
                         attributes = self.parse_range_info_update(message['rf_data'])
 
                     elif cluster_cmd == CLUSTER_CMD_AM_VERSION_RESP:
@@ -1355,10 +1355,10 @@ class ZBNode(Node):
         Example:
             b'\xaa\x9f\x88'
         """
-        sequence = struct.pack('B', params['sequence'])  # b'\xaa'
+        zdo_sequence = struct.pack('B', params['zdo_sequence'])  # b'\xaa'
         net_addr = params['addr_short'][1] + params['addr_short'][0]  # b'\x9f\x88'
 
-        data = sequence + net_addr
+        data = zdo_sequence + net_addr
         return data
 
     def generate_match_descriptor_request(self, params):
@@ -1384,7 +1384,7 @@ class ZBNode(Node):
         :param params:
         :return: Message data
         """
-        sequence = struct.pack('B', params['sequence'])  # b'\x01'
+        zdo_sequence = struct.pack('B', params['zdo_sequence'])  # b'\x01'
         net_addr = params['addr_short'][1] + params['addr_short'][0]  # b'\xfd\xff'
         profile_id = params['profile_id'][1] + params['profile_id'][0]  # b'\x16\xc2'  PROFILE_ID_ALERTME (reversed)
         num_input_clusters = struct.pack('B', len(params['in_cluster_list']) / 2)  # b'\x00'
@@ -1393,7 +1393,7 @@ class ZBNode(Node):
         output_cluster_list = params['out_cluster_list'][1] + params['out_cluster_list'][0]  # b'\xf0\x00'  CLUSTER_ID_AM_STATUS (reversed)
         # TODO Finish this off! At the moment this does not support multiple clusters, it just supports one!
 
-        data = sequence + net_addr + profile_id + num_input_clusters + input_cluster_list + num_output_clusters + output_cluster_list
+        data = zdo_sequence + net_addr + profile_id + num_input_clusters + input_cluster_list + num_output_clusters + output_cluster_list
         return data
 
     def generate_match_descriptor_response(self, params):
@@ -1416,13 +1416,13 @@ class ZBNode(Node):
         :param params:
         :return: Message data
         """
-        sequence = struct.pack('B', params['sequence'])  # b'\x04'
+        zdo_sequence = struct.pack('B', params['zdo_sequence'])  # b'\x04'
         status = ZDP_STATUS_OK  # b'\x00'
         net_addr = params['addr_short'][1] + params['addr_short'][0]  # b'\x00\x00'
         length = struct.pack('B', len(params['endpoint_list']))  # b'\x01'
         match_list = params['endpoint_list']  # b'\x02'
 
-        data = sequence + status + net_addr + length + match_list
+        data = zdo_sequence + status + net_addr + length + match_list
         return data
 
 
