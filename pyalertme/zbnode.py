@@ -313,9 +313,6 @@ class ZBNode(Node):
         self._schedule_interval = 2
         self._schedule_thread.start()
 
-        # ZDO Sequence
-        self.zdo_sequence = 1
-
     def _schedule_loop(self):
         """
         Continual Updates Thread calls the _updates() function every at 
@@ -510,6 +507,7 @@ class ZBNode(Node):
             if profile_id == PROFILE_ID_ZDP:
                 # ZigBee Device Profile ID
                 self._logger.debug('Received ZigBee Device Profile Packet')
+                zdo_sequence = message['rf_data'][0:1]
 
                 if cluster_id == CLUSTER_ID_ZDO_NWK_ADDR_REQ:
                     # Network (16-bit) Address Request
@@ -552,7 +550,6 @@ class ZBNode(Node):
                     # this controller as valid.
 
                     # First send the Match Descriptor Response
-                    zdo_sequence = 4   # message['rf_data'][0:1]
                     params = {
                         'zdo_sequence': zdo_sequence,
                         'addr_short': source_addr_short,
@@ -577,7 +574,6 @@ class ZBNode(Node):
                     self._logger.debug('Received Device Announce Message')
                     # This will tell me the address of the new thing,
                     # so we're going to send an Active Endpoint Request.
-                    zdo_sequence = 4   # message['rf_data'][0:1]
                     params = {
                         'zdo_sequence': zdo_sequence,
                         'addr_short': source_addr_short
@@ -1355,7 +1351,7 @@ class ZBNode(Node):
         Example:
             b'\xaa\x9f\x88'
         """
-        zdo_sequence = struct.pack('B', params['zdo_sequence'])  # b'\xaa'
+        zdo_sequence = params['zdo_sequence']  # b'\xaa'
         net_addr = params['addr_short'][1] + params['addr_short'][0]  # b'\x9f\x88'
 
         data = zdo_sequence + net_addr
@@ -1384,7 +1380,7 @@ class ZBNode(Node):
         :param params:
         :return: Message data
         """
-        zdo_sequence = struct.pack('B', params['zdo_sequence'])  # b'\x01'
+        zdo_sequence = params['zdo_sequence']  # b'\x01'
         net_addr = params['addr_short'][1] + params['addr_short'][0]  # b'\xfd\xff'
         profile_id = params['profile_id'][1] + params['profile_id'][0]  # b'\x16\xc2'  PROFILE_ID_ALERTME (reversed)
         num_input_clusters = struct.pack('B', len(params['in_cluster_list']) / 2)  # b'\x00'
@@ -1416,7 +1412,7 @@ class ZBNode(Node):
         :param params:
         :return: Message data
         """
-        zdo_sequence = struct.pack('B', params['zdo_sequence'])  # b'\x04'
+        zdo_sequence = params['zdo_sequence']  # b'\x04'
         status = ZDP_STATUS_OK  # b'\x00'
         net_addr = params['addr_short'][1] + params['addr_short'][0]  # b'\x00\x00'
         length = struct.pack('B', len(params['endpoint_list']))  # b'\x01'

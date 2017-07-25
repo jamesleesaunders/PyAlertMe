@@ -54,7 +54,7 @@ class TestZBNode(unittest.TestCase):
         expected = {
             'attributes': {},
             'replies': [
-                {'message_id': 'match_descriptor_response', 'params': {'addr_short': b'RK', 'endpoint_list': b'\x02', 'sequence': 4}},
+                {'message_id': 'match_descriptor_response', 'params': {'addr_short': b'RK', 'endpoint_list': b'\x02', 'zdo_sequence': b'\x01'}},
                 {'message_id': 'version_info_request'},
                 {'message_id': 'mode_change_request', 'params': {'mode': 'Normal'}}
             ]
@@ -460,12 +460,12 @@ class TestZBNode(unittest.TestCase):
         Test Generate Active Endpoints Request.
         """
         params = {
-            'sequence':  170,
+            'zdo_sequence': b'\x01',
             'addr_short': b'\x88\x9f'
         }
         message = self.node_obj.generate_message('active_endpoints_request', params)
         result = message['data']
-        expected = b'\xaa\x9f\x88'
+        expected = b'\x01\x9f\x88'
         self.assertEqual(result, expected)
 
     def test_generate_match_descriptor_request(self):
@@ -473,7 +473,7 @@ class TestZBNode(unittest.TestCase):
         Test Generate Match Descriptor Request.
         """
         params = {
-            'sequence': 1,
+            'zdo_sequence': b'\x01',
             'addr_short': b'\xff\xfd',
             'profile_id': PROFILE_ID_ALERTME,
             'in_cluster_list': b'',
@@ -503,13 +503,13 @@ class TestZBNode(unittest.TestCase):
         Test Generate Match Descriptor Response.
         """
         params = {
-            'sequence': 3,
+            'zdo_sequence': b'\x01',
             'addr_short': b'\xe1\x00',
             'endpoint_list': b'\x00\x02'
         }
         message = self.node_obj.generate_message('match_descriptor_response', params)
         result = message['data']
-        expected = b'\x03\x00\x00\xe1\x02\x00\x02'
+        expected = b'\x01\x00\x00\xe1\x02\x00\x02'
         self.assertEqual(result, expected)
 
     def test_generate_routing_table_request(self):
