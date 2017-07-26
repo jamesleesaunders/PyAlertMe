@@ -313,6 +313,8 @@ class ZBNode(Node):
         self._schedule_interval = 2
         self._schedule_thread.start()
 
+        self.endpoint_list = [ENDPOINT_ZDO, ENDPOINT_ALERTME]
+
     def _schedule_loop(self):
         """
         Continual Updates Thread calls the _updates() function every at 
@@ -553,14 +555,14 @@ class ZBNode(Node):
                     params = {
                         'zdo_sequence': zdo_sequence,
                         'addr_short': source_addr_short,
-                        'endpoint_list': ENDPOINT_ALERTME
+                        'endpoint_list': self.endpoint_list
                     }
                     replies.append({'message_id': 'match_descriptor_response', 'params': params})
 
                     # The next 2 messages are directed at the hardware code (rather than the network code).
                     # The device has to receive these two messages to stay joined.
                     replies.append({'message_id': 'version_info_request'})
-                    replies.append({'message_id': 'mode_change_request', 'params': {'mode': 'Normal'}})
+                    replies.append({'message_id': 'mode_change_request'})
 
                     # We are fully associated!
                     self._logger.debug('New Device Fully Associated')
@@ -972,7 +974,7 @@ class ZBNode(Node):
 
         return ret
 
-    def generate_mode_change_request(self, params):
+    def generate_mode_change_request(self, params=None):
         """
         Generate Mode Change Request.
         Available Modes: 'Normal', 'RangeTest', 'Locked', 'Silent'
@@ -990,7 +992,11 @@ class ZBNode(Node):
         cluster_cmd = CLUSTER_CMD_AM_MODE_REQ
         payload = b'\x00\x01'  # Default normal if no mode
 
-        mode = params['mode']
+        if not params:
+            mode = 'normal'
+        else:
+            mode = params['mode']
+
         if mode == 'normal':
             payload = b'\x00\x01'
         elif mode == 'range':
@@ -1407,16 +1413,16 @@ class ZBNode(Node):
         Match List                 Variable   List of endpoints on the remote that match the request criteria.
 
         Example:
-            b'\x04\x00\x00\x00\x01\x02'
+            b'\x01\x00\x00\xe1\x02\x00\x02'
 
         :param params:
         :return: Message data
         """
         zdo_sequence = params['zdo_sequence']  # b'\x04'
-        status = ZDP_STATUS_OK  # b'\x00'
-        net_addr = params['addr_short'][1] + params['addr_short'][0]  # b'\x00\x00'
-        length = struct.pack('B', len(params['endpoint_list']))  # b'\x01'
-        match_list = params['endpoint_list']  # b'\x02'
+        status       = ZDP_STATUS_OK  # b'\x00'
+        net_addr     = params['addr_short'][1] + params['addr_short'][0]  # b'\x00\x00'
+        length       = struct.pack('B', len(params['endpoint_list']))  # b'\x02'
+        match_list   = b''.join(params['endpoint_list'])  # b'\x00\x02'
 
         data = zdo_sequence + status + net_addr + length + match_list
         return data

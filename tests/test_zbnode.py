@@ -54,9 +54,9 @@ class TestZBNode(unittest.TestCase):
         expected = {
             'attributes': {},
             'replies': [
-                {'message_id': 'match_descriptor_response', 'params': {'addr_short': b'RK', 'endpoint_list': b'\x02', 'zdo_sequence': b'\x01'}},
+                {'message_id': 'match_descriptor_response', 'params': {'addr_short': b'RK', 'endpoint_list': [b'\x00', b'\x02'], 'zdo_sequence': b'\x01'}},
                 {'message_id': 'version_info_request'},
-                {'message_id': 'mode_change_request', 'params': {'mode': 'Normal'}}
+                {'message_id': 'mode_change_request'}
             ]
         }
         self.assertEqual(result, expected)
@@ -505,7 +505,7 @@ class TestZBNode(unittest.TestCase):
         params = {
             'zdo_sequence': b'\x01',
             'addr_short': b'\xe1\x00',
-            'endpoint_list': b'\x00\x02'
+            'endpoint_list': [b'\x00', b'\x02']
         }
         message = self.node_obj.generate_message('match_descriptor_response', params)
         result = message['data']
