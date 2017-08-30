@@ -51,9 +51,18 @@ class ZBHub(ZBNode):
             time.sleep(2.00)
 
         # Next, sent out a version request to each device we have discovered above
+        # The next 2 messages are directed at the hardware code (rather than the network code).
+        # The device has to receive these two messages to stay joined.
         for (device_id, device_obj) in self.devices.items():
-            self.send_type_request(device_obj)
+            addresses = device_obj.addr_tuple
             time.sleep(1.00)
+            message = self.generate_message('version_info_request')
+            self.send_message(message, *addresses)
+            message = self.generate_message('mode_change_request', {'mode': 'normal'})
+            self.send_message(message, *addresses)
+
+            # We are fully associated!
+            self._logger.debug('New Device Fully Associated')
 
     def list_devices(self):
         """

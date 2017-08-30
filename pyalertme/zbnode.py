@@ -559,14 +559,6 @@ class ZBNode(Node):
                     }
                     replies.append({'message_id': 'match_descriptor_response', 'params': params})
 
-                    # The next 2 messages are directed at the hardware code (rather than the network code).
-                    # The device has to receive these two messages to stay joined.
-                    replies.append({'message_id': 'version_info_request'})
-                    replies.append({'message_id': 'mode_change_request'})
-
-                    # We are fully associated!
-                    self._logger.debug('New Device Fully Associated')
-
                 elif cluster_id == CLUSTER_ID_ZDO_MATCH_DESC_RSP:
                     # Match Descriptor Response
                     self._logger.debug('Received Match Descriptor Response')
