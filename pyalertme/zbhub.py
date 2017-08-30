@@ -38,31 +38,17 @@ class ZBHub(ZBNode):
     def _discovery(self):
         """
         Discovery Thread.
+        Send out a broadcast every 2 seconds for 30 seconds.
 
         """
-        # First, send out a broadcast every 2 seconds for 30 seconds
         timeout = time.time() + 30
         i = 1
         while time.time() < timeout:
-            self._logger.debug('Sending Discovery Request #%s', i)
+            self._logger.info('Sending Discovery Request #%s', i)
             message = self.generate_message('routing_table_request')
             self.send_message(message, BROADCAST_LONG, BROADCAST_SHORT)
             i += 1
             time.sleep(2.00)
-
-        # Next, sent out a version request to each device we have discovered above
-        # The next 2 messages are directed at the hardware code (rather than the network code).
-        # The device has to receive these two messages to stay joined.
-        for (device_id, device_obj) in self.devices.items():
-            addresses = device_obj.addr_tuple
-            time.sleep(1.00)
-            message = self.generate_message('version_info_request')
-            self.send_message(message, *addresses)
-            message = self.generate_message('mode_change_request', {'mode': 'normal'})
-            self.send_message(message, *addresses)
-
-            # We are fully associated!
-            self._logger.debug('New Device Fully Associated')
 
     def list_devices(self):
         """
@@ -130,12 +116,22 @@ class ZBHub(ZBNode):
 
             if not device_obj:
                 self._logger.info('Discovered New Device')
+                # Create new device object
                 device_obj = Node()
                 device_obj.addr_long = device_addr_long
                 device_obj.addr_short = device_addr_short
-                device_obj.associated = True
                 self.devices[device_id] = device_obj
-                self.send_type_request(device_obj)
+
+            if not device_obj.type:
+                # The device has to receive these two messages to stay joined.
+                message = self.generate_message('mode_change_request', {'mode': 'normal'})
+                self.send_message(message, device_addr_long, device_addr_short)
+                message = self.generate_message('version_info_request')
+                self.send_message(message, device_addr_long, device_addr_short)
+
+                # We are fully associated!
+                device_obj.associated = True
+                self._logger.info('New Device %s Fully Associated', device_id)
 
         return device_obj
 
