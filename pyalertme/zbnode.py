@@ -565,7 +565,7 @@ class ZBNode(Node):
                     # This will tell me the address of the new thing
                     # so we're going to send an active endpoint request
                     sequence = 4   # message['rf_data'][0:1]
-                    replies.append(self.generate_message('active_endpoints_request', {'sequence': sequence, 'mode': source_addr_short}))
+                    replies.append(self.generate_message('active_endpoints_request', {'sequence': sequence, 'addr_short': source_addr_short}))
 
                 elif cluster_id == CLUSTER_ID_ZDO_MGMT_NETWORK_UPDATE:
                     # Management Network Update Notify.
