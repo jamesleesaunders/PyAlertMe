@@ -26,22 +26,33 @@ hub_obj.start(ser)
 ```
 Example output:
 ```
-Property Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: ManufactureDate	Value: 2013-09-26]
-Property Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: Version	Value: 44722]
-Property Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: Type	Value: SmartPlug]
-Property Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: Manufacturer	Value: AlertMe.com]
-Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: PowerDemand	Value: 54]
-Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: PowerDemand	Value: 53]
-Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: State	Value: OFF]
-Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: PowerDemand	Value: 0]
-Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: State	Value: ON]
-Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: PowerDemand	Value: 31]
-Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: RSSI	Value: 194]
-Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: RSSI	Value: 196]
+2017-08-30 21:51:21,138 INFO zbhub 134 New Device 00:0d:6f:00:00:1b:6a:6a Fully Associated
+Attribute Update [Node ID: 00:0d:6f:00:00:1b:6a:6a	Field: manu	Value: AlertMe.com]
+Attribute Update [Node ID: 00:0d:6f:00:00:1b:6a:6a	Field: type	Value: Door/Window sensor]
+Attribute Update [Node ID: 00:0d:6f:00:00:1b:6a:6a	Field: version	Value: 55979]
+Attribute Update [Node ID: 00:0d:6f:00:00:1b:6a:6a	Field: manu_date	Value: 2008-04-17]
+{   '00:0d:6f:00:00:1b:6a:6a': {   'manu': 'AlertMe.com',
+                                   'type': 'Door/Window sensor',
+                                   'version': 55979},
+    '00:0d:6f:00:00:1b:76:ea': {   'manu': 'AlertMe.com',
+                                   'type': 'Lamp',
+                                   'version': 1905},
+    '00:0d:6f:00:00:78:61:c0': {   'manu': 'AlertMe.com',
+                                   'type': 'Button Device',
+                                   'version': 34667},
+    '00:0d:6f:00:03:bb:b9:f8': {   'manu': 'AlertMe.com',
+                                   'type': 'SmartPlug',
+                                   'version': 9586}}
+Select Device:Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: power_demand	Value: 0]
+Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: trigger_state	Value: 0]
+Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: temperature	Value: 99.05]
+Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: tamper_state	Value: 1]
+Attribute Update [Node ID: 00:0d:6f:00:00:1b:6a:6a	Field: manu	Value: AlertMe.com]
+Attribute Update [Node ID: 00:0d:6f:00:00:1b:6a:6a	Field: type	Value: Door/Window sensor]
+Attribute Update [Node ID: 00:0d:6f:00:00:1b:6a:6a	Field: version	Value: 55979]
+Attribute Update [Node ID: 00:0d:6f:00:00:1b:6a:6a	Field: manu_date	Value: 2008-04-17]
+Attribute Update [Node ID: 00:0d:6f:00:03:bb:b9:f8	Field: power_demand	Value: 0]
 ```
-There are two types of updates:
-* 'Property Updates' - These are properties of the device (e.g Type, Manufacturer, Version).
-* 'Attribute Updates' - These are variable attributes of the device (e.g State, Power, Temperature, RSSI).
 
 The hub supports the following devices:
 * SmartPlug
