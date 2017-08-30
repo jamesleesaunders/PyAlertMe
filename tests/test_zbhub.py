@@ -103,19 +103,19 @@ class TestZBHub(unittest.TestCase):
         """
         # Match Descriptor Request
         message = {
-            'source_addr_long': '\x00\x13\xa2\x00@\xa2;\t',
+            'source_addr_long': b'\x00\x13\xa2\x00@\xa2;\t',
             'source_addr': 'RK',
-            'source_endpoint': '\x00',
-            'dest_endpoint': '\x00',
-            'profile': '\x00\x00',
-            'cluster': '\x00\x06',
+            'source_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'profile': b'\x00\x00',
+            'cluster': b'\x00\x06',
             'id': 'rx_explicit',
-            'options': '\x01',
-            'rf_data': '\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00'
+            'options': b'\x01',
+            'rf_data': b'\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00'
         }
         self.hub_obj.receive_message(message)
         result = self.hub_ser.get_data_written()
-        expected = '~\x00\x19}1\x00\x00}3\xa2\x00@\xa2;\tRK\x02\x02\x00\xf0\xc2\x16\x00\x00}1\x00\xfa\x00\x01\x9e'
+        expected = b'~\x00\x19}1\x00\x00}3\xa2\x00@\xa2;\tRK\x02\x02\x00\xf0\xc2\x16\x00\x00}1\x00\xfa\x00\x01\x9e'
         self.assertEqual(result, expected)
 
 if __name__ == '__main__':

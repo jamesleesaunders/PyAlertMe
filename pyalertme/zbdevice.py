@@ -29,7 +29,7 @@ class ZBDevice(ZBNode):
 
         # Attributes
         self.rssi = 197
-        self.mode = 'NORMAL'
+        self.mode = 'normal'
         self.power_demand = 0
         self.power_consumption = 0
 
@@ -51,7 +51,7 @@ class ZBDevice(ZBNode):
             self.hub_obj.addr_long = addr_long
             self.hub_obj.addr_short = addr_short
             params = {
-                'sequence': 1,
+                'zdo_sequence': b'\x01',
                 'addr_short': BROADCAST_SHORT,
                 'profile_id': PROFILE_ID_ALERTME,
                 'in_cluster_list': b'',
@@ -69,8 +69,7 @@ class ZBDevice(ZBNode):
 
         :return: Message
         """
-        params = {'rssi': self.rssi}
-        message = self.generate_message('range_update', params)
+        message = self.generate_message('range_update')
         return message
 
     def message_version_info_update(self):
@@ -79,11 +78,5 @@ class ZBDevice(ZBNode):
 
         :return: Message
         """
-        params = {
-            'type': self.type,
-            'version': self.version,
-            'manu': self.manu,
-            'manu_date': self.manu_date
-        }
-        message = self.generate_message('version_info_update', params)
+        message = self.generate_message('version_info_update')
         return message

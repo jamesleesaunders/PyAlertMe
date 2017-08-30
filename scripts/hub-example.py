@@ -53,35 +53,37 @@ while True:
     try:
         time.sleep(0.001)
 
-        # List Devices
         device_list = hub_obj.list_devices()
-        pp.pprint(device_list)
-        node_id = raw_input("Select Device:")
 
-        if node_id in device_list.keys():
-            while True:
-                # Select Message
-                device_obj = hub_obj.devices[node_id]
-                messages = hub_obj.list_messages()
-                pp.pprint(messages)
-                message_id = raw_input("Select Message:")
+        if len(device_list) > 0:
+            # List Devices
+            pp.pprint(device_list)
+            node_id = raw_input("Select Device:")
 
-                if message_id in messages.keys():
-                    # Select Parameters
-                    params = {}
-                    if 'expected_params' in messages[message_id].keys():
-                        print("Message Parameters:")
-                        for param_name in messages[message_id]['expected_params']:
-                            param_value = raw_input("   %s: " % param_name)
-                            params = {param_name: param_value}
+            if node_id in device_list.keys():
+                while True:
+                    # Select Message
+                    device_obj = hub_obj.devices[node_id]
+                    messages = hub_obj.list_messages()
+                    pp.pprint(messages)
+                    message_id = raw_input("Select Message:")
 
-                    # Send Message
-                    message = hub_obj.generate_message(message_id, params)
-                    addresses = device_obj.addr_tuple
-                    hub_obj.send_message(message, *addresses)
+                    if message_id in messages.keys():
+                        # Select Parameters
+                        params = {}
+                        if 'expected_params' in messages[message_id].keys():
+                            print("Message Parameters:")
+                            for param_name in messages[message_id]['expected_params']:
+                                param_value = raw_input("   %s: " % param_name)
+                                params = {param_name: param_value}
 
-                else:
-                    break
+                        # Send Message
+                        message = hub_obj.generate_message(message_id, params)
+                        addresses = device_obj.addr_tuple
+                        hub_obj.send_message(message, *addresses)
+
+                    else:
+                        break
 
     except KeyboardInterrupt:
         print("Keyboard Interrupt")

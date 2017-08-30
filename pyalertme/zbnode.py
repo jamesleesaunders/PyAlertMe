@@ -229,7 +229,7 @@ messages = {
             'dest_endpoint': ENDPOINT_ZDO,
             'data': lambda self, params: self.generate_active_endpoints_request(params)
         },
-        'expected_params': ['sequence', 'addr_short']
+        'expected_params': ['zdo_sequence', 'addr_short']
     },
     'match_descriptor_request': {
         'name': 'Match Descriptor Request',
@@ -240,7 +240,7 @@ messages = {
             'dest_endpoint': ENDPOINT_ZDO,
             'data': lambda self, params: self.generate_match_descriptor_request(params)
         },
-        'expected_params': ['sequence', 'addr_short', 'profile_id', 'in_cluster_list', 'out_cluster_list']
+        'expected_params': ['zdo_sequence', 'addr_short', 'profile_id', 'in_cluster_list', 'out_cluster_list']
     },
     'match_descriptor_response': {
         'name': 'Match Descriptor Response',
@@ -251,7 +251,7 @@ messages = {
             'dest_endpoint': ENDPOINT_ZDO,
             'data': lambda self, params: self.generate_match_descriptor_response(params)
         },
-        'expected_params': ['sequence', 'addr_short', 'endpoint_list']
+        'expected_params': ['zdo_sequence', 'addr_short', 'endpoint_list']
     },
     'routing_table_request': {
         'name': 'Management Routing Table Request',
@@ -313,8 +313,7 @@ class ZBNode(Node):
         self._schedule_interval = 2
         self._schedule_thread.start()
 
-        # ZDO Sequence
-        self.zdo_sequence = 1
+        self.endpoint_list = [ENDPOINT_ZDO, ENDPOINT_ALERTME]
 
     def _schedule_loop(self):
         """
@@ -357,30 +356,36 @@ class ZBNode(Node):
 
     def generate_message(self, message_id, params=None):
         """
-        Generate message.
+        Generate Message.
 
         :param message_id: Message ID
-        :param params: Optional
         :return:
         """
-        if params is None or params == '':
-            params = {}
-
         if message_id in messages.keys():
             # Take a deep copy of the message
             message = copy.deepcopy(messages[message_id])
 
-            if 'expected_params' in message.keys():
-                expected_params = sorted(message['expected_params'])
-                provided_params = sorted(params.keys())
-                missing_params = sorted(set(expected_params).difference(set(provided_params)))
+            if params:
+                # If we have manually been provided any params then use these
+                if 'expected_params' in message.keys():
+                    expected_params = sorted(message['expected_params'])
+                    provided_params = sorted(params.keys())
+                    missing_params = sorted(set(expected_params).difference(set(provided_params)))
 
-                if len(missing_params) > 0:
-                    raise Exception("Missing Parameters: %s" % missing_params)
+                    # We need to check if there are any missing
+                    if len(missing_params) > 0:
+                        raise Exception("Missing Parameters: %s" % missing_params)
+
+            else:
+                # Otherwise attempt to auto calculate params from the device object
+                params = {}
+                if 'expected_params' in message.keys():
+                    for param in message['expected_params']:
+                        params[param] = self.get_attribute(param)
 
             # If 'data' is a lambda, then call it and replace with the return value
             data = message['frame']['data']
-            if callable(data):
+            if callable(message['frame']['data']):
                 message['frame']['data'] = data(self, params)
 
             # Return processed message
@@ -456,9 +461,17 @@ class ZBNode(Node):
             source_addr_long = message['source_addr_long']
             source_addr_short = message['source_addr']
 
+            # Update any attributes which may need updating
             self.process_message(source_addr_long, source_addr_short, ret['attributes'])
 
+            # Send any replies which may need sending
             for reply in ret['replies']:
+                message_id = reply['message_id']
+                if 'params' in reply.keys():
+                    params = reply['params']
+                else:
+                    params = {}
+                reply = self.generate_message(message_id, params)
                 self.send_message(reply, source_addr_long, source_addr_short)
                 time.sleep(0.5)
 
@@ -496,13 +509,14 @@ class ZBNode(Node):
             if profile_id == PROFILE_ID_ZDP:
                 # ZigBee Device Profile ID
                 self._logger.debug('Received ZigBee Device Profile Packet')
+                zdo_sequence = message['rf_data'][0:1]
 
                 if cluster_id == CLUSTER_ID_ZDO_NWK_ADDR_REQ:
                     # Network (16-bit) Address Request
                     self._logger.debug('Received Network (16-bit) Address Request')
 
                 elif cluster_id == CLUSTER_ID_ZDO_NWK_ADDR_RSP:
-                    # Network (16-bit) Address Response.
+                    # Network (16-bit) Address Response
                     self._logger.debug('Received Network (16-bit) Address Response')
 
                 elif cluster_id == CLUSTER_ID_ZDO_MGMT_RTG_REQ:
@@ -514,11 +528,11 @@ class ZBNode(Node):
                     self._logger.debug('Received Management Routing Response')
 
                 elif cluster_id == CLUSTER_ID_ZDO_SIMPLE_DESC_REQ:
-                    # Simple Descriptor Request.
+                    # Simple Descriptor Request
                     self._logger.debug('Received Simple Descriptor Request')
 
                 elif cluster_id == CLUSTER_ID_ZDO_ACTIVE_EP_REQ:
-                    # Active Endpoint Request.
+                    # Active Endpoint Request
                     self._logger.debug('Received Active Endpoint Request')
 
                 elif cluster_id == CLUSTER_ID_ZDO_ACTIVE_EP_RSP:
@@ -538,22 +552,12 @@ class ZBNode(Node):
                     # this controller as valid.
 
                     # First send the Match Descriptor Response
-                    sequence = 4   # message['rf_data'][0:1]
                     params = {
-                        'sequence': sequence,
-                        'addr_short': self.addr_short,
-                        'endpoint_list': ENDPOINT_ALERTME
+                        'zdo_sequence': zdo_sequence,
+                        'addr_short': source_addr_short,
+                        'endpoint_list': self.endpoint_list
                     }
-                    replies.append(self.generate_message('match_descriptor_response', params))
-
-                    # The next messages are directed at the hardware code (rather
-                    # than the network code). The device has to receive these two
-                    # messages to stay joined.
-                    replies.append(self.generate_message('version_info_request'))
-                    replies.append(self.generate_message('mode_change_request', {'mode': 'Normal'}))
-
-                    # We are fully associated!
-                    self._logger.debug('New Device Fully Associated')
+                    replies.append({'message_id': 'match_descriptor_response', 'params': params})
 
                 elif cluster_id == CLUSTER_ID_ZDO_MATCH_DESC_RSP:
                     # Match Descriptor Response
@@ -562,13 +566,16 @@ class ZBNode(Node):
                 elif cluster_id == CLUSTER_ID_ZDO_END_DEVICE_ANNCE:
                     # Device Announce Message
                     self._logger.debug('Received Device Announce Message')
-                    # This will tell me the address of the new thing
-                    # so we're going to send an active endpoint request
-                    sequence = 4   # message['rf_data'][0:1]
-                    replies.append(self.generate_message('active_endpoints_request', {'sequence': sequence, 'addr_short': source_addr_short}))
+                    # This will tell me the address of the new thing,
+                    # so we're going to send an Active Endpoint Request.
+                    params = {
+                        'zdo_sequence': zdo_sequence,
+                        'addr_short': source_addr_short
+                    }
+                    replies.append({'message_id': 'active_endpoints_request', 'params': params})
 
                 elif cluster_id == CLUSTER_ID_ZDO_MGMT_NETWORK_UPDATE:
-                    # Management Network Update Notify.
+                    # Management Network Update Notify
                     self._logger.debug('Received Management Network Update Notify')
 
                 else:
@@ -584,7 +591,7 @@ class ZBNode(Node):
                         # Switch State Request
                         # b'\x11\x00\x01\x01'
                         self._logger.debug('Received Switch State Request')
-                        replies.append(self.generate_message('switch_state_update', {'switch_state': self.switch_state}))
+                        replies.append({'message_id': 'switch_state_update'})
 
                     elif cluster_cmd == CLUSTER_CMD_AM_STATE_RESP:
                         self._logger.debug('Received Switch State Update')
@@ -596,7 +603,7 @@ class ZBNode(Node):
                         # b'\x11\x00\x02\x00\x01' Off
                         self._logger.debug('Received Switch State Change')
                         attributes = self.parse_switch_state_request(message['rf_data'])
-                        replies.append(self.generate_message('switch_state_update', {'switch_state': self.switch_state}))
+                        replies.append({'message_id': 'switch_state_update'})
 
                     else:
                         self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
@@ -618,11 +625,11 @@ class ZBNode(Node):
                         self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
 
                 elif cluster_id == CLUSTER_ID_AM_TAMPER:
-                    self._logger.debug('Received Tamper Switch Changed Update')
+                    self._logger.debug('Received Tamper Switch Triggered')
                     attributes = self.parse_tamper_state(message['rf_data'])
 
                 elif cluster_id == CLUSTER_ID_AM_BUTTON:
-                    self._logger.debug('Received Button Press Update')
+                    self._logger.debug('Received Button Pressed')
                     attributes = self.parse_button_press(message['rf_data'])
 
                 elif cluster_id == CLUSTER_ID_AM_SECURITY:
@@ -632,12 +639,12 @@ class ZBNode(Node):
                     # needs initialization, this command seems to take care of that.
                     # So, look at the value of the data and send the command.
                     if message['rf_data'][3:7] == b'\x15\x00\x39\x10':
-                        replies.append(self.generate_message('security_init'))
+                        replies.append({'message_id': 'security_init'})
                     attributes = self.parse_security_state(message['rf_data'])
 
                 elif cluster_id == CLUSTER_ID_AM_DISCOVERY:
                     if cluster_cmd == CLUSTER_CMD_AM_RSSI:
-                        self._logger.debug('Received RSSI Range Test Update')
+                        self._logger.debug('Received RSSI Range Update')
                         attributes = self.parse_range_info_update(message['rf_data'])
 
                     elif cluster_cmd == CLUSTER_CMD_AM_VERSION_RESP:
@@ -647,13 +654,7 @@ class ZBNode(Node):
                     elif cluster_cmd == CLUSTER_CMD_AM_VERSION_REQ:
                         # b'\x11\x00\xfc\x00\x01'
                         self._logger.debug('Received Version Request')
-                        params = {
-                            'type': self.type,
-                            'version': self.version,
-                            'manu': self.manu,
-                            'manu_date': self.manu_date
-                        }
-                        replies.append(self.generate_message('version_info_update', params))
+                        replies.append({'message_id': 'version_info_update'})
 
                     else:
                         self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
@@ -665,39 +666,34 @@ class ZBNode(Node):
 
                     elif cluster_cmd == CLUSTER_CMD_AM_MODE_REQ:
                         self._logger.debug('Received Mode Change Request')
-                        # Take note of hub address
-                        self.hub_addr_long = source_addr_long
-                        self.hub_addr_short = source_addr_short
-                        # We are now fully associated
-                        self.associated = True
-
                         mode_cmd = message['rf_data'][3] + message['rf_data'][4]
+                        mode = 'normal'
+
                         if mode_cmd == b'\x00\x01':
                             # Normal
                             # b'\x11\x00\xfa\x00\x01'
                             self._logger.debug('Normal Mode')
-                            self.mode = 'NORMAL'
+                            mode = 'normal'
 
                         elif mode_cmd == b'\x01\x01':
                             # Range Test
                             # b'\x11\x00\xfa\x01\x01'
                             self._logger.debug('Range Test Mode')
-                            self.mode = 'RANGE'
-                            # TODO Setup thread loop to send regular range RSSI updates
-                            # for now just send one...
-                            replies.append(self.generate_message('range_update'))
+                            mode = 'range'
 
                         elif mode_cmd == b'\x02\x01':
                             # Locked
                             # b'\x11\x00\xfa\x02\x01'
                             self._logger.debug('Locked Mode')
-                            self.mode = 'LOCKED'
+                            mode = 'locked'
 
                         elif mode_cmd == b'\x03\x01':
                             # Silent
                             # b'\x11\x00\xfa\x03\x01'
                             self._logger.debug('Silent Mode')
-                            self.mode = 'SILENT'
+                            mode = 'silent'
+
+                        attributes = {'mode': mode}
 
                     else:
                         self._logger.error('Unrecognised Cluster Command: %r', cluster_cmd)
@@ -970,7 +966,7 @@ class ZBNode(Node):
 
         return ret
 
-    def generate_mode_change_request(self, params):
+    def generate_mode_change_request(self, params=None):
         """
         Generate Mode Change Request.
         Available Modes: 'Normal', 'RangeTest', 'Locked', 'Silent'
@@ -988,14 +984,18 @@ class ZBNode(Node):
         cluster_cmd = CLUSTER_CMD_AM_MODE_REQ
         payload = b'\x00\x01'  # Default normal if no mode
 
-        mode = params['mode']
-        if mode == 'Normal':
+        if not params:
+            mode = 'normal'
+        else:
+            mode = params['mode']
+
+        if mode == 'normal':
             payload = b'\x00\x01'
-        elif mode == 'RangeTest':
+        elif mode == 'range':
             payload = b'\x01\x01'
-        elif mode == 'Locked':
+        elif mode == 'locked':
             payload = b'\x02\x01'
-        elif mode == 'Silent':
+        elif mode == 'silent':
             payload = b'\x03\x01'
         else:
             self._logger.error('Invalid mode request %s', mode)
@@ -1349,10 +1349,10 @@ class ZBNode(Node):
         Example:
             b'\xaa\x9f\x88'
         """
-        sequence = struct.pack('B', params['sequence'])  # b'\xaa'
+        zdo_sequence = params['zdo_sequence']  # b'\xaa'
         net_addr = params['addr_short'][1] + params['addr_short'][0]  # b'\x9f\x88'
 
-        data = sequence + net_addr
+        data = zdo_sequence + net_addr
         return data
 
     def generate_match_descriptor_request(self, params):
@@ -1378,7 +1378,7 @@ class ZBNode(Node):
         :param params:
         :return: Message data
         """
-        sequence = struct.pack('B', params['sequence'])  # b'\x01'
+        zdo_sequence = params['zdo_sequence']  # b'\x01'
         net_addr = params['addr_short'][1] + params['addr_short'][0]  # b'\xfd\xff'
         profile_id = params['profile_id'][1] + params['profile_id'][0]  # b'\x16\xc2'  PROFILE_ID_ALERTME (reversed)
         num_input_clusters = struct.pack('B', len(params['in_cluster_list']) / 2)  # b'\x00'
@@ -1387,7 +1387,7 @@ class ZBNode(Node):
         output_cluster_list = params['out_cluster_list'][1] + params['out_cluster_list'][0]  # b'\xf0\x00'  CLUSTER_ID_AM_STATUS (reversed)
         # TODO Finish this off! At the moment this does not support multiple clusters, it just supports one!
 
-        data = sequence + net_addr + profile_id + num_input_clusters + input_cluster_list + num_output_clusters + output_cluster_list
+        data = zdo_sequence + net_addr + profile_id + num_input_clusters + input_cluster_list + num_output_clusters + output_cluster_list
         return data
 
     def generate_match_descriptor_response(self, params):
@@ -1405,18 +1405,18 @@ class ZBNode(Node):
         Match List                 Variable   List of endpoints on the remote that match the request criteria.
 
         Example:
-            b'\x04\x00\x00\x00\x01\x02'
+            b'\x01\x00\x00\xe1\x02\x00\x02'
 
         :param params:
         :return: Message data
         """
-        sequence = struct.pack('B', params['sequence'])  # b'\x04'
-        status = ZDP_STATUS_OK  # b'\x00'
-        net_addr = params['addr_short'][1] + params['addr_short'][0]  # b'\x00\x00'
-        length = struct.pack('B', len(params['endpoint_list']))  # b'\x01'
-        match_list = params['endpoint_list']  # b'\x02'
+        zdo_sequence = params['zdo_sequence']  # b'\x04'
+        status       = ZDP_STATUS_OK  # b'\x00'
+        net_addr     = params['addr_short'][1] + params['addr_short'][0]  # b'\x00\x00'
+        length       = struct.pack('B', len(params['endpoint_list']))  # b'\x02'
+        match_list   = b''.join(params['endpoint_list'])  # b'\x00\x02'
 
-        data = sequence + status + net_addr + length + match_list
+        data = zdo_sequence + status + net_addr + length + match_list
         return data
 
 

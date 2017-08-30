@@ -39,24 +39,24 @@ class TestZBNode(unittest.TestCase):
 
         # Match Descriptor Request
         message = {
-            'source_addr_long': '\x00\x13\xa2\x00@\xa2;\t',
-            'source_addr': 'RK',
-            'source_endpoint': '\x00',
-            'dest_endpoint': '\x00',
-            'profile': '\x00\x00',
-            'cluster': '\x00\x06',
+            'source_addr_long': b'\x00\x13\xa2\x00@\xa2;\t',
+            'source_addr': b'RK',
+            'source_endpoint': b'\x00',
+            'dest_endpoint': b'\x00',
+            'profile': b'\x00\x00',
+            'cluster': b'\x00\x06',
             'id': 'rx_explicit',
-            'options': '\x01',
-            'rf_data': '\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00'
+            'options': b'\x01',
+            'rf_data': b'\x01\xfd\xff\x16\xc2\x00\x01\xf0\x00'
         }
 
         result = self.node_obj.parse_message(message)
         expected = {
             'attributes': {},
             'replies': [
-                {'cluster': '\x80\x06', 'data': '\x04\x00\x00\x00\x01\x02', 'dest_endpoint': '\x00', 'profile': '\x00\x00', 'src_endpoint': '\x00'},
-                {'cluster': '\x00\xf6', 'data': '\x11\x00\xfc', 'dest_endpoint': '\x02', 'profile': '\xc2\x16', 'src_endpoint': '\x02'},
-                {'cluster': '\x00\xf0', 'data': '\x11\x00\xfa\x00\x01', 'dest_endpoint': '\x02', 'profile': '\xc2\x16', 'src_endpoint': '\x02'}
+                {'message_id': 'match_descriptor_response', 'params': {'addr_short': b'RK', 'endpoint_list': [b'\x00', b'\x02'], 'zdo_sequence': b'\x01'}},
+                {'message_id': 'version_info_request'},
+                {'message_id': 'mode_change_request'}
             ]
         }
         self.assertEqual(result, expected)
@@ -107,19 +107,16 @@ class TestZBNode(unittest.TestCase):
         expected = {'profile': b'\xc2\x16', 'cluster': '\x00\xf6', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x02', 'data': b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\nSmartPlug\n2013-09-26'}
         self.assertEqual(result, expected)
 
+        # Test providing no parameters (should get from object attributes)
+        result = self.node_obj.generate_message('version_info_update')
+        expected = {'profile': b'\xc2\x16', 'cluster': '\x00\xf6', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x02', 'data': b'\tq\xfe90\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bPyAlertMe\nZBNode\n2017-01-01'}
+        self.assertEqual(result, expected)
+
         # Test providing a couple of parameters missing
         # Should throw exception detailing the parameters which are missing
         with self.assertRaises(Exception) as context:
             self.node_obj.generate_message('version_info_update', {'manu': 'AlertMe.com', 'type': 'SmartPlug'})
         self.assertTrue("Missing Parameters: ['manu_date', 'version']" in context.exception)
-
-        # Test providing no parameters
-        with self.assertRaises(Exception) as context:
-            self.node_obj.generate_message('version_info_update', {})
-        self.assertTrue("Missing Parameters: ['manu', 'manu_date', 'type', 'version']" in context.exception)
-        with self.assertRaises(Exception) as context:
-            self.node_obj.generate_message('version_info_update')
-        self.assertTrue("Missing Parameters: ['manu', 'manu_date', 'type', 'version']" in context.exception)
 
         # Test message without data lambda
         result = self.node_obj.generate_message('permit_join_request')
@@ -252,19 +249,19 @@ class TestZBNode(unittest.TestCase):
         """
         Test Generate Mode Change Request.
         """
-        result = self.node_obj.generate_mode_change_request({'mode': 'Normal'})
+        result = self.node_obj.generate_mode_change_request({'mode': 'normal'})
         expected = b'\x11\x00\xfa\x00\x01'
         self.assertEqual(result, expected)
 
-        result = self.node_obj.generate_mode_change_request({'mode': 'RangeTest'})
+        result = self.node_obj.generate_mode_change_request({'mode': 'range'})
         expected = b'\x11\x00\xfa\x01\x01'
         self.assertEqual(result, expected)
 
-        result = self.node_obj.generate_mode_change_request({'mode': 'Locked'})
+        result = self.node_obj.generate_mode_change_request({'mode': 'locked'})
         expected = b'\x11\x00\xfa\x02\x01'
         self.assertEqual(result, expected)
 
-        result = self.node_obj.generate_mode_change_request({'mode': 'Silent'})
+        result = self.node_obj.generate_mode_change_request({'mode': 'silent'})
         expected = b'\x11\x00\xfa\x03\x01'
         self.assertEqual(result, expected)
 
@@ -463,12 +460,12 @@ class TestZBNode(unittest.TestCase):
         Test Generate Active Endpoints Request.
         """
         params = {
-            'sequence':  170,
+            'zdo_sequence': b'\x01',
             'addr_short': b'\x88\x9f'
         }
         message = self.node_obj.generate_message('active_endpoints_request', params)
         result = message['data']
-        expected = b'\xaa\x9f\x88'
+        expected = b'\x01\x9f\x88'
         self.assertEqual(result, expected)
 
     def test_generate_match_descriptor_request(self):
@@ -476,7 +473,7 @@ class TestZBNode(unittest.TestCase):
         Test Generate Match Descriptor Request.
         """
         params = {
-            'sequence': 1,
+            'zdo_sequence': b'\x01',
             'addr_short': b'\xff\xfd',
             'profile_id': PROFILE_ID_ALERTME,
             'in_cluster_list': b'',
@@ -506,13 +503,13 @@ class TestZBNode(unittest.TestCase):
         Test Generate Match Descriptor Response.
         """
         params = {
-            'sequence': 3,
+            'zdo_sequence': b'\x01',
             'addr_short': b'\xe1\x00',
-            'endpoint_list': b'\x00\x02'
+            'endpoint_list': [b'\x00', b'\x02']
         }
         message = self.node_obj.generate_message('match_descriptor_response', params)
         result = message['data']
-        expected = b'\x03\x00\x00\xe1\x02\x00\x02'
+        expected = b'\x01\x00\x00\xe1\x02\x00\x02'
         self.assertEqual(result, expected)
 
     def test_generate_routing_table_request(self):
