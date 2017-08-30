@@ -18,7 +18,7 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
 logger = logging.getLogger('pyalertme')
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 # Specify log message format
 formatter = logging.Formatter('%(asctime)s %(levelname)-3s %(module)-5s %(lineno)-3s %(message)s')
