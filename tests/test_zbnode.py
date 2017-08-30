@@ -54,9 +54,7 @@ class TestZBNode(unittest.TestCase):
         expected = {
             'attributes': {},
             'replies': [
-                {'message_id': 'match_descriptor_response', 'params': {'addr_short': b'RK', 'endpoint_list': [b'\x00', b'\x02'], 'zdo_sequence': b'\x01'}},
-                {'message_id': 'version_info_request'},
-                {'message_id': 'mode_change_request'}
+                {'message_id': 'match_descriptor_response', 'params': {'addr_short': b'RK', 'endpoint_list': [b'\x00', b'\x02'], 'zdo_sequence': b'\x01'}}
             ]
         }
         self.assertEqual(result, expected)
