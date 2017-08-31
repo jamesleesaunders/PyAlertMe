@@ -64,3 +64,9 @@ v0.3.0 - 26 Jun 2017
 * Making more use of device objects - not only are they used to create new devices but also in the hub.
 * ZigBee message improvements.
 * Improved callback code.
+
+v0.3.1 - 30 Aug 2017
+* Improved the way we reply to request messages.
+* Improved discovery logic.
+* Improved attributes logic.
+* Updated README.

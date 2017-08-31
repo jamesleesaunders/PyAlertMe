@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='PyAlertMe',
-    version='0.2.2',
+    version='0.3.1',
     description='Python AlertMe',
     url='https://github.com/jamesleesaunders/PyAlertMe',
     author='James Saunders',
