@@ -189,9 +189,10 @@ class ZBHub(ZBNode):
         :param command: Parameter or command to be sent
         :param value: Value, State, Mode
         """
+        device_obj = self.device_obj_from_id(device_id)
         if command == 'switch_state':
-            self.send_switch_state_request(device_id, value)
+            self.send_switch_state_request(device_obj, value)
         elif command == 'mode':
-            self.send_mode_request(device_id, value)
+            self.send_mode_request(device_obj, value)
         else:
             self._logger.error('Invalid Attribute Request')
