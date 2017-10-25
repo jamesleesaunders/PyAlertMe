@@ -124,10 +124,10 @@ class Node(object):
 
     def _callback(self, attr_name, attr_value):
         """
-        Callback when attributes are updated
+        Callback when attributes are updated, to be overridden to suit needs.
 
         :param attr_name:
         :param attr_value:
         :return:
         """
-        print("Attribute Update [Node ID: " + self.id + "\tField: " + attr_name + "\tValue: " + str(attr_value) + "]")
+        self._logger.debug('Attribute Update [NodeID: %s Field: %s Value: %s]', self.id, attr_name, attr_value)
