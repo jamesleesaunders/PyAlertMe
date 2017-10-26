@@ -16,6 +16,21 @@ import logging
 import pprint
 
 class TestCmd(Command):
+    """
+    This sets up the commands that commander will look for and what to do.  The commands are
+     - discovery
+     - broadcast
+     - nodes list
+     * nodes <device_id> rename string
+     - nodes <device_id> state [0/1]
+     * nodes <device_id> mode ?
+     * nodes <device_id> attributes ?
+     * nodes <device_id> type
+     * nodes <device_id> detail
+     - halt
+    The - point are working, the * need to be fixed
+    the <device_id> is show in the nodes list (its a MAC address)
+    """ 
     def do_discovery(self, *args):
         # Discovery
         hub_obj.discovery()
@@ -38,8 +53,8 @@ class TestCmd(Command):
 
             return output
 
-        if args[0].isdigit():
-            node_id = int(args[0])
+        if args[0][0].isdigit():
+            node_id = args[0]
 
             if args[1] == "rename":
                 # Concatenate all following params
@@ -52,12 +67,14 @@ class TestCmd(Command):
 
             if args[1] == "state":
                 value = args[2]
-                hub_obj.call_device_command(node_id, 'State', value)
+                this_device_obj = hub_obj.device_obj_from_id(node_id)
+                #hub_obj.call_device_command(this_device_obj, 'switch_state', value)
+                hub_obj.send_switch_state_request(this_device_obj, value)
                 return 'Node: ' + str(node_id) + ' State Changed: ' + value
 
             if args[1] == "mode":
                 value = args[2]
-                hub_obj.call_device_command(node_id, 'Mode', value)
+                hub_obj.call_device_command(node_id, 'mode', value)
                 return 'Node: ' + str(node_id) + ' Mode: ' + value
 
             if args[1] == "attributes":
@@ -96,7 +113,7 @@ if __name__ == '__main__':
 
     # Create console handler and set level to info
     sh = logging.StreamHandler()
-    sh.setLevel(logging.DEBUG)
+    sh.setLevel(logging.INFO)
     sh.setFormatter(formatter)
     logger.addHandler(sh)
 
@@ -107,13 +124,13 @@ if __name__ == '__main__':
     logger.addHandler(fh)
 
     # Serial configuration
-    XBEE_PORT = '/dev/tty.usbserial-DN018OI6'
+    #XBEE_PORT = '/dev/tty.usbserial-DN018OI6'
+    XBEE_PORT = '/dev/ttyUSB0'
     XBEE_BAUD = 9600
     ser = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
     # Start hub
-    hub_obj = ZBHub()
-    hub_obj.start(ser)
+    hub_obj = ZBHub(ser)
 
     # Start commander
     cmd = Commander('PyAlertMe', cmd_cb=TestCmd())
