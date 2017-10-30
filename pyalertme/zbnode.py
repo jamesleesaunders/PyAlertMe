@@ -1,3 +1,8 @@
+
+# Filename:    zbnode.py
+# Description: This contains all the values code (and static data structures) act as a zigbee node
+#              and to communicate with Alertme nodes 
+ 
 from pyalertme.node import Node
 import time
 import threading
@@ -7,65 +12,65 @@ import struct
 
 
 # ZigBee Addressing
-BROADCAST_LONG = b'\x00\x00\x00\x00\x00\x00\xff\xff'
-BROADCAST_SHORT = b'\xff\xfd'
+BROADCAST_LONG  = b'\x00\x00\x00\x00\x00\x00\xff\xff'
+BROADCAST_SHORT = b'\xff\xfe'
 
 # ZigBee Profile IDs
-PROFILE_ID_ZDP = b'\x00\x00'  # ZigBee Device Profile
-PROFILE_ID_HA = b'\x01\x04'  # HA Device Profile
-PROFILE_ID_LL = b'\xc0\x5e'  # Light Link Profile
+PROFILE_ID_ZDP     = b'\x00\x00'  # ZigBee Device Profile
+PROFILE_ID_HA      = b'\x01\x04'  # HA Device Profile
+PROFILE_ID_LL      = b'\xc0\x5e'  # Light Link Profile
 PROFILE_ID_ALERTME = b'\xc2\x16'  # AlertMe Private Profile
 
 # ZigBee Endpoints
-ENDPOINT_ZDO = b'\x00'  # ZigBee Device Objects Endpoint
+ENDPOINT_ZDO     = b'\x00'  # ZigBee Device Objects Endpoint
 ENDPOINT_ALERTME = b'\x02'  # AlertMe / Iris Endpoint
 
 # ZDP Status
-ZDP_STATUS_OK = b'\x00'
-ZDP_STATUS_INVALID = b'\x80'
+ZDP_STATUS_OK        = b'\x00'
+ZDP_STATUS_INVALID   = b'\x80'
 ZDP_STATUS_NOT_FOUND = b'\x81'
 
 # ZDO Clusters
 # See:
 #    http://ftp1.digi.com/support/images/APP_NOTE_XBee_ZigBee_Device_Profile.pdf
 #    http://www.cel.com/pdf/misc/zic09_zdp_api.pdf
-CLUSTER_ID_ZDO_NWK_ADDR_REQ = b'\x00\x00'  # Network (16-bit) Address Request
-CLUSTER_ID_ZDO_NWK_ADDR_RSP = b'\x80\x00'  # Network (16-bit) Address Response
-CLUSTER_ID_ZDO_SIMPLE_DESC_REQ = b'\x00\x04'  # Simple Descriptor Request
-CLUSTER_ID_ZDO_ACTIVE_EP_REQ = b'\x00\x05'  # Active Endpoints Request
-CLUSTER_ID_ZDO_ACTIVE_EP_RSP = b'\x80\x05'  # Active Endpoints Response
-CLUSTER_ID_ZDO_MATCH_DESC_REQ = b'\x00\x06'  # Match Descriptor Request
-CLUSTER_ID_ZDO_MATCH_DESC_RSP = b'\x80\x06'  # Match Descriptor Response
-CLUSTER_ID_ZDO_END_DEVICE_ANNCE = b'\x00\x13'  # End Device Announce
-CLUSTER_ID_ZDO_MGMT_RTG_REQ = b'\x00\x32'  # Management Routing Request
-CLUSTER_ID_ZDO_MGMT_RTG_RSP = b'\x80\x32'  # Management Routing Response
+CLUSTER_ID_ZDO_NWK_ADDR_REQ         = b'\x00\x00'  # Network (16-bit) Address Request
+CLUSTER_ID_ZDO_NWK_ADDR_RSP         = b'\x80\x00'  # Network (16-bit) Address Response
+CLUSTER_ID_ZDO_SIMPLE_DESC_REQ      = b'\x00\x04'  # Simple Descriptor Request
+CLUSTER_ID_ZDO_ACTIVE_EP_REQ        = b'\x00\x05'  # Active Endpoints Request
+CLUSTER_ID_ZDO_ACTIVE_EP_RSP        = b'\x80\x05'  # Active Endpoints Response
+CLUSTER_ID_ZDO_MATCH_DESC_REQ       = b'\x00\x06'  # Match Descriptor Request
+CLUSTER_ID_ZDO_MATCH_DESC_RSP       = b'\x80\x06'  # Match Descriptor Response
+CLUSTER_ID_ZDO_END_DEVICE_ANNCE     = b'\x00\x13'  # End Device Announce
+CLUSTER_ID_ZDO_MGMT_RTG_REQ         = b'\x00\x32'  # Management Routing Request
+CLUSTER_ID_ZDO_MGMT_RTG_RSP         = b'\x80\x32'  # Management Routing Response
 CLUSTER_ID_ZDO_MGMT_PERMIT_JOIN_REQ = b'\x00\x36'  # Permit Join Request Request
-CLUSTER_ID_ZDO_MGMT_NETWORK_UPDATE = b'\x80\x38'  # Management Network Update
+CLUSTER_ID_ZDO_MGMT_NETWORK_UPDATE  = b'\x80\x38'  # Management Network Update
 
 # AlertMe Clusters
 # See:
 #    http://www.desert-home.com/2015/06/hacking-into-iris-door-sensor-part-4.html
-CLUSTER_ID_AM_SWITCH = b'\x00\xee'  # SmartPlug Switch Cluster
-CLUSTER_ID_AM_POWER = b'\x00\xef'  # Power Information
-CLUSTER_ID_AM_STATUS = b'\x00\xf0'  # Device Status
-CLUSTER_ID_AM_TAMPER = b'\x00\xf2'  # Device Tamper Cluster
-CLUSTER_ID_AM_BUTTON = b'\x00\xf3'  # Keyfob / Button
+CLUSTER_ID_AM_SWITCH    = b'\x00\xee'  # SmartPlug Switch Cluster
+CLUSTER_ID_AM_POWER     = b'\x00\xef'  # Power Information
+CLUSTER_ID_AM_STATUS    = b'\x00\xf0'  # Device Status
+CLUSTER_ID_AM_TAMPER    = b'\x00\xf2'  # Device Tamper Cluster
+CLUSTER_ID_AM_BUTTON    = b'\x00\xf3'  # Keyfob / Button
 CLUSTER_ID_AM_DISCOVERY = b'\x00\xf6'  # Device Discovery
-CLUSTER_ID_AM_SECURITY = b'\x05\x00'  # Security
+CLUSTER_ID_AM_SECURITY  = b'\x05\x00'  # Security
 
 # AlertMe Cluster Commands
-CLUSTER_CMD_AM_SECURITY = b'\x00'  # Security Event (Sensors)
-CLUSTER_CMD_AM_STATE_REQ = b'\x01'  # State Request (SmartPlug)
-CLUSTER_CMD_AM_STATE_CHANGE = b'\x02'  # Change State (SmartPlug)
-CLUSTER_CMD_AM_STATE_RESP = b'\x80'  # Switch Status Update
-CLUSTER_CMD_AM_PWR_DEMAND = b'\x81'  # Power Demand Update
+CLUSTER_CMD_AM_SECURITY        = b'\x00'  # Security Event (Sensors)
+CLUSTER_CMD_AM_STATE_REQ       = b'\x01'  # State Request (SmartPlug)
+CLUSTER_CMD_AM_STATE_CHANGE    = b'\x02'  # Change State (SmartPlug)
+CLUSTER_CMD_AM_STATE_RESP      = b'\x80'  # Switch Status Update
+CLUSTER_CMD_AM_PWR_DEMAND      = b'\x81'  # Power Demand Update
 CLUSTER_CMD_AM_PWR_CONSUMPTION = b'\x82'  # Power Consumption & Uptime Update
-CLUSTER_CMD_AM_PWR_UNKNOWN = b'\x86'  # Unknown British Gas Power Meter Update
-CLUSTER_CMD_AM_MODE_REQ = b'\xfa'  # Mode Change Request
-CLUSTER_CMD_AM_STATUS = b'\xfb'  # Status Update
-CLUSTER_CMD_AM_VERSION_REQ = b'\xfc'  # Version Information Request
-CLUSTER_CMD_AM_RSSI = b'\xfd'  # RSSI Range Test Update
-CLUSTER_CMD_AM_VERSION_RESP = b'\xfe'  # Version Information Response
+CLUSTER_CMD_AM_PWR_UNKNOWN     = b'\x86'  # Unknown British Gas Power Meter Update
+CLUSTER_CMD_AM_MODE_REQ        = b'\xfa'  # Mode Change Request
+CLUSTER_CMD_AM_STATUS          = b'\xfb'  # Status Update
+CLUSTER_CMD_AM_VERSION_REQ     = b'\xfc'  # Version Information Request
+CLUSTER_CMD_AM_RSSI            = b'\xfd'  # RSSI Range Test Update
+CLUSTER_CMD_AM_VERSION_RESP    = b'\xfe'  # Version Information Response
 
 # At the moment I am not sure what/if the following dictionary will be used?
 # It is here to describe the relationship between Cluster ID and Cmd.
@@ -461,9 +466,6 @@ class ZBNode(Node):
             source_addr_long = message['source_addr_long']
             source_addr_short = message['source_addr']
 
-            # Update any attributes which may need updating
-            self.process_message(source_addr_long, source_addr_short, ret['attributes'])
-
             # Send any replies which may need sending
             for reply in ret['replies']:
                 message_id = reply['message_id']
@@ -474,6 +476,9 @@ class ZBNode(Node):
                 reply = self.generate_message(message_id, params)
                 self.send_message(reply, source_addr_long, source_addr_short)
                 time.sleep(0.5)
+
+            # Update any attributes which may need updating
+            self.process_message(source_addr_long, source_addr_short, ret['attributes'])
 
     def parse_message(self, message):
         """

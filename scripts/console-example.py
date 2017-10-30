@@ -11,7 +11,7 @@ import sys
 sys.path.insert(0, '../')
 from commander import *
 import serial
-from pyalertme import *
+from pyalertme.zbhub import *
 import logging
 import pprint
 
@@ -23,7 +23,7 @@ class TestCmd(Command):
      - nodes list
      * nodes <device_id> rename string
      - nodes <device_id> state [0/1]
-     * nodes <device_id> mode ?
+     * nodes <device_id> mode [normal|range|locked|silent]
      * nodes <device_id> attributes ?
      * nodes <device_id> type
      * nodes <device_id> detail
@@ -82,8 +82,8 @@ class TestCmd(Command):
                 return hub_obj.get_node_attribute_history(node_id, attrib_name, 338083200, 1537228800)
 
             if args[1] == "type":
-                message = hub_obj.generate_type_request_message()
-                hub_obj.send_message(message, *hub_obj.device_id_to_addrs(node_id))
+                device_obj = hub_obj.device_obj_from_id(node_id)
+                hub_obj.send_type_request(device_obj)
                 return 'Type Request Sent'
 
             if args[1] == "detail":
