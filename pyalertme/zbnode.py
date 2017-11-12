@@ -366,6 +366,7 @@ class ZBNode(Node):
         :param message_id: Message ID
         :return:
         """
+        self._logger.debug('Genereting message %s' % message_id)
         if message_id in messages.keys():
             # Take a deep copy of the message
             message = copy.deepcopy(messages[message_id])
