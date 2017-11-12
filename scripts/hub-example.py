@@ -12,7 +12,7 @@ import logging
 import time
 import sys
 sys.path.insert(0, '../')
-from pyalertme import *
+from pyalertme.zbhub import *
 import pprint
 
 pp = pprint.PrettyPrinter(indent=4)
@@ -36,9 +36,10 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 # Serial Configuration
-XBEE_PORT = '/dev/tty.usbserial-DN018OI6'
+# XBEE_PORT = '/dev/tty.usbserial-DN018OI6'
 # XBEE_PORT = '/dev/cu.usbserial-DN02ZXKE'
 # XBEE_PORT = '/dev/tty.usbserial-A1014P7W'
+XBEE_PORT = '/dev/ttyUSB0'
 XBEE_BAUD = 9600
 ser = serial.Serial(XBEE_PORT, XBEE_BAUD)
 
@@ -66,6 +67,7 @@ while True:
                     device_obj = hub_obj.devices[node_id]
                     messages = hub_obj.list_messages()
                     pp.pprint(messages)
+                    pp.pprint("      exit: to exit this device")
                     message_id = raw_input("Select Message:")
 
                     if message_id in messages.keys():
@@ -82,8 +84,10 @@ while True:
                         addresses = device_obj.addr_tuple
                         hub_obj.send_message(message, *addresses)
 
-                    else:
+                    elif message_id == "exit":
                         break
+            elif node_id == "discovery":
+                hub_obj.discovery()
 
     except KeyboardInterrupt:
         print("Keyboard Interrupt")
