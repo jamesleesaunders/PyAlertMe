@@ -18,7 +18,8 @@ class ZBSmartPlug(ZBDevice):
 
         # Type Info
         self.type = 'ZBSmartPlug'
-        self.version = 12345
+        self.hwMajorVersion = 123
+        self.hwMinorVersion=45
         self.manu = 'PyAlertMe'
         self.manu_date = '2017-01-01'
 
