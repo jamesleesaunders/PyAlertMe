@@ -33,7 +33,7 @@ class Node(object):
         self.type = None
         self.state = None
         self.version = None
-        self.manu = None
+        self.manu_string = None
         self.manu_date = None
         self.last_update = None
 

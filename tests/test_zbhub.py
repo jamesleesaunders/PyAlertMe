@@ -43,23 +43,24 @@ class TestZBHub(unittest.TestCase):
         """
         # First, lets manually construct a Version message and send it into the Hub.
         message = {
-            'source_addr_long': b'\x00\ro\x00\x03\xbb\xb9\xf8',
-            'source_addr': b'\x88\x9f',
-            'source_endpoint': b'\x02',
-            'dest_endpoint': b'\x02',
             'profile': b'\xc2\x16',
-            'cluster': b'\x00\xf6',
-            'id': 'rx_explicit',
+            'source_addr': b'\x92T',
+            'dest_endpoint': b'\x02',
+            'rf_data': b'\t\x00\xfeT\x92\x1b\xf7r\x01\x00o\r\x009\x10\x07\x00\x01(\x00\x01\x0bAlertMe.com\tSmartPlug\n2011-07-25',
+            'source_endpoint': b'\x02',
             'options': b'\x01',
-            'rf_data': b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\tSmartPlug\n2013-09-26'
+            'source_addr_long': b'\x00\ro\x00\x01r\xf7\x1b',
+            'cluster': b'\x00\xf6',
+            'id': 'rx_explicit'
         }
         self.hub_obj.receive_message(message)
         result = self.hub_obj.list_devices()
         expected = {
-            '00:0d:6f:00:03:bb:b9:f8': {
+            '00:0d:6f:00:01:72:f7:1b': {
+                'manu_string': 'AlertMe.com',
                 'type': 'SmartPlug',
-                'version': 20045,
-                'manu': 'AlertMe.com'
+                'hwMajorVersion': 1,
+                'hwMinorVersion': 0,
             }
         }
         self.assertEqual(result, expected)
@@ -67,8 +68,9 @@ class TestZBHub(unittest.TestCase):
         # Next, lets get the class to generate a Version message and send it into the Hub.
         params = {
             'type': 'Generic',
-            'version': 12345,
-            'manu': 'PyAlertMe',
+            'hwMajorVersion': 1,
+            'hwMinorVersion': 0,
+            'manu_string': 'PyAlertMe',
             'manu_date': '2017-01-01'
         }
         message = self.device_obj.generate_message('version_info_update', params)
@@ -79,23 +81,26 @@ class TestZBHub(unittest.TestCase):
         self.hub_obj.receive_message(message)
         result = self.hub_obj.list_devices()
         expected = {
-            '00:0d:6f:00:03:bb:b9:f8': {
+            '00:0d:6f:00:01:72:f7:1b': {
                 'type': 'SmartPlug',
-                'version': 20045,
-                'manu': 'AlertMe.com'
+                'hwMajorVersion': 1,
+                'hwMinorVersion': 0,
+                'manu_string': 'AlertMe.com'
             },
             '00:0d:6f:00:00:00:ff:ff': {
                 'type': 'Generic',
-                'version': 12345,
-                'manu': 'PyAlertMe'
+                'hwMajorVersion': 1,
+                'hwMinorVersion': 0,
+                'manu_string': 'PyAlertMe'
             }
         }
         self.assertEqual(result, expected)
 
         # Test get device
-        result = self.hub_obj.get_device('00:0d:6f:00:03:bb:b9:f8')
+        result = self.hub_obj.get_device('00:0d:6f:00:01:72:f7:1b')
         self.assertTrue(result['type'] == 'SmartPlug')
-        self.assertTrue(result['version'] == 20045)
+        self.assertTrue(result['hwMajorVersion'] == 1)
+        self.assertTrue(result['hwMinorVersion'] == 0)
 
     def test_mock_serial(self):
         """

@@ -158,7 +158,7 @@ messages = {
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda self, params: self.generate_version_info_update(params)
         },
-        'expected_params': ['version', 'type', 'manu', 'manu_date']
+        'expected_params': ['hwMajorVersion', 'hwMinorVersion', 'type', 'manu_string', 'manu_date']
     },
     'range_update': {
         'name': 'Range Update',
@@ -328,8 +328,9 @@ class ZBNode(Node):
 
         # Type Info
         self.type = 'ZBNode'
-        self.version = 12345
-        self.manu = 'PyAlertMe'
+        self.hwMajorVersion = 123
+        self.hwMinorVersion = 45
+        self.manu_string = 'PyAlertMe'
         self.manu_date = '2017-01-01'
 
         # Start up Serial and ZigBee
@@ -804,12 +805,14 @@ class ZBNode(Node):
         """
         preamble = b'\x09\x71'  # b'\tq'
         cluster_cmd = CLUSTER_CMD_AM_VERSION_RESP
-        payload = struct.pack('H', params['version']) \
-                  + b'\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0b' \
-                  + params['manu'] \
-                  + '\n' + params['type'] \
-                  + '\n' + params['manu_date']
-
+        payload = b'\x48\x41' + b'\xd2\x1b\x19\x00\x00\x6f\x0d\x00' + b'\x39\x10' \
+                  + struct.pack('<HBBBB', 7, 1, 28, params['hwMinorVersion'], params['hwMajorVersion']) \
+                  + struct.pack('B', len(params['manu_string'])) \
+                  + params['manu_string'] \
+                  + struct.pack('B', len(params['type'])) \
+                  + params['type'] \
+                  + struct.pack('B', len(params['manu_date'])) \
+                  + params['manu_date']
         data = preamble + cluster_cmd + payload
         return data
 

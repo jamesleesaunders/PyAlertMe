@@ -20,7 +20,7 @@ class ZBHub(ZBNode):
         # Type Info
         self.type = 'ZBHub'
         self.version = 12345
-        self.manu = 'PyAlertMe'
+        self.manu_string = 'PyAlertMe'
         self.manu_date = '2017-01-01'
 
         # Discovery Thread and List of Known Devices
@@ -60,8 +60,9 @@ class ZBHub(ZBNode):
         for (device_id, device_obj) in self.devices.items():
             devices[device_id] = {
                 'type': device_obj.type,
-                'manu': device_obj.manu,
-                'version': device_obj.version
+                'manu_string': device_obj.manu_string,
+                'hwMajorVersion': device_obj.hwMajorVersion,
+                'hwMinorVersion': device_obj.hwMinorVersion
             }
 
         return devices
