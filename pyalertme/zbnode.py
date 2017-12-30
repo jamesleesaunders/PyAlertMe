@@ -9,7 +9,7 @@ import threading
 from xbee import ZigBee
 import copy
 import struct
-
+import pprint
 
 # ZigBee Addressing
 BROADCAST_LONG  = b'\x00\x00\x00\x00\x00\x00\xff\xff'
@@ -43,9 +43,9 @@ CLUSTER_ID_ZDO_MATCH_DESC_REQ       = b'\x00\x06'  # Match Descriptor Request
 CLUSTER_ID_ZDO_MATCH_DESC_RSP       = b'\x80\x06'  # Match Descriptor Response
 CLUSTER_ID_ZDO_END_DEVICE_ANNCE     = b'\x00\x13'  # End Device Announce
 CLUSTER_ID_ZDO_MGMT_RTG_REQ         = b'\x00\x32'  # Management Routing Request
-CLUSTER_ID_ZDO_MGMT_RTG_RSP         = b'\x80\x32'  # Management Routing Response
+CLUSTER_ID_ZDO_MGMT_RTG_RSP         = b'\x80\x32'  # Management Routing Response (seen in outputs as x802 but the '2' char is really 0x32 printed as a char)
 CLUSTER_ID_ZDO_MGMT_PERMIT_JOIN_REQ = b'\x00\x36'  # Permit Join Request Request
-CLUSTER_ID_ZDO_MGMT_NETWORK_UPDATE  = b'\x80\x38'  # Management Network Update
+CLUSTER_ID_ZDO_MGMT_NETWORK_UPDATE  = b'\x80\x36'  # Management Network Update  (seen in outputs as x806 but the '6' is really 0x36
 
 # AlertMe Clusters
 # See:
@@ -59,13 +59,46 @@ CLUSTER_ID_AM_DISCOVERY = b'\x00\xf6'  # Device Discovery
 CLUSTER_ID_AM_SECURITY  = b'\x05\x00'  # Security
 
 # AlertMe Cluster Commands
-CLUSTER_CMD_AM_SECURITY        = b'\x00'  # Security Event (Sensors)
-CLUSTER_CMD_AM_STATE_REQ       = b'\x01'  # State Request (SmartPlug)
-CLUSTER_CMD_AM_STATE_CHANGE    = b'\x02'  # Change State (SmartPlug)
-CLUSTER_CMD_AM_STATE_RESP      = b'\x80'  # Switch Status Update
-CLUSTER_CMD_AM_PWR_DEMAND      = b'\x81'  # Power Demand Update
-CLUSTER_CMD_AM_PWR_CONSUMPTION = b'\x82'  # Power Consumption & Uptime Update
+# Security IasZoneCluster commands cluster b'\x05\x00' = 1280
+CLUSTER_CMD_AM_SEC_STATUS_CHANGE         = b'\x00'  # Security Event (Sensors)
+CLUSTER_CMD_AM_SEC_ENROLL_REQ            = b'\x01'  #
+# AmGeneralCluster commands cluster b'\x00\xf0' = 240
+CLUSTER_CMD_AM_SET_RTC_CMD               = b'\x00'  # SET_RTC_CMD = 0
+CLUSTER_CMD_AM_RTC_CMD_REQ               = b'\x80'  # REQUEST_RTC_CMD = 128
+CLUSTER_CMD_AM_LIFESIGN_CMD              = b'\xfb'  # LIFESIGN_CMD = 251
+CLUSTER_CMD_AM_SET_MODE_CMD              = b'\xfa'  # SET_MODE_CMD = 250
+CLUSTER_CMD_AM_STOP_POLLING_CMD          = b'\xfd'  # STOP_POLLING_CMD = 253
+DEVICE_MODE_NORMAL_OPS = 0
+DEVICE_MODE_RANGE_TEST = 1
+DEVICE_MODE_TEST = 2
+DEVICE_MODE_SEEKING = 3
+DEVICE_MODE_IDLE = 4
+DEVICE_MODE_QUIESCENT = 5
+DEVICE_MODE_OPT_NONE = 0
+DEVICE_MODE_OPT_SET_HNF = 1
+DEVICE_MODE_OPT_CLEAR_HNF = 2
+# AmPowerCtrlCluster commands cluster b'\x00\xee' = 238
+CLUSTER_CMD_AM_STATE_REQ                 = b'\x01'  # CMD_SET_OPERATING_MODE = 1 # State Request (SmartPlug)
+CLUSTER_CMD_AM_STATE_CHANGE              = b'\x02'  # CMD_SET_RELAY_STATE = 2    # Change State (SmartPlug)
+CLUSTER_CMD_AM_STATE_REPORT_REQ          = b'\x03'  # CMD_REQUEST_REPORT = 3
+CLUSTER_CMD_AM_STATE_RESP                = b'\x80'  # CMD_STATUS_REPORT = 128    # Switch Status Update
+# AmPowerMonCluster commands cluster b'\x00\xef = 239
+CLUSTER_CMD_AM_PWR_SET_REPT_PARAMS       = b'\x00' # CMD_SET_REPT_PARAMS = 0
+CLUSTER_CMD_AM_PWR_REQUEST_REPORT        = b'\x03' # CMD_REQUEST_REPORT = 3
+CLUSTER_CMD_AM_PWR_SET_REPORT_RATE       = b'\x04' # CMD_SET_REPORT_RATE= 4
+CLUSTER_CMD_AM_PWR_DEMAND                = b'\x81' # CMD_POWER_REPORT = 129 # Power Demand Update
+CLUSTER_CMD_AM_PWR_CONSUMPTION           = b'\x82' # CMD_ENERGY_REPORT = 130 #Power Consumption & Uptime Update
+CLUSTER_CMD_AM_PWD_BATCH_POWER_REPORT    = b'\x84' # CMD_BATCH_POWER_REPORT = 132
+CLUSTER_CMD_AM_PWD_BATCH_ENERGY_REPORT   = b'\x85' # CMD_BATCH_ENERGY_REPORT = 133
+CLUSTER_CMD_AM_PWD_POWER_ENERGY_REPORT   = b'\x86' # CMD_POWER_ENERGY_REPORT = 134
+CLUSTER_CMD_AM_PWD_BATCH_POWER_ENERGY_REPORT   = b'\x87' # CMD_BATCH_POWER_ENERGY_REPORT = 135
 CLUSTER_CMD_AM_PWR_UNKNOWN     = b'\x86'  # Unknown British Gas Power Meter Update
+# AmMaintenanceCluster commands cluster b'\x00\xf6' = 246
+CLUSTER_CMD_AM_MAINT_HELLO_REQ           = b'\xfc' # HELLO_WORLD_REQ = 252
+CLUSTER_CMD_AM_MAINT_HELLO_RESP          = b'\xfe' # HELLO_WORLD_RESP = 254
+CLUSTER_CMD_AM_MAINT_RANGE_TEST_REQ      = b'\xfd' # RANGE_TEST_SEND_CMD = 253
+CLUSTER_CMD_AM_MAINT_RANGE_TEST_RESP     = b'\xfd' # RANGE_TEST_RECV_CMD = 253
+
 CLUSTER_CMD_AM_MODE_REQ        = b'\xfa'  # Mode Change Request
 CLUSTER_CMD_AM_STATUS          = b'\xfb'  # Status Update
 CLUSTER_CMD_AM_VERSION_REQ     = b'\xfc'  # Version Information Request
@@ -77,7 +110,6 @@ CLUSTER_CMD_AM_VERSION_RESP    = b'\xfe'  # Version Information Response
 # One day this may be used by the parse_message() function and link with the parse_xxxxx() functions?
 alertme_cluster_cmds = {
     CLUSTER_ID_AM_SWITCH: {
-        CLUSTER_CMD_AM_STATE_REQ: "Relay State Request (SmartPlug)",
         CLUSTER_CMD_AM_STATE_CHANGE: "Relay State Change (SmartPlug)",
         CLUSTER_CMD_AM_STATE_RESP: "Switch Status Update"
     },
@@ -98,7 +130,7 @@ alertme_cluster_cmds = {
         CLUSTER_CMD_AM_VERSION_RESP: "Version Information Response"
     },
     CLUSTER_ID_AM_SECURITY: {
-        CLUSTER_CMD_AM_SECURITY: "Security Command"
+        CLUSTER_CMD_AM_SEC_ENROLL_REQ: "Security Command"
     }
 }
 
@@ -126,7 +158,7 @@ messages = {
             'dest_endpoint': ENDPOINT_ALERTME,
             'data': lambda self, params: self.generate_version_info_update(params)
         },
-        'expected_params': ['version', 'type', 'manu', 'manu_date']
+        'expected_params': ['hwMajorVersion', 'hwMinorVersion', 'type', 'manu_string', 'manu_date']
     },
     'range_update': {
         'name': 'Range Update',
@@ -296,8 +328,9 @@ class ZBNode(Node):
 
         # Type Info
         self.type = 'ZBNode'
-        self.version = 12345
-        self.manu = 'PyAlertMe'
+        self.hwMajorVersion = 123
+        self.hwMinorVersion = 45
+        self.manu_string = 'PyAlertMe'
         self.manu_date = '2017-01-01'
 
         # Start up Serial and ZigBee
@@ -488,7 +521,17 @@ class ZBNode(Node):
         :param message: Dict of message
         :return:
         """
-        self._logger.debug('Received Message: %s', message)
+        self._logger.debug('Received Message: %s ', message)
+        try:
+            nicestring = ' '.join(('%#04x' % ord(c) for c in message['rf_data']))
+            self._logger.debug('RF_data: %s ', nicestring)
+        except:
+            self._logger.debug('no RF_data')
+        try:
+            nicestring = ' '.join(('%#04x' % ord(c) for c in message['cluster']))
+            self._logger.debug('Cluster: %s ', nicestring)
+        except:
+            self._logger.debug('Issue with decoding cluster')
 
         attributes = {}
         replies = []
@@ -537,11 +580,11 @@ class ZBNode(Node):
                     # Simple Descriptor Request
                     self._logger.debug('Received Simple Descriptor Request')
 
-                elif cluster_id == CLUSTER_ID_ZDO_ACTIVE_EP_REQ:
+                elif cluster_id == CLUSTER_ID_ZDO_ACTIVE_EP_REQ:     #0x0005
                     # Active Endpoint Request
                     self._logger.debug('Received Active Endpoint Request')
 
-                elif cluster_id == CLUSTER_ID_ZDO_ACTIVE_EP_RSP:
+                elif cluster_id == CLUSTER_ID_ZDO_ACTIVE_EP_RSP:     #0x8005
                     # Active Endpoints Response
                     # This message tells us what the device can do, but it isn't
                     # constructed correctly to match what the switch can do according
@@ -549,7 +592,7 @@ class ZBNode(Node):
                     # after we receive the Match Descriptor below.
                     self._logger.debug('Received Active Endpoint Response')
 
-                elif cluster_id == CLUSTER_ID_ZDO_MATCH_DESC_REQ:
+                elif cluster_id == CLUSTER_ID_ZDO_MATCH_DESC_REQ:     #0x0006
                     # Match Descriptor Request
                     self._logger.debug('Received Match Descriptor Request')
                     # This is the point where we finally respond to the switch.
@@ -569,7 +612,7 @@ class ZBNode(Node):
                     # Match Descriptor Response
                     self._logger.debug('Received Match Descriptor Response')
 
-                elif cluster_id == CLUSTER_ID_ZDO_END_DEVICE_ANNCE:
+                elif cluster_id == CLUSTER_ID_ZDO_END_DEVICE_ANNCE:     #0x0013
                     # Device Announce Message
                     self._logger.debug('Received Device Announce Message')
                     # This will tell me the address of the new thing,
@@ -762,12 +805,14 @@ class ZBNode(Node):
         """
         preamble = b'\x09\x71'  # b'\tq'
         cluster_cmd = CLUSTER_CMD_AM_VERSION_RESP
-        payload = struct.pack('H', params['version']) \
-                  + b'\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0b' \
-                  + params['manu'] \
-                  + '\n' + params['type'] \
-                  + '\n' + params['manu_date']
-
+        payload = b'\x48\x41' + b'\xd2\x1b\x19\x00\x00\x6f\x0d\x00' + b'\x39\x10' \
+                  + struct.pack('<HBBBB', 7, 1, 28, params['hwMinorVersion'], params['hwMajorVersion']) \
+                  + struct.pack('B', len(params['manu_string'])) \
+                  + params['manu_string'] \
+                  + struct.pack('B', len(params['type'])) \
+                  + params['type'] \
+                  + struct.pack('B', len(params['manu_date'])) \
+                  + params['manu_date']
         data = preamble + cluster_cmd + payload
         return data
 
@@ -780,37 +825,27 @@ class ZBNode(Node):
         ----------                 ----       -----------
         Preamble                   2          Unknown Preamble TBC
         Cluster Command            1          Cluster Command - Version Information Response (b'\xfe')
-        Unknown                    17         Unknown Content TBC There may be more interesting stuff in here?
-        HW Version                 2          Hardware Version
+        NodeID                     2          unsigned short (H)
+        EUI64Str                   8          8x Char (8s)
+        mfgID                      2          unsigned short (H)
+        DeviceType                 2          unsigned short (H)
+        AppRelease                 1          unsigned inter (B)
+        AppVersion                 1          unsigned inter (B)
+        HWMinor                    1          unsigned inter (B)
+        HWMajor                    1          unsigned inter (B
         Type Info                  Variable   Type Information (b'AlertMe.com\nSmartPlug\n2013-09-26')
 
         :param data: Message data
         :return: Parameter dictionary of version info
         """
-        # The version string is variable length.
-        # We therefore have to calculate the length of the string 
-        # which we then use in the unpack.
-        l = len(data) - 22
-        ret = dict(zip(
-            ('cluster_cmd', 'version', 'manu_string'),
-            struct.unpack('< 2x s H 17x %ds' % l, data)
-        ))
 
-        # Break down the version string into its component parts
-        # AlertMe.com\nSmartPlug\n2013-09-26
-        ret['manu_string'] = str(ret['manu_string'].decode()) \
-            .replace('\t', '\n') \
-            .replace('\r', '\n') \
-            .replace('\x0e', '\n') \
-            .replace('\x0b', '\n') \
-            .replace('\x06', '\n') \
-            .replace('\x04', '\n') \
-            .replace('\x12', '\n')
-        (ret['manu'], ret['type'], ret['manu_date']) = ret['manu_string'].split('\n')
+        ret = dict()
+        ret['nodeId'], Eui64str, ret['mfgId'], ret['deviceType'], ret['appRelease'], ret['appVersion'], ret['hwMinorVersion'], ret['hwMajorVersion'] = struct.unpack('<H8sHHBBBB', data[3:21])
 
-        # Delete not required keys
-        del ret['manu_string']
-        del ret['cluster_cmd']
+        # In ZclStrings the first byte is the lenght of that string feild, followed by more string feilds
+        ret['manu_string'], message = self.getZclString(data[21:])
+        ret['type'], message = self.getZclString(message)
+        ret['manu_date'], message = self.getZclString(message)
 
         return ret
 
@@ -1003,6 +1038,8 @@ class ZBNode(Node):
             payload = b'\x02\x01'
         elif mode == 'silent':
             payload = b'\x03\x01'
+        elif mode == 'idle':
+            payload = b'\x04\x01'
         else:
             self._logger.error('Invalid mode request %s', mode)
 
@@ -1249,7 +1286,7 @@ class ZBNode(Node):
         :return: Message data
         """
         preamble = b'\x11\x80'
-        cluster_cmd = CLUSTER_CMD_AM_SECURITY
+        cluster_cmd = CLUSTER_CMD_AM_SEC_STATUS_CHANGE
         payload = b'\x00\x05'
 
         data = preamble + cluster_cmd + payload
@@ -1418,6 +1455,7 @@ class ZBNode(Node):
         """
         zdo_sequence = params['zdo_sequence']  # b'\x04'
         status       = ZDP_STATUS_OK  # b'\x00'
+        status       = ZDP_STATUS_OK  # b'\x00'
         net_addr     = params['addr_short'][1] + params['addr_short'][0]  # b'\x00\x00'
         length       = struct.pack('B', len(params['endpoint_list']))  # b'\x02'
         match_list   = b''.join(params['endpoint_list'])  # b'\x00\x02'
@@ -1425,8 +1463,12 @@ class ZBNode(Node):
         data = zdo_sequence + status + net_addr + length + match_list
         return data
 
-
-
+    def getZclString(self, message):
+        zclStringLength = ord(message[0])
+        zclString = message[1:1 + zclStringLength]
+        remainder = message[1 + zclStringLength:]
+        return (
+         zclString, remainder)
 
 
 

@@ -74,10 +74,16 @@ class TestZBNode(unittest.TestCase):
         result = self.node_obj.parse_message(message)
         expected = {
             'attributes': {
-                'manu': 'AlertMe.com',
+                'manu_string': 'AlertMe.com',
                 'manu_date': '2013-09-26',
                 'type': 'SmartPlug',
-                'version': 20045
+                'hwMajorVersion': 1,
+                'hwMinorVersion': 0,
+                'appRelease': 0,
+                'appVersion': 41,
+                'mfgId': 4153,
+                'deviceType': 7,
+                'nodeId': 20045
             },
             'replies': []
         }
@@ -101,20 +107,20 @@ class TestZBNode(unittest.TestCase):
         Test Get Message.
         """
         # Test providing all the appropriate parameters
-        result = self.node_obj.generate_message('version_info_update', {'version': 20045, 'manu': 'AlertMe.com', 'type': 'SmartPlug', 'manu_date': '2013-09-26'})
-        expected = {'profile': b'\xc2\x16', 'cluster': '\x00\xf6', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x02', 'data': b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\nSmartPlug\n2013-09-26'}
+        result = self.node_obj.generate_message('version_info_update', {'hwMajorVersion': 1, 'hwMinorVersion': 0,  'manu_string': 'AlertMe.com', 'type': 'SmartPlug', 'manu_date': '2013-09-26'})
+        expected = {'profile': b'\xc2\x16', 'cluster': '\x00\xf6', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x02', 'data': b'\tq\xfeHA\xd2\x1b\x19\x00\x00o\r\x009\x10\x07\x00\x01\x1c\x00\x01\x0bAlertMe.com\tSmartPlug\n2013-09-26'}
         self.assertEqual(result, expected)
 
         # Test providing no parameters (should get from object attributes)
         result = self.node_obj.generate_message('version_info_update')
-        expected = {'profile': b'\xc2\x16', 'cluster': '\x00\xf6', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x02', 'data': b'\tq\xfe90\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bPyAlertMe\nZBNode\n2017-01-01'}
+        expected = {'profile': b'\xc2\x16', 'cluster': '\x00\xf6', 'dest_endpoint': b'\x02', 'src_endpoint': b'\x02', 'data': b'\tq\xfeHA\xd2\x1b\x19\x00\x00o\r\x009\x10\x07\x00\x01\x1c\x2d\x7b\x09PyAlertMe\x06ZBNode\n2017-01-01'}
         self.assertEqual(result, expected)
 
         # Test providing a couple of parameters missing
         # Should throw exception detailing the parameters which are missing
         with self.assertRaises(Exception) as context:
-            self.node_obj.generate_message('version_info_update', {'manu': 'AlertMe.com', 'type': 'SmartPlug'})
-        self.assertTrue("Missing Parameters: ['manu_date', 'version']" in context.exception)
+            self.node_obj.generate_message('version_info_update', {'manu_string': 'AlertMe.com', 'type': 'SmartPlug'})
+        self.assertTrue("Missing Parameters: ['hwMajorVersion', 'hwMinorVersion', 'manu_date']" in context.exception)
 
         # Test message without data lambda
         result = self.node_obj.generate_message('permit_join_request')
@@ -137,7 +143,7 @@ class TestZBNode(unittest.TestCase):
         message = messages['version_info_update']
         expected = {
             'name': 'Version Info Update',
-            'expected_params': ['version', 'type', 'manu', 'manu_date']
+            'expected_params': ['hwMajorVersion', 'hwMinorVersion', 'type', 'manu_string', 'manu_date']
         }
         self.assertEqual(message, expected)
 
@@ -291,96 +297,166 @@ class TestZBNode(unittest.TestCase):
         """
         Test Parse Version Information Update.
         """
+        result = self.node_obj.parse_version_info_update(b'\tq\xfeHA\xd2\x1b\x19\x00\x00o\r\x009\x10\x07\x00\x01\x1c\x2d\x7b\x09PyAlertMe\x06ZBNode\n2017-01-01')
+        expected = {
+            'type': 'ZBNode',
+            'hwMajorVersion': 123,
+            'hwMinorVersion': 45,
+            'manu_string': 'PyAlertMe',
+            'manu_date': '2017-01-01',
+            'appRelease': 1,
+            'appVersion': 28,
+            'mfgId': 4153,
+            'deviceType': 7,
+            'nodeId': 16712
+        }
+        self.assertEqual(result, expected)
+
         result = self.node_obj.parse_version_info_update(b'\tq\xfeMN\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bAlertMe.com\tSmartPlug\n2013-09-26')
         expected = {
             'type': 'SmartPlug',
-            'version': 20045,
-            'manu': 'AlertMe.com',
-            'manu_date': '2013-09-26'
+            'hwMajorVersion': 1,
+            'hwMinorVersion': 0,
+            'manu_string': 'AlertMe.com',
+            'manu_date': '2013-09-26',
+            'appRelease': 0,
+            'appVersion': 41,
+            'mfgId': 4153,
+            'deviceType': 7,
+            'nodeId': 20045
         }
         self.assertEqual(result, expected)
 
         result = self.node_obj.parse_version_info_update(b'\tp\xfebI\xb2\x8a\xc2\x00\x00o\r\x009\x10\r\x00\x03#\x01\x01\x0bAlertMe.com\x0bPower Clamp\n2010-05-19')
         expected = {
             'type': 'Power Clamp',
-            'version': 18786,
-            'manu': 'AlertMe.com',
-            'manu_date': '2010-05-19'
+            'hwMajorVersion': 1,
+            'hwMinorVersion': 1,
+            'manu_string': 'AlertMe.com',
+            'manu_date': '2010-05-19',
+            'appRelease': 3,
+            'appVersion': 35,
+            'mfgId': 4153,
+            'deviceType': 13,
+            'nodeId': 18786
         }
         self.assertEqual(result, expected)
 
         result = self.node_obj.parse_version_info_update(b'\tp\xfe+\xe8\xc0ax\x00\x00o\r\x009\x10\x01\x00\x01#\x00\x01\x0bAlertMe.com\rButton Device\n2010-11-15')
         expected = {
             'type': 'Button Device',
-            'version': 59435,
-            'manu': 'AlertMe.com',
-            'manu_date': '2010-11-15'
+            'hwMajorVersion': 1,
+            'hwMinorVersion': 0,
+            'manu_string': 'AlertMe.com',
+            'manu_date': '2010-11-15',
+            'appRelease': 1,
+            'appVersion': 35,
+            'mfgId': 4153,
+            'deviceType': 1,
+            'nodeId': 59435
         }
         self.assertEqual(result, expected)
 
         result = self.node_obj.parse_version_info_update(b'\tp\xfe\xb6\xb7x\x1dx\x00\x00o\r\x009\x10\x06\x00\x00#\x00\x02\x0bAlertMe.com\nPIR Device\n2010-11-24')
         expected = {
             'type': 'PIR Device',
-            'version': 47030,
-            'manu': 'AlertMe.com',
-            'manu_date': '2010-11-24'
+            'hwMajorVersion': 2,
+            'hwMinorVersion': 0,
+            'manu_string': 'AlertMe.com',
+            'manu_date': '2010-11-24',
+            'appRelease': 0,
+            'appVersion': 35,
+            'mfgId': 4153,
+            'deviceType': 6,
+            'nodeId': 47030
         }
         self.assertEqual(result, expected)
 
         result = self.node_obj.parse_version_info_update(b'\t\x00\xfe\xad\xe3jj\x1b\x00\x00o\r\x009\x10\x05\x00\x06\x12\x00\x01\x0bAlertMe.com\x12Door/Window sensor\n2008-04-17')
         expected = {
             'type': 'Door/Window sensor',
-            'version': 58285,
-            'manu': 'AlertMe.com',
-            'manu_date': '2008-04-17'
+            'hwMajorVersion': 1,
+            'hwMinorVersion': 0,
+            'manu_string': 'AlertMe.com',
+            'manu_date': '2008-04-17',
+            'appRelease': 6,
+            'appVersion': 18,
+            'mfgId': 4153,
+            'deviceType': 5,
+            'nodeId': 58285
         }
         self.assertEqual(result, expected)
 
         result = self.node_obj.parse_version_info_update(b'\tp\xfe\x82@\xc1e\x1d\x00\x00o\r\x009\x10\x04\x00\x01#\x00\x01\x0bAlertMe.com\x0eAlarm Detector\n2010-11-24')
         expected = {
             'type': 'Alarm Detector',
-            'version': 16514,
-            'manu': 'AlertMe.com',
-            'manu_date': '2010-11-24'
+            'hwMajorVersion': 1,
+            'hwMinorVersion': 0,
+            'manu_string': 'AlertMe.com',
+            'manu_date': '2010-11-24',
+            'appRelease': 1,
+            'appVersion': 35,
+            'mfgId': 4153,
+            'deviceType': 4,
+            'nodeId': 16514
         }
         self.assertEqual(result, expected)
 
         result = self.node_obj.parse_version_info_update(b'\t0\xfe3B\x08BI\x00\x00o\r\x009\x10\x03\x00\x03#\x00\x01\x0bAlertMe.com\rKeyfob Device\n2010-11-10')
         expected = {
             'type': 'Keyfob Device',
-            'version': 16947,
-            'manu': 'AlertMe.com',
-            'manu_date': '2010-11-10'
+            'hwMajorVersion': 1,
+            'hwMinorVersion': 0,
+            'manu_string': 'AlertMe.com',
+            'manu_date': '2010-11-10',
+            'appRelease': 3,
+            'appVersion': 35,
+            'mfgId': 4153,
+            'deviceType': 3,
+            'nodeId': 16947
         }
         self.assertEqual(result, expected)
 
         result = self.node_obj.parse_version_info_update(b'\t\x00\xfe\x1b\x15V_\x1b\x00\x00o\r\x009\x10\x02\x00\x07\x12\x00\x02\x0bAlertMe.com\x06Beacon\n2008-07-08')
         expected = {
             'type': 'Beacon',
-            'version': 5403,
-            'manu': 'AlertMe.com',
-            'manu_date': '2008-07-08'
+            'hwMajorVersion': 2,
+            'hwMinorVersion': 0,
+            'manu_string': 'AlertMe.com',
+            'manu_date': '2008-07-08',
+            'appRelease': 7,
+            'appVersion': 18,
+            'mfgId': 4153,
+            'deviceType': 2,
+            'nodeId': 5403
         }
         self.assertEqual(result, expected)
 
         result = self.node_obj.parse_version_info_update(b'\t\x00\xfe\xde\xa4\xeav\x1b\x00\x00o\r\x009\x10\x02\x00\x06\x12\x01\x01\x0bAlertMe.com\x04Lamp\n2008-04-17')
         expected = {
             'type': 'Lamp',
-            'version': 42206,
-            'manu': 'AlertMe.com',
-            'manu_date': '2008-04-17'
+            'hwMajorVersion': 1,
+            'hwMinorVersion': 1,
+            'manu_string': 'AlertMe.com',
+            'manu_date': '2008-04-17',
+            'appRelease': 6,
+            'appVersion': 18,
+            'mfgId': 4153,
+            'deviceType': 2,
+            'nodeId': 42206
         }
         self.assertEqual(result, expected)
 
     def test_generate_version_info_update(self):
         params = {
             'type': 'Generic',
-            'version': 12345,
-            'manu': 'PyAlertMe',
+            'hwMajorVersion': 123,
+            'hwMinorVersion': 45,
+            'manu_string': 'PyAlertMe',
             'manu_date': '2017-01-01'
         }
         result = self.node_obj.generate_version_info_update(params)
-        expected = b'\tq\xfe90\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bPyAlertMe\nGeneric\n2017-01-01'
+        expected = b'\tq\xfeHA\xd2\x1b\x19\x00\x00o\r\x009\x10\x07\x00\x01\x1c-{\tPyAlertMe\x07Generic\n2017-01-01'
 
         self.assertEqual(result, expected)
 
