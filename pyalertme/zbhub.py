@@ -41,7 +41,7 @@ class ZBHub(ZBNode):
         Send out a broadcast every 2 seconds for 30 seconds.
 
         """
-        timeout = time.time() + 30
+        timeout = time.time() + 3
         i = 1
         while time.time() < timeout:
             self._logger.info('Sending Discovery Request #%s', i)
