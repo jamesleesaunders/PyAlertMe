@@ -41,7 +41,7 @@ class TestZBSmartPlug(unittest.TestCase):
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xf6',
             'profile': b'\xc2\x16',
-            'data': b'\tq\xfe90\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bPyAlertMe\nZBSmartPlug\n2017-01-01'
+            'data': b'\tq\xfeHA\xd2\x1b\x19\x00\x00o\r\x009\x10\x07\x00\x01\x1c-{\x09PyAlertMe\x0bZBSmartPlug\n2017-01-01'
         }
         self.assertEqual(result, expected)
 

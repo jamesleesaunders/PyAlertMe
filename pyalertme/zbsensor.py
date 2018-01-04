@@ -17,7 +17,8 @@ class ZBSensor(ZBDevice):
 
         # Type Info
         self.type = 'ZBSensor'
-        self.version = 12345
+        self.hwMajorVersion = 123
+        self.hwMinorVersion = 45
         self.manu = 'PyAlertMe'
         self.manu_date = '2017-01-01'
 

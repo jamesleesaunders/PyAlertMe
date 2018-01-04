@@ -40,7 +40,7 @@ class TestZBSensor(unittest.TestCase):
             'dest_endpoint': b'\x02',
             'cluster': b'\x00\xf6',
             'profile': b'\xc2\x16',
-            'data': b'\tq\xfe90\xf8\xb9\xbb\x03\x00o\r\x009\x10\x07\x00\x00)\x00\x01\x0bPyAlertMe\nZBSensor\n2017-01-01'
+            'data': b'\tq\xfeHA\xd2\x1b\x19\x00\x00o\r\x009\x10\x07\x00\x01\x1c\x2d\x7b\x09PyAlertMe\x08ZBSensor\n2017-01-01'
         }
         self.assertEqual(result, expected)
 

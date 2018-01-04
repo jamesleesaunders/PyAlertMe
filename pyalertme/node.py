@@ -22,9 +22,18 @@ class Node(object):
         self.addr_short = b''
 
         # Type Info
+        self.nodeId = None
+        self.nodeEui64 = None
+        self.mfgId = None
+        self.deviceType = None
+        self.appRelease = None
+        self.appVersion = None
+        self.hwMinorVersion = None
+        self.hwMajorVersion = None
         self.type = None
+        self.state = None
         self.version = None
-        self.manu = None
+        self.manu_string = None
         self.manu_date = None
         self.last_update = None
 
@@ -131,3 +140,4 @@ class Node(object):
         :return:
         """
         self._logger.debug('Attribute Update [NodeID: %s Field: %s Value: %s]', self.id, attr_name, attr_value)
+        pass
